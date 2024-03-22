@@ -5,7 +5,6 @@ from Machine.Devices.IO.class_consolev2 import ConsoleV2
 from Machine.Devices.Memory.class_ram import RAM
 from Machine.Devices.Memory.class_rom import ROM
 from Machine.Devices.Processors.class_processor import Processor
-from Machine.Devices.Processors.class_processor_with_instruction_cache import ProcessorWithInstructionCache
 from Machine.Devices.Testers.class_debugger import Debugger
 from Machine.class_backplane import BackPlane
 from Machine.Devices.IO.class_console import Console
@@ -147,8 +146,6 @@ class MachineBuilder:
                 self._backplane.add_device(RAM(starting_address=address, size=size))
             case 'processor':
                 self._backplane.add_device(Processor(size=size, starting_address=address))
-            case 'processor_with_cache':
-                self._backplane.add_device(ProcessorWithInstructionCache(size=size, starting_address=address))
             case 'console':
                 self._backplane.add_device(Console(starting_address=address, interrupt=interrupt))
             case 'consolev2':

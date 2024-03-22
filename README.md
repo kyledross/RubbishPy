@@ -1,5 +1,5 @@
 # RubbishPy
-A Python implementation of RubbishVM
+A Python implementation of RubbishVM.  
 Refer to LICENSE.txt for license information.
  
 

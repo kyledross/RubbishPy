@@ -17,7 +17,7 @@ python3 main.py  {options}
 
 example:  
 *cd RubbishPy/src*  
-*ex: python3 main.py --compiler address=0 size=1024 program=../Programs/typewriter.txt --processor --consolev2 address=1024 interrupt=2
+*python3 main.py --compiler address=0 size=1024 program=../Programs/typewriter.txt --processor --consolev2 address=1024 interrupt=2*
 
 ## History of RubbishPy
 

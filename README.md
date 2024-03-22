@@ -1,5 +1,5 @@
 # RubbishPy
-A Python implementation of RubbishVM
+A Python implementation of RubbishVM.  
 Refer to LICENSE.txt for license information.
  
 
@@ -13,7 +13,7 @@ RubbishPy requires tkinter for window support in console (apt install python3-tk
 RubbishPy was developed with JetBrains PyCharm.  
 
 ## Running RubbishPy in terminal
-python3 ./src/main.py  {options}  
+python3 main.py  {options}  
 
 example:  
 *cd RubbishPy/src*  

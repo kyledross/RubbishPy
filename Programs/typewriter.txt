@@ -59,7 +59,8 @@ rtn
 title: data Typewriter example\r\n
 data (c) 2024 Kyle D. Ross\r\n
 data \r\n
-data This program will echo the characters you type to the console.\r\n\r\n\0
+data This program will echo the characters you type to the console.\r\n
+data To end the program, close this window.\r\n\r\n\0
 
 ' =======================================
 ' Print loop

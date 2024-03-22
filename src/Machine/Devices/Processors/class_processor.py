@@ -70,7 +70,6 @@ class Processor(BaseProcessor):
             match self.current_instruction:
 
                 # todo: implement floating point math
-                # todo: implement halt
                 # todo: implement new instruction RTNPRESERVE which doesn't pop the registers
 
                 case InstructionSet.NOP:
@@ -245,8 +244,6 @@ class Processor(BaseProcessor):
         elif self.phase == self.Phases.AwaitingSecondOperand:
             if control_bus.get_response():
                 destination_register = self.internal_stack.pop()
-                # todo: When running the Hello World app for a bit, when CTRL-C is pressed, the program crashes here
-                #  with an index out of range. the databus is 18, the data_pointer is 7
                 self.registers[destination_register] = self.registers[data_bus.get_data()]
                 self.finish_instruction(True)
 

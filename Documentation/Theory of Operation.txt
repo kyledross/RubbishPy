@@ -1,0 +1,26 @@
+For licensing information, see LICENSE.txt
+
+ The backplane consists of a bus and a clock control.
+
+The bus consists collectively of:
+ - The address lines (32-bit)
+ - The data lines (32-bit)
+ - The control lines (32-bit)
+
+The backplane can have devices attached to it.
+This is implemented by a public list of type BaseDevice.
+When the backplane is powered on, it will iterate through each attached Device and call the Cycle method.
+The device will perform whatever task it has to do (be it a processor, RAM, ROM, or anything else).
+
+The control lines represent the state of the bus.
+The control lines consist of:
+ - A write line (high when the data on the data lines is being written to a device)
+ - A read line (high when the data on the data lines is being read from a device)
+ - A response line (normally low, high when a device has completed responding to the read or write request)
+
+Upon each cycle, if the device isn't already in a busy state, it shall look to see if the write or read lines are high.  If they are (and if it makes sense to respond), the device will check the address lines to see if the address falls within the device's address range.  If it does, the device will begin performing the work.
+
+The device shall perform a reasonable amount of work in the Cycle, with the goal of relinquishing back as soon as practically possible.  If the device needs more clock cycles to perform the work, then it will maintain a state where it can resume upon the next cycle.
+
+The device that sets the read or write request shall monitor the response line on each cycle.  Once the response line is set, the device may act upon the data on the data bus (if appropriate) in the cycle.
+

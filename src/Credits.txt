@@ -1,0 +1,6 @@
+audio:
+
+src/Resources/stop-13692.mp3
+by irinairinafomicheva via Pixabay
+site: https://pixabay.com/users/irinairinafomicheva-25140203/
+license: Pixabay non-CC0 content license (https://pixabay.com/service/license-summary/)

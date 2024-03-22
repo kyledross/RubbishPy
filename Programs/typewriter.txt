@@ -1,0 +1,82 @@
+' For licensing information, see LICENSE.txt
+
+' Console typewriter example
+' Pre-requisites:
+' Compiler at address 0
+' Processor
+' I/O Console at address 1024, interrupt 2
+
+' Usage:
+' python3 ./src/main.py --compiler address=0 size=1024 program=./Programs/typewriter.txt --processor --console address=1024 interrupt=2
+
+' =======================================
+' Display title
+lr 3 title
+call print_loop
+
+' =======================================
+' Entry point
+' =======================================
+' Set interrupt vector for console keypress (IRQ 2)
+siv 2 keypress
+' Put processor to sleep to wait for IRQ
+main: sleep
+' If the processor is ever taken out of sleep and control returns here, jump back to
+' main and put the processor to sleep, again.  This will only happen if there is a
+' WAKE instruction where there shouldn't be.
+jmp main
+
+' =======================================
+' Keypress handler
+' =======================================
+' Handle IRQ
+' Load value at 1024 (the console) into register 1
+keypress: lrm 1 1024
+' Load CR into register 2
+lr 2 13
+' Compare registers 1 and 2
+cmp
+' If equal, the user typed CR, so jump to the "next line" routine
+je CR
+' Otherwise, send the value in register 1 back to the console (address 1024) to be printed.
+mrm 1 1024
+' Return from the interrupt handler
+rtn
+
+' =======================================
+' Next Line routine
+' =======================================
+' Send a 13 (CR) then a 10 (LF) to the console (address 1024), the return from the interrupt handler
+CR: lr 3 13
+mrm 3 1024
+lr 3 10
+mrm 3 1024
+rtn
+
+' =======================================
+' Title data
+' =======================================
+title: data Typewriter example\r\n
+data (c) 2024 Kyle D. Ross\r\n
+data \r\n
+data This program will echo the characters you type to the console.\r\n\r\n\0
+
+' =======================================
+' Print loop
+' Usage: Load register 3 with the address of the string to print, then call print_loop
+' The string should terminate with ASCII 0.
+' Example:
+' lr 3 title
+' call print_loop
+' =======================================
+print_loop: LRM 4 @3
+LR 1 0
+LRR 2 4
+CMP
+JE print_return
+MRM 4 1024
+LR 1 1
+LRR 2 3
+ADD
+JMP print_loop
+print_return: rtn

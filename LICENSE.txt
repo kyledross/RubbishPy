@@ -1,0 +1,2 @@
+RubbishPy
+Copyright 2024 Kyle D. Ross.  All rights reserved.

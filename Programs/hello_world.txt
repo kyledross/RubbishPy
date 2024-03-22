@@ -6,6 +6,9 @@
 ' Processor
 ' I/O Console at address 1024, interrupt 2
 
+' Usage:
+' python3 main.py --compiler address=0 size=1024 program=../Programs/hello_world.txt --processor --consolev2 address=1024 interrupt=2
+
 lr 3 title
 loop: call print_loop
 jmp loop

@@ -75,6 +75,7 @@ class BackPlane:
         Raises:
             SystemExit: If the HALT interrupt is detected.
         """
+        print("Backplane running.")
         loop_counter = 0
         start_time = time.time()
         while True:

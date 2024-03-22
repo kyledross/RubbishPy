@@ -7,7 +7,7 @@
 ' I/O Console at address 1024, interrupt 2
 
 ' Usage:
-' python3 ./src/main.py --compiler address=0 size=1024 program=./Programs/typewriter.txt --processor --console address=1024 interrupt=2
+' python3 main.py --compiler address=0 size=1024 program=../Programs/typewriter.txt --processor --consolev2 address=1024 interrupt=2
 
 ' =======================================
 ' Display title

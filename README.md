@@ -1,6 +1,6 @@
 # RubbishPy
 A Python implementation of RubbishVM
-For licensing information, see LICENSE.txt
+Refer to LICENSE.txt for license information.
  
 
 ## Introduction

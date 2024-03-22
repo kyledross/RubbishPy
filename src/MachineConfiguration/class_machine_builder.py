@@ -1,4 +1,5 @@
-#  Copyright (c) 2024. Kyle D. Ross.  All rights reserved.
+#  Copyright (c) 2024. Kyle D. Ross.
+#  Refer to LICENSE.txt for license information.
 
 from Compiler.class_rubbish_compiler import RubbishCompiler
 from Machine.Devices.IO.class_consolev2 import ConsoleV2

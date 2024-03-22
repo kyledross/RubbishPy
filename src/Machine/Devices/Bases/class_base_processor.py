@@ -1,4 +1,5 @@
-#  Copyright (c) 2024. Kyle D. Ross.  All rights reserved.
+#  Copyright (c) 2024. Kyle D. Ross.
+#  Refer to LICENSE.txt for license information.
 
 from Machine.Buses.class_address_bus import AddressBus
 from Machine.Buses.class_control_bus import ControlBus

@@ -106,7 +106,7 @@ Processor: v1.2
 =======================================================
 -- Logic instructions
 
-Or (Or's register 1 and 2, result into register 3)
+Or (Or register 1 and 2, result into register 3)
 Or
 Opcode: 23
 Processor: v1

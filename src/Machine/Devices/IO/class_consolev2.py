@@ -152,9 +152,6 @@ class ConsoleV2(BaseDevice):
         self.textbox.see(tk.END)
         self.textbox.config(state="disabled")
 
-        # todo: although it scrolls to end, it still briefly scrolls to top,
-        # creating a flicker
-
     def process_keypress(self, interrupt_bus):
         """
         Processes the keypress event.

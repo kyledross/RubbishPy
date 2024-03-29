@@ -1,7 +1,6 @@
-#  Copyright (c) 2024. Kyle D. Ross.
+#  Copyright (c) 2024 Kyle D. Ross.
 #  Refer to LICENSE.txt for license information.
 
-import os
 import time
 
 from Machine.Devices.Bases.class_base_device import BaseDevice
@@ -75,6 +74,7 @@ class BackPlane:
         Raises:
             SystemExit: If the HALT interrupt is detected.
         """
+        print("Backplane running.")
         loop_counter = 0
         start_time = time.time()
         while True:
@@ -84,7 +84,7 @@ class BackPlane:
                 if self._interruptBus.test_interrupt(Interrupts.halt):
                     print("HALT interrupt detected.")
                     # noinspection PyProtectedMember,PyUnresolvedReferences
-                    os._exit(0)
+                    exit()
                 if loop_counter == 500000:
                     end_time = time.time()
                     speed = loop_counter / (end_time - start_time)

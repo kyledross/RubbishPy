@@ -80,6 +80,7 @@ class ConsoleV2(BaseDevice):
             interrupt_bus (Bus): The interrupt bus.
         """
         if self.console_closed:
+            self.console_window.quit()
             interrupt_bus.set_interrupt(Interrupts.halt)
             return
 

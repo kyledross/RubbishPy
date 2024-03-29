@@ -175,7 +175,9 @@ class ConsoleV2(BaseDevice):
 
     def process_cursor(self):
         """
-        This will add or remove the cursor character from the console output buffer, and update the textbox.
+        Processes the cursor.
+        Returns:
+            None
         """
 
         flash_interval = 1 / self._cursor_blinks_per_second
@@ -190,6 +192,10 @@ class ConsoleV2(BaseDevice):
             self._cursor_last_display_time = current_time
 
     def cursor_off(self):
+        """
+        This will remove the cursor character from the console output buffer.
+        Returns: None
+        """
         if self._cursor_is_displayed:
             self.console_output_buffer = self.console_output_buffer[:-1]
             self._cursor_is_displayed = False
@@ -205,12 +211,26 @@ class ConsoleV2(BaseDevice):
         self.textbox.focus_set()
 
         def capture_keypress(event):
+            """
+            Captures the keypress event.
+            Args:
+                event: The keypress event.
+
+            Returns: "break"
+
+            """
             # todo: figure out how to handle control keypress
             self.keypress = event.char
             self.keypress_event.set()
             return "break"
 
         def on_close():
+            """
+            Closes the console window.
+            Returns:
+                None
+
+            """
             self.console_closed = True
 
         self.console_window.bind("<KeyPress>", capture_keypress)

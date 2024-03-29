@@ -1,7 +1,9 @@
 #  Copyright (c) 2024 Kyle D. Ross.
 #  Refer to LICENSE.txt for license information.
 
+
 import threading
+import time
 import tkinter as tk
 from queue import Queue
 
@@ -49,6 +51,12 @@ class ConsoleV2(BaseDevice):
     run_form():
         Runs the form.
     """
+
+    # synthetic cursor control
+    _cursor_is_displayed: bool = False
+    _cursor_last_display_time: float = 0
+    _cursor_blinks_per_second: int = 2
+
     def __init__(self, starting_address: int, interrupt_number: int):
         """
         Constructs all the necessary attributes for the console device.
@@ -61,6 +69,7 @@ class ConsoleV2(BaseDevice):
         self.interrupt_number = interrupt_number
         self.keystroke_buffer = Queue()
         self.console_output_buffer = ""
+        self.keypress = ""
         self.keypress_event = threading.Event()
         self.console_window = None
         self.textbox = None
@@ -83,6 +92,7 @@ class ConsoleV2(BaseDevice):
             return
 
         if self.console_is_ready():
+            self.process_cursor()
             self.process_keypress(interrupt_bus)
             if self.address_is_valid(address_bus):
                 if control_bus.get_read_request():
@@ -93,20 +103,21 @@ class ConsoleV2(BaseDevice):
                         control_bus.set_read_request(False)
                         control_bus.set_response(True)
                 if control_bus.get_write_request():
+                    self.cursor_off()
                     data = data_bus.get_data()
                     if data == 8:  # backspace
                         if len(self.console_output_buffer) > 0:
-                            self.console_output_buffer = self.console_output_buffer[:-1]
+                            self.set_console_output_buffer(self.console_output_buffer[:-1])
                     elif data == 12:  # form feed
-                        self.console_output_buffer = ""
+                        self.set_console_output_buffer("")
                     elif data == 7:  # bell
                         # do nothing
                         pass
                     else:
                         if 0 <= data <= 255:
-                            self.console_output_buffer += chr(data)
-                            self.console_output_buffer = self.console_output_buffer.replace("\r\n", "\n").replace("\r",
-                                                                                                                  "")
+                            self.set_console_output_buffer(self.console_output_buffer + chr(data))
+                            self.set_console_output_buffer(
+                                self.console_output_buffer.replace("\r\n", "\n").replace("\r", ""))
                     control_bus.set_write_request(False)
                     control_bus.set_response(True)
                     self.update_textbox()
@@ -119,6 +130,16 @@ class ConsoleV2(BaseDevice):
             bool: True if the console is ready, False otherwise.
         """
         return self.console_window is not None and self.textbox is not None
+
+    def set_console_output_buffer(self, output: str):
+        """
+        Sets the console output buffer.
+
+        Parameters:
+            output (str): The output to set in the console output buffer.
+        """
+        self.console_output_buffer = output
+        self.update_textbox()
 
     def update_textbox(self):
         """
@@ -153,6 +174,33 @@ class ConsoleV2(BaseDevice):
         form_thread = threading.Thread(target=self.run_form)
         form_thread.start()
 
+    def process_cursor(self):
+        """
+        Processes the cursor.
+        Returns:
+            None
+        """
+
+        flash_interval = 1 / self._cursor_blinks_per_second
+        current_time = time.time()
+        if current_time - self._cursor_last_display_time > flash_interval:
+            if self._cursor_is_displayed:
+                self.cursor_off()
+            else:
+                self.console_output_buffer += "_"
+                self._cursor_is_displayed = True
+            self.update_textbox()
+            self._cursor_last_display_time = current_time
+
+    def cursor_off(self):
+        """
+        This will remove the cursor character from the console output buffer.
+        Returns: None
+        """
+        if self._cursor_is_displayed:
+            self.console_output_buffer = self.console_output_buffer[:-1]
+            self._cursor_is_displayed = False
+
     def run_form(self):
         """
         Runs the form.
@@ -164,12 +212,26 @@ class ConsoleV2(BaseDevice):
         self.textbox.focus_set()
 
         def capture_keypress(event):
+            """
+            Captures the keypress event.
+            Args:
+                event: The keypress event.
+
+            Returns: "break"
+
+            """
             # todo: figure out how to handle control keypress
             self.keypress = event.char
             self.keypress_event.set()
             return "break"
 
         def on_close():
+            """
+            Closes the console window.
+            Returns:
+                None
+
+            """
             self.console_closed = True
 
         self.console_window.bind("<KeyPress>", capture_keypress)

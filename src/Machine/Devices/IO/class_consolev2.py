@@ -9,8 +9,6 @@ from Constants.class_interrupts import Interrupts
 from Machine.Devices.Bases.class_base_device import BaseDevice
 
 
-# todo When Hello World program is running, if the user presses the CTRL key, the program displays some garbage.
-#  That shouldn't happen.
 class ConsoleV2(BaseDevice):
     """
     A class used to represent a Console device version 2.
@@ -131,6 +129,7 @@ class ConsoleV2(BaseDevice):
         self.textbox.insert(tk.END, self.console_output_buffer)
         self.textbox.mark_set("insert", tk.END)  # Set the cursor at the end of the text
         self.textbox.see(tk.END)
+        self.textbox.config(state="disabled")
 
         # todo: although it scrolls to end, it still briefly scrolls to top,
         # creating a flicker

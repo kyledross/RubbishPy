@@ -85,7 +85,7 @@ class BackPlane:
                 if self._interruptBus.test_interrupt(Interrupts.halt):
                     print("HALT interrupt detected.")
                     # noinspection PyProtectedMember,PyUnresolvedReferences
-                    os._exit(0)
+                    exit()
                 if loop_counter == 500000:
                     end_time = time.time()
                     speed = loop_counter / (end_time - start_time)

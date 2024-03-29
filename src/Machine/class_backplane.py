@@ -1,7 +1,6 @@
 #  Copyright (c) 2024 Kyle D. Ross.
 #  Refer to LICENSE.txt for license information.
 
-import os
 import time
 
 from Machine.Devices.Bases.class_base_device import BaseDevice

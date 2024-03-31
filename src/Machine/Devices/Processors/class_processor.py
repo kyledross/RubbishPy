@@ -70,9 +70,6 @@ class Processor(BaseProcessor):
         if not self.sleeping:
             match self.current_instruction:
 
-                # todo: implement proper floating point math
-                # todo: implement new instruction RTNPRESERVE which doesn't pop the registers
-
                 case InstructionSet.NOP:
                     self.finish_instruction(True)
 

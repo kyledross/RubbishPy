@@ -1,49 +1,6 @@
 #  Copyright (c) 2024 Kyle D. Ross.
 #  Refer to LICENSE.txt for license information.
 
-# Function to cross-reference register
-def cross_reference_register(parameters, parameter_number):
-    """
-    This function checks if the parameter starts with '@' and if so, it multiplies the parameter by -1.
-    This is used to indicate that the parameter is a register.
-    :param parameters: The list of parameters.
-    :param parameter_number: The index of the parameter to cross-reference.
-    """
-    if str(parameters[parameter_number]).startswith("@"):
-        parameters[parameter_number] = str(int(parameters[parameter_number][1:]) * -1)
-
-
-# Function to get instruction code
-def get_instruction_code(instruction):
-    """
-    This function returns the op code for the given instruction.
-    :param instruction: The instruction to get the op code for.
-    :return: The op code for the given instruction.
-    """
-    # noinspection SpellCheckingInspection
-    op_codes = {
-        "LR": 1, "LRM": 2, "LRR": 3, "MRM": 4, "ADD": 5, "DIV": 8, "MUL": 7, "SUB": 6, "JMP": 11, "HALT": 9,
-        "DEBUG": 10, "RST": 12, "CMP": 13, "JE": 14, "JNE": 15, "JL": 16, "JG": 17, "PUSH": 18, "POP": 19,
-        "CALL": 20, "RTN": 21, "SIV": 26, "SLEEP": 28, "WAKE": 29, "FDIV": 27, "FADD": 30, "FSUB": 31,
-        "FMUL": 32, "TOIEEE": 33, "PEEK": 34, "OR": 23, "AND": 24, "XOR": 25, "NOT": 22, "DEBUGOUT": 35, "DEBUGPUSH": 36
-    }
-    return op_codes[instruction]
-
-
-def is_numeric(s):
-    """
-    This function checks if the input string can be converted to a float.
-    It returns True if the string can be converted to a float, otherwise it returns False.
-
-    :param s: The string to check.
-    :return: True if the string can be converted to a float, otherwise False.
-    """
-    try:
-        float(s)
-        return True
-    except ValueError:
-        return False
-
 
 class RubbishCompiler:
     """
@@ -124,7 +81,7 @@ class RubbishCompiler:
                                              "DEBUG", "RST", "CMP", "JE", "JNE", "JL", "JG", "PUSH", "POP", "CALL",
                                              "RTN", "SIV", "SLEEP", "WAKE", "FDIV", "FADD", "FSUB", "FMUL", "TOIEEE",
                                              "PEEK", "OR", "AND", "XOR", "NOT", "DEBUGOUT", "DEBUGPUSH"}:
-                            self.add_instruction(get_instruction_code(instruction), parameters, code, phase == 2)
+                            self.add_instruction(self.get_instruction_code(instruction), parameters, code, phase == 2)
 
                         else:
                             out = f"Unknown instruction {instruction} at line {line_number}"
@@ -141,6 +98,18 @@ class RubbishCompiler:
         finally:
             print("-----------------------------------")
 
+    # Function to cross-reference register
+    @staticmethod
+    def cross_reference_register(parameters, parameter_number):
+        """
+        This function checks if the parameter starts with '@' and if so, it multiplies the parameter by -1.
+        This is used to indicate that the parameter is a register.
+        :param parameters: The list of parameters.
+        :param parameter_number: The index of the parameter to cross-reference.
+        """
+        if str(parameters[parameter_number]).startswith("@"):
+            parameters[parameter_number] = str(int(parameters[parameter_number][1:]) * -1)
+
     def cross_reference_label(self, parameters, parameter_number, cross_reference_labels: bool = False):
         """
         This method cross-references a label.
@@ -150,7 +119,7 @@ class RubbishCompiler:
         :param cross_reference_labels: Whether to cross-reference labels or not.
         """
         parameter = str(parameters[parameter_number])
-        if not is_numeric(parameter) and not parameter.startswith("@"):  # don't cross-reference pointers
+        if not self.is_numeric(parameter) and not parameter.startswith("@"):  # don't cross-reference pointers
             # label references used to be required to be prefixed with a colon
             # this is no longer necessary, so remove the colon if it exists
             if parameter.startswith(":"):
@@ -168,7 +137,7 @@ class RubbishCompiler:
         :param address_parameter: The parameter to get the address for.
         :return: The address for the given parameter.
         """
-        if is_numeric(address_parameter):
+        if self.is_numeric(address_parameter):
             return int(address_parameter)
         return self.labels[address_parameter]
 
@@ -185,7 +154,7 @@ class RubbishCompiler:
         code.append(instruction)
         for parameter_index in range(1, len(parameters)):
             self.cross_reference_label(parameters, parameter_index, cross_reference_labels)
-            cross_reference_register(parameters, parameter_index)
+            self.cross_reference_register(parameters, parameter_index)
             code.append(int(parameters[parameter_index]))
 
     def get_address_from_label(self, label):
@@ -195,6 +164,39 @@ class RubbishCompiler:
         :return: The address for the given label.
         """
         return str(self.labels[label])
+
+    # Function to get instruction code
+    @staticmethod
+    def get_instruction_code(instruction):
+        """
+        This function returns the op code for the given instruction.
+        :param instruction: The instruction to get the op code for.
+        :return: The op code for the given instruction.
+        """
+        # noinspection SpellCheckingInspection
+        op_codes = {
+            "LR": 1, "LRM": 2, "LRR": 3, "MRM": 4, "ADD": 5, "DIV": 8, "MUL": 7, "SUB": 6, "JMP": 11, "HALT": 9,
+            "DEBUG": 10, "RST": 12, "CMP": 13, "JE": 14, "JNE": 15, "JL": 16, "JG": 17, "PUSH": 18, "POP": 19,
+            "CALL": 20, "RTN": 21, "SIV": 26, "SLEEP": 28, "WAKE": 29, "FDIV": 27, "FADD": 30, "FSUB": 31,
+            "FMUL": 32, "TOIEEE": 33, "PEEK": 34, "OR": 23, "AND": 24, "XOR": 25, "NOT": 22, "DEBUGOUT": 35,
+            "DEBUGPUSH": 36
+        }
+        return op_codes[instruction]
+
+    @staticmethod
+    def is_numeric(s):
+        """
+        This function checks if the input string can be converted to a float.
+        It returns True if the string can be converted to a float, otherwise it returns False.
+
+        :param s: The string to check.
+        :return: True if the string can be converted to a float, otherwise False.
+        """
+        try:
+            float(s)
+            return True
+        except ValueError:
+            return False
 
     @staticmethod
     def add_debug_trace(line):

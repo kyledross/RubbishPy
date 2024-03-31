@@ -10,19 +10,6 @@ from Constants.class_interrupts import Interrupts as Interrupts
 from Machine.Devices.Bases.class_base_device import BaseDevice
 
 
-def formatted_textbox_test(text):
-    """
-    Function to replace all carriage return and newline characters with newline characters.
-
-    Parameters:
-    text (str): The text to be formatted.
-
-    Returns:
-    str: The formatted text.
-    """
-    return text.replace("\r\n", "\n").replace("\r", "\n")
-
-
 class Console(BaseDevice):
     """
     A class used to represent a Console device.
@@ -121,6 +108,19 @@ class Console(BaseDevice):
                 control_bus.set_response(True)
                 self.update_textbox(self.console_output_buffer)
 
+    @staticmethod
+    def formatted_textbox_test(text):
+        """
+        Function to replace all carriage return and newline characters with newline characters.
+
+        Parameters:
+        text (str): The text to be formatted.
+
+        Returns:
+        str: The formatted text.
+        """
+        return text.replace("\r\n", "\n").replace("\r", "\n")
+
     def console_is_ready(self):
         if self.console_window is None:
             return False
@@ -136,7 +136,7 @@ class Console(BaseDevice):
         # Set the text of the textbox
         self.textbox.config(state="normal")
         self.textbox.delete(1.0, tk.END)
-        self.textbox.insert(tk.END, formatted_textbox_test(text))
+        self.textbox.insert(tk.END, self.formatted_textbox_test(text))
         self.textbox.config(state="disabled")
         self.textbox.see(tk.END)
 

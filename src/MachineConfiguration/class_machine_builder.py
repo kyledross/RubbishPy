@@ -7,10 +7,9 @@ from Machine.Devices.Memory.class_ram import RAM
 from Machine.Devices.Memory.class_rom import ROM
 from Machine.Devices.Processors.class_processor import Processor
 from Machine.Devices.Testers.class_debugger import Debugger
-from Machine.class_backplane import BackPlane
+from Machine.Backplane.class_backplane import BackPlane
 from Machine.Devices.IO.class_console import Console
 from Machine.Devices.IO.class_addressable_text_display import AddressableTextDisplay
-
 
 device_group = []
 
@@ -19,21 +18,6 @@ device_group = []
 # This class creates an instance of the backplane.
 # This class creates instances of each device and attaches them to the backplane.
 # This class then returns an outfitted machine to the entry point, where the machine is started.
-
-
-def read_file(filename):
-    """
-    Function to read a file and return its contents.
-
-    Parameters:
-    filename (str): The name of the file to be read.
-
-    Returns:
-    str: The contents of the file.
-    """
-    with open(filename, 'r') as file:
-        contents = file.read()
-    return contents
 
 
 class MachineBuilder:
@@ -60,6 +44,7 @@ class MachineBuilder:
     attach_device(device):
         Attaches a device to the machine.
     """
+
     def __init__(self, devices=None):
         """
         Constructs all the necessary attributes for the machine builder.
@@ -156,7 +141,7 @@ class MachineBuilder:
             case 'rom':
                 self._backplane.add_device(ROM(starting_address=address))
             case 'compiler':
-                compiler = RubbishCompiler(source=read_file(program), address=address)
+                compiler = RubbishCompiler(source=self.read_file(program), address=address)
                 code = compiler.compile()
                 if len(code) > size:
                     print("Warning: The compiled program size exceeds the specified size.")
@@ -168,3 +153,18 @@ class MachineBuilder:
                 self._backplane.add_device(Debugger())
             case _:
                 print(f"Device {device_to_add} not found.")
+
+    @staticmethod
+    def read_file(filename):
+        """
+        Function to read a file and return its contents.
+
+        Parameters:
+        filename (str): The name of the file to be read.
+
+        Returns:
+        str: The contents of the file.
+        """
+        with open(filename, 'r') as file:
+            contents = file.read()
+        return contents

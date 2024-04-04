@@ -3,6 +3,7 @@
 
 from Compiler.class_rubbish_compiler import RubbishCompiler
 from Machine.Devices.IO.class_consolev2 import ConsoleV2
+from Machine.Devices.IO.class_consolev3 import ConsoleV3
 from Machine.Devices.Memory.class_ram import RAM
 from Machine.Devices.Memory.class_rom import ROM
 from Machine.Devices.Processors.class_processor import Processor
@@ -136,6 +137,8 @@ class MachineBuilder:
                 self._backplane.add_device(Console(starting_address=address, interrupt=interrupt))
             case 'consolev2':
                 self._backplane.add_device(ConsoleV2(starting_address=address, interrupt_number=interrupt))
+            case 'consolev3':
+                self._backplane.add_device(ConsoleV3(starting_address=address, interrupt_number=interrupt))
             case 'display':
                 self._backplane.add_device(AddressableTextDisplay(starting_address=address, width=width, height=height))
             case 'rom':

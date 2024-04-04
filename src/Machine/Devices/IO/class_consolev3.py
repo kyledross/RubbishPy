@@ -1,3 +1,6 @@
+#  Copyright (c) 2024 Kyle D. Ross.
+#  Refer to LICENSE.txt for license information.
+
 from Machine.Devices.Bases.class_base_device import BaseDevice
 from Machine.Devices.IO.class_addressable_text_display import FONT_UBUNTU_MONO_REGULAR
 import tkinter as tk

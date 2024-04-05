@@ -65,9 +65,7 @@ class ConsoleV3(BaseDevice):
         :param address: The address to read from.
         :return: The character at the given address.
         """
-        row = address // self._width
-        col = address % self._width
-        return self.display[row][col]
+        return self.display[address // self._width][address % self._width]
 
     def process_data(self, data):
         """
@@ -92,17 +90,13 @@ class ConsoleV3(BaseDevice):
             if self._cursorX < 0:
                 self._cursorY -= 1
                 self._cursorX = self._width - 1
-            data = 32
-            offset_address = self._cursorY * self._width + self._cursorX
-            self.write(offset_address, chr(data))
+            self.write(self._cursorY * self._width + self._cursorX, chr(32))
         else:
-            offset_address = self._cursorY * self._width + self._cursorX
-            self.write(offset_address, chr(data))
+            self.write(self._cursorY * self._width + self._cursorX, chr(data))
             self._cursorX += 1
-
-        if self._cursorX >= self._width:
-            self._cursorX = 0
-            self._cursorY += 1
+            if self._cursorX >= self._width:
+                self._cursorX = 0
+                self._cursorY += 1
             if self._cursorY >= self._height:
                 self.scroll_labels_up()
 

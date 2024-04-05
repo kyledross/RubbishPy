@@ -98,7 +98,9 @@ def parse_command_line_arguments():
         console_args = dict(args.consolev3)
         address = console_args.get("address")
         interrupt = console_args.get("interrupt")
-        device_groups.append({'device_name': 'consolev3', 'address': address, 'interrupt': interrupt})
+        width = console_args.get("width")
+        height = console_args.get("height")
+        device_groups.append({'device_name': 'consolev3', 'address': address, 'interrupt': interrupt, 'width': width, 'height': height})
 
     if args.display:
         display_args = dict(args.display)

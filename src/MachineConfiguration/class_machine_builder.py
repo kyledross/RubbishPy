@@ -138,7 +138,7 @@ class MachineBuilder:
             case 'consolev2':
                 self._backplane.add_device(ConsoleV2(starting_address=address, interrupt_number=interrupt))
             case 'consolev3':
-                self._backplane.add_device(ConsoleV3(starting_address=address, interrupt_number=interrupt))
+                self._backplane.add_device(ConsoleV3(starting_address=address, width=width, height=height, interrupt_number=interrupt))
             case 'display':
                 self._backplane.add_device(AddressableTextDisplay(starting_address=address, width=width, height=height))
             case 'rom':

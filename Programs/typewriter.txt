@@ -1,4 +1,6 @@
+' Copyright 2024 Kyle D. Ross
 ' For licensing information, see LICENSE.txt
+
 
 ' Console typewriter example
 ' Pre-requisites:

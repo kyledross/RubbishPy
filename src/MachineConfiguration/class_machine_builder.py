@@ -1,4 +1,4 @@
-#  Copyright (c) 2024 Kyle D. Ross.
+#  Copyright (c) 2024 Kyle D. Ross.  All rights reserved.
 #  Refer to LICENSE.txt for license information.
 
 from Compiler.class_rubbish_compiler import RubbishCompiler

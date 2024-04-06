@@ -1,4 +1,4 @@
-#  Copyright (c) 2024 Kyle D. Ross.
+#  Copyright (c) 2024 Kyle D. Ross.  All rights reserved.
 #  Refer to LICENSE.txt for license information.
 
 import tkinter as tk
@@ -85,6 +85,9 @@ class ConsoleV3(BaseDevice):
         if data == 13:
             self._cursorX = 0
             self._cursorY += 1
+            if self._cursorY >= self._height:
+                self.scroll_labels_up()
+                self._cursorY -= 1
         elif data == 8:
             self._cursorX -= 1
             if self._cursorX < 0:
@@ -99,6 +102,7 @@ class ConsoleV3(BaseDevice):
                 self._cursorY += 1
             if self._cursorY >= self._height:
                 self.scroll_labels_up()
+                self._cursorY -= 1
 
     def write(self, address, value: str):
         """

@@ -9,7 +9,7 @@ from Machine.Devices.Bases.class_base_device import BaseDevice
 FONT_UBUNTU_MONO_REGULAR = "Ubuntu Mono Regular"
 
 
-class AddressableTextDisplay(BaseDevice):
+class ConsoleV3(BaseDevice):
     """
     The AddressableTextDisplay class represents a text display that can be
     addressed by a computer system. It inherits from the BaseDevice class
@@ -21,8 +21,13 @@ class AddressableTextDisplay(BaseDevice):
     _width: int = 0  # The width of the display
     _height: int = 0  # The height of the display
     _formClosing: bool = False  # Flag to indicate if the form is closing
+    _interrupt_number: int = 0
 
-    def __init__(self, starting_address, width, height):
+    # cursor management
+    _cursorX: int = 0
+    _cursorY: int = 0
+
+    def __init__(self, starting_address, width, height, interrupt_number: int):
         """
         Constructor for the AddressableTextDisplay class.
         Initializes the starting address, width, and height of the display.
@@ -31,9 +36,10 @@ class AddressableTextDisplay(BaseDevice):
         :param width: The width of the display.
         :param height: The height of the display.
         """
+        self._interrupt_number = interrupt_number
         self._width = width
         self._height = height
-        super().__init__(starting_address, self._width * self._height)
+        super().__init__(starting_address, 1)
         self.display = [[' '] * self._width for _ in range(self._height)]
         self.window = tk.Tk()
         self.labels = \
@@ -59,11 +65,46 @@ class AddressableTextDisplay(BaseDevice):
         :param address: The address to read from.
         :return: The character at the given address.
         """
-        row = address // self._width
-        col = address % self._width
-        return self.display[row][col]
+        return self.display[address // self._width][address % self._width]
 
-    def write(self, address, value):
+    def process_data(self, data):
+        """
+        This method will take the data, and based off of the cursorX and cursorY position,
+        will compute the offset address to be passed to the write method.
+        It will then increment the cursorX value by one.
+        If cursorX is >= the width, it will set cursorX to 0 and increment the cursorY by one.
+        If cursorY is >= the height, it will scroll the labels up by one, setting the new line all blank.
+        If the data is 13, it will set cursorX to 0 and increment the cursorY by one.
+        If the data is 8, it will decrement cursorX by one. If cursorX is < 0, it will decrement the cursorY by one and set cursorX to the width-1.
+        Args:
+            data:
+
+        Returns:
+
+        """
+        if data == 13:
+            self._cursorX = 0
+            self._cursorY += 1
+            if self._cursorY >= self._height:
+                self.scroll_labels_up()
+                self._cursorY -= 1
+        elif data == 8:
+            self._cursorX -= 1
+            if self._cursorX < 0:
+                self._cursorY -= 1
+                self._cursorX = self._width - 1
+            self.write(self._cursorY * self._width + self._cursorX, chr(32))
+        else:
+            self.write(self._cursorY * self._width + self._cursorX, chr(data))
+            self._cursorX += 1
+            if self._cursorX >= self._width:
+                self._cursorX = 0
+                self._cursorY += 1
+            if self._cursorY >= self._height:
+                self.scroll_labels_up()
+                self._cursorY -= 1
+
+    def write(self, address, value: str):
         """
         This method writes a character to the display at a given address.
         :param address: The address to write to.
@@ -92,7 +133,7 @@ class AddressableTextDisplay(BaseDevice):
                 control_bus.set_response(True)
             if control_bus.get_write_request():
                 data = data_bus.get_data()
-                self.write(address_bus.get_address() - self.starting_address, chr(data))
+                self.process_data(data)
                 control_bus.set_write_request(False)
                 control_bus.set_response(True)
         self.update_window()
@@ -109,3 +150,12 @@ class AddressableTextDisplay(BaseDevice):
         This method starts the main loop of the window.
         """
         self.window.mainloop()
+
+    def scroll_labels_up(self):
+        for i in range(self._height - 1):
+            for j in range(self._width):
+                self.display[i][j] = self.display[i + 1][j]
+                self.labels[i][j]['text'] = self.labels[i + 1][j]['text']
+        for j in range(self._width):
+            self.display[self._height - 1][j] = ' '
+            self.labels[self._height - 1][j]['text'] = ' '

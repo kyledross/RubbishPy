@@ -1,4 +1,4 @@
-#  Copyright (c) 2024 Kyle D. Ross.
+#  Copyright (c) 2024 Kyle D. Ross.  All rights reserved.
 #  Refer to LICENSE.txt for license information.
 
 import sys
@@ -59,6 +59,7 @@ def parse_command_line_arguments():
     parser.add_argument('--debugger', action='store_const', const=True)
     parser.add_argument('--console', type=lambda x: x.split('='), nargs='+')
     parser.add_argument('--consolev2', type=lambda x: x.split('='), nargs='+')
+    parser.add_argument('--consolev3', type=lambda x: x.split('='), nargs='+')
     parser.add_argument("--compiler", type=lambda x: x.split('='), nargs='+')
     parser.add_argument("--display", type=lambda x: x.split('='), nargs='+')
     # Parse the command-line arguments
@@ -92,6 +93,14 @@ def parse_command_line_arguments():
         address = console_args.get("address")
         interrupt = console_args.get("interrupt")
         device_groups.append({'device_name': 'consolev2', 'address': address, 'interrupt': interrupt})
+
+    if args.consolev3:
+        console_args = dict(args.consolev3)
+        address = console_args.get("address")
+        interrupt = console_args.get("interrupt")
+        width = console_args.get("width")
+        height = console_args.get("height")
+        device_groups.append({'device_name': 'consolev3', 'address': address, 'interrupt': interrupt, 'width': width, 'height': height})
 
     if args.display:
         display_args = dict(args.display)

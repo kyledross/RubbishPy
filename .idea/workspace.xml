@@ -7,7 +7,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="78cc514a-0b02-4573-a54b-3dd67957637d" name="Changes" comment="Add console scroll test loop&#10;&#10;This commit adds a new file for testing console scrolling, with a looping behavior. Script sends characters A-Z to console, line by line, without a carriage return at the end, creating a seamless loop for easier observation." />
+    <list default="true" id="78cc514a-0b02-4573-a54b-3dd67957637d" name="Changes" comment="Replace CDATA section with directly encoded string in workspace.xml&#10;&#10;The changes replace using &lt;![CDATA[]]&gt; section with directly encoded string within the 'PropertiesComponent' of '.idea/workspace.xml'. Encoding strings directly in this manner allows for more consistent handling of special characters across various contexts in the XML file.">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -54,33 +56,33 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Python tests.Python tests for test_class_rom.TestROM.test_cycle_read_request_valid_address.executor&quot;: &quot;Debug&quot;,
-    &quot;Python tests.Python tests in test_class_rom.py.executor&quot;: &quot;Run&quot;,
-    &quot;Python.Addressable Display Test.executor&quot;: &quot;Debug&quot;,
-    &quot;Python.Consolev3 Scroll Test Looping.executor&quot;: &quot;Debug&quot;,
-    &quot;Python.Consolev3 Scroll Test.executor&quot;: &quot;Run&quot;,
-    &quot;Python.Consolev3 Test.executor&quot;: &quot;Run&quot;,
-    &quot;Python.Processor Test.executor&quot;: &quot;Run&quot;,
-    &quot;Python.Typewriter Console v3.executor&quot;: &quot;Debug&quot;,
-    &quot;Python.Typewriter.executor&quot;: &quot;Debug&quot;,
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;consolev3-development&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/home/kyle/PycharmProjects/RubbishPy/Programs&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.stylelint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.stylelint&quot;: &quot;&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;run.code.analysis.last.selected.profile&quot;: &quot;aDefault&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;copyright&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Python tests.Python tests for test_class_rom.TestROM.test_cycle_read_request_valid_address.executor": "Debug",
+    "Python tests.Python tests in test_class_rom.py.executor": "Run",
+    "Python.Addressable Display Test.executor": "Debug",
+    "Python.Consolev3 Scroll Test Looping.executor": "Run",
+    "Python.Consolev3 Scroll Test.executor": "Run",
+    "Python.Consolev3 Test.executor": "Run",
+    "Python.Processor Test.executor": "Run",
+    "Python.Typewriter Console v3.executor": "Debug",
+    "Python.Typewriter.executor": "Debug",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "git-widget-placeholder": "development",
+    "last_opened_file_path": "/home/kyle/PycharmProjects/RubbishPy/Programs",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.stylelint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.stylelint": "",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "run.code.analysis.last.selected.profile": "aDefault",
+    "settings.editor.selected.configurable": "copyright",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/Programs" />
@@ -329,7 +331,15 @@
       <option name="project" value="LOCAL" />
       <updated>1712430807721</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="Replace CDATA section with directly encoded string in workspace.xml&#10;&#10;The changes replace using &lt;![CDATA[]]&gt; section with directly encoded string within the 'PropertiesComponent' of '.idea/workspace.xml'. Encoding strings directly in this manner allows for more consistent handling of special characters across various contexts in the XML file.">
+      <option name="closed" value="true" />
+      <created>1712431137433</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1712431137433</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -344,13 +354,14 @@
     <MESSAGE value="Add console scrolling feature and update copyright notice&#10;&#10;In the class_consolev3.py script, the copyright notice has been enhanced to include &quot;All rights reserved&quot;. Additionally, a console scrolling feature is integrated, where the script now tests for cursor position and initiates scrolling when cursor reaches the bottom of the console." />
     <MESSAGE value="Update copyright notice and license agreement across files&#10;&#10;Amended source files and directories to carry the enhanced copyright notice &quot;All rights reserved&quot;. Also updated the license.txt file, replacing the previous MIT license with the Software License Agreement, defining terms such as license grant, definition of software, rights and termination. The changes essentially introduce stricter terms with respect to the usage, modification, and distribution of the software." />
     <MESSAGE value="Add console scroll test loop&#10;&#10;This commit adds a new file for testing console scrolling, with a looping behavior. Script sends characters A-Z to console, line by line, without a carriage return at the end, creating a seamless loop for easier observation." />
-    <option name="LAST_COMMIT_MESSAGE" value="Add console scroll test loop&#10;&#10;This commit adds a new file for testing console scrolling, with a looping behavior. Script sends characters A-Z to console, line by line, without a carriage return at the end, creating a seamless loop for easier observation." />
+    <MESSAGE value="Replace CDATA section with directly encoded string in workspace.xml&#10;&#10;The changes replace using &lt;![CDATA[]]&gt; section with directly encoded string within the 'PropertiesComponent' of '.idea/workspace.xml'. Encoding strings directly in this manner allows for more consistent handling of special characters across various contexts in the XML file." />
+    <option name="LAST_COMMIT_MESSAGE" value="Replace CDATA section with directly encoded string in workspace.xml&#10;&#10;The changes replace using &lt;![CDATA[]]&gt; section with directly encoded string within the 'PropertiesComponent' of '.idea/workspace.xml'. Encoding strings directly in this manner allows for more consistent handling of special characters across various contexts in the XML file." />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/RubbishPy$Consolev3_Test.coverage" NAME="Consolev3 Scroll Test Coverage Results" MODIFIED="1712430578720" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$Sourcepath$" />
     <SUITE FILE_PATH="coverage/RubbishPy$.coverage" NAME=" Coverage Results" MODIFIED="1712428790472" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
     <SUITE FILE_PATH="coverage/RubbishPy$Addressable_Display_Test.coverage" NAME="Addressable Display Test Coverage Results" MODIFIED="1712337818716" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$Sourcepath$" />
     <SUITE FILE_PATH="coverage/RubbishPy$Typewriter_Console_v3.coverage" NAME="Typewriter Console v3 Coverage Results" MODIFIED="1712337081092" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$Sourcepath$" />
-    <SUITE FILE_PATH="coverage/RubbishPy$Consolev3_Scroll_Test_Looping.coverage" NAME="Consolev3 Scroll Test Looping Coverage Results" MODIFIED="1712430754273" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$Sourcepath$" />
+    <SUITE FILE_PATH="coverage/RubbishPy$Consolev3_Scroll_Test_Looping.coverage" NAME="Consolev3 Scroll Test Looping Coverage Results" MODIFIED="1712431102287" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$Sourcepath$" />
   </component>
 </project>

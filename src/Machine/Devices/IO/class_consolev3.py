@@ -75,7 +75,8 @@ class ConsoleV3(BaseDevice):
         If cursorX is >= the width, it will set cursorX to 0 and increment the cursorY by one.
         If cursorY is >= the height, it will scroll the labels up by one, setting the new line all blank.
         If the data is 13, it will set cursorX to 0 and increment the cursorY by one.
-        If the data is 8, it will decrement cursorX by one. If cursorX is < 0, it will decrement the cursorY by one and set cursorX to the width-1.
+        If the data is 8, it will decrement cursorX by one. If cursorX is < 0, it will decrement the cursorY by one and
+        set cursorX to the width-1.
         Args:
             data:
 

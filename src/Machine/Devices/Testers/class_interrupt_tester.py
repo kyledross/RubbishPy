@@ -1,6 +1,6 @@
 #  Copyright (c) 2024 Kyle D. Ross.  All rights reserved.
 #  Refer to LICENSE.txt for license information.
-
+import Constants.class_interrupts
 from Machine.Buses.class_control_bus import ControlBus
 from Machine.Buses.class_address_bus import AddressBus
 from Machine.Buses.class_data_bus import DataBus
@@ -15,4 +15,4 @@ class InterruptTester(BaseDevice):
     def cycle(self, address_bus: AddressBus, data_bus: DataBus, control_bus: ControlBus, interrupt_bus: InterruptBus):
         force_interrupt = False
         if force_interrupt:
-            interrupt_bus.set_interrupt(1)
+            interrupt_bus.set_interrupt(Constants.class_interrupts.Interrupts.irq1)

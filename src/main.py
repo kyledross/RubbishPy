@@ -4,7 +4,6 @@
 import sys
 
 
-
 # This is the entry point into the emulator.
 # This entry point will create an instance of the machine builder.
 # The machine builder will return an instance of the backplane with all devices attached.

@@ -1,5 +1,5 @@
 #  Copyright (c) 2024 Kyle D. Ross.  All rights reserved.
-#  Refer to LICENSE.txt for license information.
+#  Refer to LICENSE.md for license information.
 
 class CompareResults:
     """

@@ -3,7 +3,7 @@
 
 import sys
 
-# change
+
 
 # This is the entry point into the emulator.
 # This entry point will create an instance of the machine builder.
@@ -101,7 +101,8 @@ def parse_command_line_arguments():
         interrupt = console_args.get("interrupt")
         width = console_args.get("width")
         height = console_args.get("height")
-        device_groups.append({'device_name': 'consolev3', 'address': address, 'interrupt': interrupt, 'width': width, 'height': height})
+        device_groups.append(
+            {'device_name': 'consolev3', 'address': address, 'interrupt': interrupt, 'width': width, 'height': height})
 
     if args.display:
         display_args = dict(args.display)

@@ -44,6 +44,21 @@ def start_machine():
             show_help()
 
 
+def check_required_parameters(device: str, parameters, keys):
+    """
+    Checks if any of the specified keys are None in the parameters dictionary.
+
+    Parameters:
+    parameters (dict): The dictionary of parameters to check.
+    keys (list): The list of keys to check in the parameters dictionary.
+    """
+    for key in keys:
+        if parameters.get(key) is None:
+            print(f"Error: The {device} device requires {key} to be specified.")
+            print("Use --help for help.")
+            exit(1)
+
+
 def parse_command_line_arguments():
     """Parses the command line arguments and returns a list of device groups.  Each device group is a dictionary"""
     device_groups = []
@@ -81,17 +96,20 @@ def parse_command_line_arguments():
         ram_args = dict(args.ram)
         address = ram_args.get("address")
         size = ram_args.get("size")
+        check_required_parameters("RAM", ram_args, ["address", "size"])
         device_groups.append({'device_name': 'ram', 'address': address, 'size': size})
     if args.console:
         console_args = dict(args.console)
         address = console_args.get("address")
         interrupt = console_args.get("interrupt")
+        check_required_parameters("Console", console_args, ["address", "interrupt"])
         device_groups.append({'device_name': 'console', 'address': address, 'interrupt': interrupt})
 
     if args.consolev2:
         console_args = dict(args.consolev2)
         address = console_args.get("address")
         interrupt = console_args.get("interrupt")
+        check_required_parameters("Consolev2", console_args, ["address", "interrupt"])
         device_groups.append({'device_name': 'consolev2', 'address': address, 'interrupt': interrupt})
 
     if args.consolev3:
@@ -100,6 +118,7 @@ def parse_command_line_arguments():
         interrupt = console_args.get("interrupt")
         width = console_args.get("width")
         height = console_args.get("height")
+        check_required_parameters("Consolev3", console_args, ["address", "interrupt", "width", "height"])
         device_groups.append(
             {'device_name': 'consolev3', 'address': address, 'interrupt': interrupt, 'width': width, 'height': height})
 
@@ -112,6 +131,7 @@ def parse_command_line_arguments():
             width = display_args.get("width")
         if "height" in display_args:
             height = display_args.get("height")
+        check_required_parameters("Display", display_args, ["address"])
         device_groups.append({'device_name': 'display', 'address': address, 'width': width, 'height': height})
 
     if args.compiler:
@@ -119,6 +139,7 @@ def parse_command_line_arguments():
         address = compiler_args.get("address")
         program = compiler_args.get("program")
         size = compiler_args.get("size")
+        check_required_parameters("Compiler", compiler_args, ["address", "program", "size"])
         device_groups.append({'device_name': 'compiler', 'address': address, 'program': program, 'size': size})
 
     # Print the device groups

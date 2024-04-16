@@ -1,0 +1,111 @@
+' Copyright 2024 Kyle D. Ross
+' For licensing information, see LICENSE.txt
+
+' Send the letters A through Z to the console with no CR/LF
+' Send enough to cause the cursor to wrap to the next line
+
+' char A
+begin: lr 1 65
+mrm 1 1024
+
+' char B
+lr 1 66
+mrm 1 1024
+
+' char C
+lr 1 67
+mrm 1 1024
+
+' char D
+lr 1 68
+mrm 1 1024
+
+' char E
+lr 1 69
+mrm 1 1024
+
+' char F
+lr 1 70
+mrm 1 1024
+
+' char G
+lr 1 71
+mrm 1 1024
+
+' char H
+lr 1 72
+mrm 1 1024
+
+' char I
+lr 1 73
+mrm 1 1024
+
+' char J
+lr 1 74
+mrm 1 1024
+
+' char K
+lr 1 75
+mrm 1 1024
+
+' char L
+lr 1 76
+mrm 1 1024
+
+' char M
+lr 1 77
+mrm 1 1024
+
+' char N
+lr 1 78
+mrm 1 1024
+
+' char O
+lr 1 79
+mrm 1 1024
+
+' char P
+lr 1 80
+mrm 1 1024
+
+' char Q
+lr 1 81
+mrm 1 1024
+
+' char R
+lr 1 82
+mrm 1 1024
+
+' char S
+lr 1 83
+mrm 1 1024
+
+' char T
+lr 1 84
+mrm 1 1024
+
+' char U
+lr 1 85
+mrm 1 1024
+
+' char V
+lr 1 86
+mrm 1 1024
+
+' char W
+lr 1 87
+mrm 1 1024
+
+' char X
+lr 1 88
+mrm 1 1024
+
+' char Y
+lr 1 89
+mrm 1 1024
+
+' char Z
+lr 1 90
+mrm 1 1024
+
+jmp begin

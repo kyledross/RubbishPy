@@ -12,6 +12,19 @@ from Machine.Devices.Bases.class_base_device import BaseDevice
 
 FONT_UBUNTU_MONO_REGULAR = "Ubuntu Mono Regular"
 
+
+def show_execution_time(func):
+    def wrapper(*args, **kwargs):
+        print(f"{func.__name__} started")
+        start_time = time.time()
+        result = func(*args, **kwargs)
+        end_time = time.time()
+        print(f"{func.__name__} executed in {end_time - start_time} seconds")
+        return result
+
+    return wrapper
+
+
 class ConsoleV31(BaseDevice):
     """
     A class used to represent a Console device version 2.
@@ -69,7 +82,7 @@ class ConsoleV31(BaseDevice):
         """
         super().__init__(starting_address, 1)
         self.labels = None
-        self.labels_ready = False
+        self.form_ready = False
         self.console_is_busy = False
         self._width = width
         self._height = height
@@ -182,8 +195,7 @@ class ConsoleV31(BaseDevice):
         Returns:
             bool: True if the console is ready, False otherwise.
         """
-        return not self.console_is_busy and self.console_window is not None and self.labels_ready
-
+        return not self.console_is_busy and self.console_window is not None and self.form_ready
 
     def process_keypress(self, interrupt_bus):
         """
@@ -193,14 +205,18 @@ class ConsoleV31(BaseDevice):
             interrupt_bus (Bus): The interrupt bus.
         """
         if self.keypress_event.is_set():
+            print("Keypress detected")
             self.keystroke_buffer.put(self.keypress)
             self.keypress_event.clear()
+            print(f"Keypress: {self.keypress} cleared.")
             interrupt_bus.set_interrupt(self.interrupt_number)
 
+    @show_execution_time
     def start_form(self):
         """
         Starts the form in a separate thread.
         """
+
         form_thread = threading.Thread(target=self.run_form)
         form_thread.start()
 
@@ -211,7 +227,7 @@ class ConsoleV31(BaseDevice):
             None
         """
         # todo: replace with more elegant solution
-        pass
+        return
 
         flash_interval = 1 / self._cursor_blinks_per_second
         current_time = time.time()
@@ -229,17 +245,17 @@ class ConsoleV31(BaseDevice):
         Returns: None
         """
         # todo: replace with more elegant solution
-        pass
+        return
 
         if self._cursor_is_displayed:
             self.console_buffer = self.console_buffer[:-1]
             self._cursor_is_displayed = False
 
+    @show_execution_time
     def run_form(self):
         """
         Runs the form.
         """
-        # todo: this runs very, very slowly
         self.console_window = tk.Tk()
         self.console_window.title("Console v3.1")
         self.labels = \
@@ -249,8 +265,6 @@ class ConsoleV31(BaseDevice):
         for i in range(self._height):
             for j in range(self._width):
                 self.labels[i][j].grid(row=i, column=j)
-        self.labels_ready = True
-
 
         def capture_keypress(event):
             """
@@ -277,4 +291,5 @@ class ConsoleV31(BaseDevice):
 
         self.console_window.bind("<KeyPress>", capture_keypress)
         self.console_window.protocol("WM_DELETE_WINDOW", on_close)
+        self.form_ready = True
         self.console_window.mainloop()

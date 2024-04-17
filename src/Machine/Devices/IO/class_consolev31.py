@@ -1,7 +1,6 @@
 #  Copyright (c) 2024 Kyle D. Ross.  All rights reserved.
 #  Refer to LICENSE.md for license information.
-
-
+import string
 import threading
 import time
 import tkinter as tk
@@ -10,6 +9,7 @@ from queue import Queue
 from Constants.class_interrupts import Interrupts
 from Machine.Devices.Bases.class_base_device import BaseDevice
 
+DEFAULT_LABEL_CONTENTS = ' '  # set to X if debugging so the labels may be seen
 FONT_UBUNTU_MONO_REGULAR = "Ubuntu Mono Regular"
 
 
@@ -124,6 +124,7 @@ class ConsoleV31(BaseDevice):
         """
         if data == 13:
             self._cursorX = 0
+        elif data == 10:  # LF
             self._cursorY += 1
             if self._cursorY >= self._height:
                 self.scroll_labels_up()
@@ -132,7 +133,7 @@ class ConsoleV31(BaseDevice):
             self._cursorX -= 1
             if self._cursorX < 0:
                 self._cursorY -= 1
-                self._cursorX = self._width - 1
+                self._cursorX = self._width - 1  # todo: seek to the end of the current line
             self.write(self._cursorY * self._width + self._cursorX, chr(32))
         else:
             self.write(self._cursorY * self._width + self._cursorX, chr(data))
@@ -258,13 +259,7 @@ class ConsoleV31(BaseDevice):
         """
         self.console_window = tk.Tk()
         self.console_window.title("Console v3.1")
-        self.labels = \
-            [[tk.Label(self.console_window, text=' ', font=(FONT_UBUNTU_MONO_REGULAR, 10), width=1) for _ in
-              range(self._width)] for _ in
-             range(self._height)]
-        for i in range(self._height):
-            for j in range(self._width):
-                self.labels[i][j].grid(row=i, column=j)
+        self.create_labels()
 
         def capture_keypress(event):
             """
@@ -275,9 +270,9 @@ class ConsoleV31(BaseDevice):
             Returns: "break"
 
             """
-            # todo: figure out how to handle control keypress
-            self.keypress = event.char
-            self.keypress_event.set()
+            if event.char != "":
+                self.keypress = event.char
+                self.keypress_event.set()
             return "break"
 
         def on_close():
@@ -287,9 +282,20 @@ class ConsoleV31(BaseDevice):
                 None
 
             """
+            # todo: change cursor to wait while form is being closed
             self.console_closed = True
 
         self.console_window.bind("<KeyPress>", capture_keypress)
         self.console_window.protocol("WM_DELETE_WINDOW", on_close)
         self.form_ready = True
         self.console_window.mainloop()
+
+    def create_labels(self):
+        # todo: labels are growing in height when a character is assigned to them
+        # todo: there is a lot of space between each row of labels
+        self.labels = [
+            [tk.Label(self.console_window, text=DEFAULT_LABEL_CONTENTS, font=(FONT_UBUNTU_MONO_REGULAR, 10), width=1, padx=0, pady=0) for _
+             in range(self._width)] for _ in range(self._height)]
+        for i in range(self._height):
+            for j in range(self._width):
+                self.labels[i][j].grid(row=i, column=j, pady=0, padx=0)  # Set pady and padx to 0 in grid method

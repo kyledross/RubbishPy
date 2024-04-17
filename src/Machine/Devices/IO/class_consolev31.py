@@ -130,7 +130,7 @@ class ConsoleV31(BaseDevice):
         if self.input_queue.qsize() > 0:
             interrupt_bus.set_interrupt(self.interrupt_number)
 
-        self.process_keypress(interrupt_bus)
+        self.process_keypress()
         if self.address_is_valid(address_bus):
             if control_bus.get_read_request():
                 if not self.input_queue.empty():
@@ -161,12 +161,10 @@ class ConsoleV31(BaseDevice):
         """
         return self.console_window is not None and self.form_ready
 
-    def process_keypress(self, interrupt_bus):
+    def process_keypress(self):
         """
         Processes the keypress event.
 
-        Parameters:
-            interrupt_bus (Bus): The interrupt bus.
         """
         if self.keypress_event.is_set():
             log_message("Keypress detected")
@@ -195,12 +193,11 @@ class ConsoleV31(BaseDevice):
             Processes the cursor.
             """
             if self._cursor_is_displayed:
-                self.labels[self._cursorY][self._cursorX]['text'] = '▌' # left three-quarters block
+                self.labels[self._cursorY][self._cursorX]['text'] = '▌'  # left three-quarters block
             else:
                 self.labels[self._cursorY][self._cursorX]['text'] = chr(32)
             self._cursor_is_displayed = not self._cursor_is_displayed
             self.console_window.after(int(1000 / self._cursor_blinks_per_second), process_cursor)
-
 
         def process_data(data):
             # pop the data off the output queue and call this with it

@@ -1,5 +1,9 @@
 #  Copyright (c) 2024 Kyle D. Ross.  All rights reserved.
 #  Refer to LICENSE.md for license information.
+
+"""
+The Console v3.1 device class.
+"""
 import sys
 import threading
 import time
@@ -15,11 +19,27 @@ FONT_UBUNTU_MONO_REGULAR = "Ubuntu Mono Regular"
 
 
 def log_message(message):
+    """
+    A function to log a message if a debugger is attached.
+    Args:
+        message:
+
+    Returns:
+
+    """
     if sys.gettrace():
         print(message)
 
 
 def show_execution_time(func):
+    """
+    A decorator to show the execution time of a function.
+    Args:
+        func:
+
+    Returns:
+
+    """
     def wrapper(*args, **kwargs):
         log_message(f"{func.__name__} started")
         start_time = time.time()
@@ -33,41 +53,7 @@ def show_execution_time(func):
 
 class ConsoleV31(BaseDevice):
     """
-    A class used to represent a Console device version 2.
-    This console is compatible with the original console.
-
-    ...
-
-    Attributes
-    ----------
-    interrupt_number : int
-        the interrupt number for the console
-    input_queue : Queue
-        a queue to store the keystrokes
-    console_buffer : str
-        a string to store the console output
-    keypress_event : threading.Event
-        an event to indicate a keypress
-    console_window : tk.Tk
-        the tkinter window for the console
-    console_closed : bool
-        a flag to indicate if the console is closed
-    ...
-
-    Methods
-    -------
-    cycle(address_bus, data_bus, control_bus, interrupt_bus):
-        Executes a cycle of the console device.
-    console_is_ready():
-        Checks if the console is ready.
-    update_textbox():
-        Updates the text in the textbox.
-    process_keypress(interrupt_bus):
-        Processes the keypress event.
-    start_form():
-        Starts the form in a separate thread.
-    run_form():
-        Runs the form.
+    The Console device class.
     """
 
     # synthetic cursor control
@@ -86,13 +72,15 @@ class ConsoleV31(BaseDevice):
         Parameters:
             starting_address (int): The starting address of the console device.
             interrupt_number (int): The interrupt number for the console device.
+            width (int): The width of the console.
+            height (int): The height of the console.
         """
         super().__init__(starting_address, 1)
         self.labels = None
         self.form_ready = False
         self._width = width
         self._height = height
-        self.console_buffer = [[' '] * self._width for _ in range(self._height)]
+        self.display_buffer = [[' '] * self._width for _ in range(self._height)]
         self.interrupt_number = interrupt_number
         self.input_queue = Queue()
         self.output_queue = Queue()
@@ -102,15 +90,15 @@ class ConsoleV31(BaseDevice):
         self.console_closed = False
         self.start_form()
 
-    def write(self, address, value: str):
+    def write_to_display_buffer(self, address, value: str):
         """
-        This method writes a character to the display at a given address.
+        This method writes a character to the display buffer at a given address.
         :param address: The address to write to.
         :param value: The character to write.
         """
         row = address // self._width
         col = address % self._width
-        self.console_buffer[row][col] = value
+        self.display_buffer[row][col] = value
 
     def cycle(self, address_bus, data_bus, control_bus, interrupt_bus):
         """
@@ -146,11 +134,16 @@ class ConsoleV31(BaseDevice):
                 control_bus.set_response(True)
 
     def scroll_up(self):
+        """
+        Scrolls the display buffer up by one line.
+        Returns:
+
+        """
         for i in range(self._height - 1):
             for j in range(self._width):
-                self.console_buffer[i][j] = self.console_buffer[i + 1][j]
+                self.display_buffer[i][j] = self.display_buffer[i + 1][j]
         for j in range(self._width):
-            self.console_buffer[self._height - 1][j] = ' '
+            self.display_buffer[self._height - 1][j] = ' '
 
     def console_is_ready(self):
         """
@@ -163,7 +156,7 @@ class ConsoleV31(BaseDevice):
 
     def process_keypress(self):
         """
-        Processes the keypress event.
+        Processes the keypress event by putting the keypress into the input queue.
 
         """
         if self.keypress_event.is_set():
@@ -199,17 +192,23 @@ class ConsoleV31(BaseDevice):
             self._cursor_is_displayed = not self._cursor_is_displayed
             self.console_window.after(int(1000 / self._cursor_blinks_per_second), process_cursor)
 
-        def process_data(data):
-            # pop the data off the output queue and call this with it
+        def find_last_non_space_character_on_current_row():
             """
-            This method will take the data, and based off of the cursorX and cursorY position,
-            will compute the offset address to be passed to the write method.
-            It will then increment the cursorX value by one.
-            If cursorX is >= the width, it will set cursorX to 0 and increment the cursorY by one.
-            If cursorY is >= the height, it will scroll the labels up by one, setting the new line all blank.
-            If the data is 13, it will set cursorX to 0 and increment the cursorY by one.
-            If the data is 8, it will decrement cursorX by one. If cursorX is < 0, it will decrement the cursorY by one
-            and set cursorX to the width-1.
+            Finds the last non-space character on the current row.
+            Returns:
+                int: The last non-space character on the current row.
+            """
+            for i in range(self._width - 1, -1, -1):
+                if self.display_buffer[self._cursorY][i] != ' ':
+                    return i+1
+            return 0
+
+        def process_data(data):
+            """
+            Processes the data to be displayed on the console.
+            If the data is a CR, LF, or BS, the cursor is moved accordingly and the display buffer is updated.
+            If the data is a printable character, the character is written to the display buffer and the cursor
+            is moved.
             Args:
                 data:
 
@@ -227,10 +226,13 @@ class ConsoleV31(BaseDevice):
                 self._cursorX -= 1
                 if self._cursorX < 0:
                     self._cursorY -= 1
-                    self._cursorX = self._width - 1  # todo: seek to the end of the current line
-                self.write(self._cursorY * self._width + self._cursorX, chr(32))
+                    if self._cursorY < 0:
+                        self._cursorY = 0
+                        self._cursorX = 0
+                    self._cursorX = find_last_non_space_character_on_current_row()
+                self.write_to_display_buffer(self._cursorY * self._width + self._cursorX, chr(32))
             else:
-                self.write(self._cursorY * self._width + self._cursorX, chr(data))
+                self.write_to_display_buffer(self._cursorY * self._width + self._cursorX, chr(data))
                 self._cursorX += 1
                 if self._cursorX >= self._width:
                     self._cursorX = 0
@@ -255,7 +257,7 @@ class ConsoleV31(BaseDevice):
 
         def on_close():
             """
-            Closes the console window.
+            Captures the on_close event and sets the console_closed attribute to True.
             Returns:
                 None
 
@@ -265,6 +267,7 @@ class ConsoleV31(BaseDevice):
         def process_output_queue():
             """
             Processes the output queue.
+            This queue contains the data to be displayed on the console.
             Returns:
                 None
 
@@ -279,7 +282,7 @@ class ConsoleV31(BaseDevice):
             if data_changed:
                 for i in range(self._height):
                     for j in range(self._width):
-                        self.labels[i][j]['text'] = self.console_buffer[i][j]
+                        self.labels[i][j]['text'] = self.display_buffer[i][j]
             self.console_window.after(REFRESH_RATE_MS, process_output_queue)
 
         self.console_window.bind("<KeyPress>", capture_keypress)
@@ -290,6 +293,11 @@ class ConsoleV31(BaseDevice):
         self.console_window.mainloop()
 
     def create_labels(self):
+        """
+        Creates the labels for the console.
+        Returns:
+
+        """
         self.labels = []
         for _ in range(self._height):
             self.labels.append([tk.Label(self.console_window, text=DEFAULT_LABEL_CONTENTS,

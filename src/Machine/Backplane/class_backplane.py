@@ -1,6 +1,6 @@
 #  Copyright (c) 2024 Kyle D. Ross.  All rights reserved.
 #  Refer to LICENSE.md for license information.
-
+import threading
 import time
 
 from Machine.Devices.Bases.class_base_device import BaseDevice
@@ -91,3 +91,4 @@ class BackPlane:
                     print(f"{(speed / 1000):.0f} kHz")
                     start_time = time.time()
                     loop_counter = 0
+                time.sleep(0.0000001)

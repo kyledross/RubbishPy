@@ -71,6 +71,7 @@ class ConsoleV31(BaseDevice):
     _cursorX: int = 0
     _cursorY: int = 0
 
+# Todo: add switch to change cr/lf behavior
     def __init__(self, starting_address, width, height, interrupt_number: int):
         """
         Constructs all the necessary attributes for the console device.

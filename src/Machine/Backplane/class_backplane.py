@@ -90,4 +90,4 @@ class BackPlane:
                     print(f"{(speed / 1000):.0f} kHz")
                     start_time = time.time()
                     loop_counter = 0
-                time.sleep(0.0000001)
+            time.sleep(0)

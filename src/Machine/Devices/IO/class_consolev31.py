@@ -18,6 +18,7 @@ def log_message(message):
     if sys.gettrace():
         print(message)
 
+
 def show_execution_time(func):
     def wrapper(*args, **kwargs):
         log_message(f"{func.__name__} started")

@@ -73,7 +73,8 @@ class ConsoleV31(BaseDevice):
     # synthetic cursor control
     _cursor_is_displayed: bool = False
     _cursor_last_display_time: float = 0
-    _cursor_blinks_per_second: int = 2
+    _cursor_blinks_per_second: int = 3
+
     # cursor management
     _cursorX: int = 0
     _cursorY: int = 0
@@ -126,7 +127,6 @@ class ConsoleV31(BaseDevice):
             interrupt_bus.set_interrupt(Interrupts.halt)
             return
 
-        self.process_cursor()
         self.process_keypress(interrupt_bus)
         if self.address_is_valid(address_bus):
             if control_bus.get_read_request():
@@ -137,7 +137,6 @@ class ConsoleV31(BaseDevice):
                     control_bus.set_read_request(False)
                     control_bus.set_response(True)
             if control_bus.get_write_request():
-                self.cursor_off()
                 data = data_bus.get_data()
                 self.output_queue.put(data)
                 control_bus.set_write_request(False)
@@ -173,7 +172,6 @@ class ConsoleV31(BaseDevice):
             log_message(f"Keypress: {self.keypress} cleared.")
             interrupt_bus.set_interrupt(self.interrupt_number)
 
-    @show_execution_time
     def start_form(self):
         """
         Starts the form in a separate thread.
@@ -182,38 +180,6 @@ class ConsoleV31(BaseDevice):
         form_thread = threading.Thread(target=self.run_form)
         form_thread.start()
 
-    def process_cursor(self):
-        """
-        Processes the cursor.
-        Returns:
-            None
-        """
-        # todo: replace with more elegant solution
-        return
-
-        flash_interval = 1 / self._cursor_blinks_per_second
-        current_time = time.time()
-        if current_time - self._cursor_last_display_time > flash_interval:
-            if self._cursor_is_displayed:
-                self.cursor_off()
-            else:
-                self.console_buffer += "_"
-                self._cursor_is_displayed = True
-            self._cursor_last_display_time = current_time
-
-    def cursor_off(self):
-        """
-        This will remove the cursor character from the console output buffer.
-        Returns: None
-        """
-        # todo: replace with more elegant solution
-        return
-
-        if self._cursor_is_displayed:
-            self.console_buffer = self.console_buffer[:-1]
-            self._cursor_is_displayed = False
-
-    @show_execution_time
     def run_form(self):
         """
         Runs the form.
@@ -222,8 +188,19 @@ class ConsoleV31(BaseDevice):
         self.console_window.title("Console v3.1")
         self.create_labels()
 
+        def process_cursor():
+            """
+            Processes the cursor.
+            """
+            if self._cursor_is_displayed:
+                self.labels[self._cursorY][self._cursorX]['text'] = '▌' # left three-quarters block
+            else:
+                self.labels[self._cursorY][self._cursorX]['text'] = chr(32)
+            self._cursor_is_displayed = not self._cursor_is_displayed
+            self.console_window.after(int(1000 / self._cursor_blinks_per_second), process_cursor)
+
+
         def process_data(data):
-            # todo: this should be called on the window thread on a timer
             # pop the data off the output queue and call this with it
             """
             This method will take the data, and based off of the cursorX and cursorY position,
@@ -284,10 +261,8 @@ class ConsoleV31(BaseDevice):
                 None
 
             """
-            # todo: change cursor to wait while form is being closed
             self.console_closed = True
 
-        @show_execution_time
         def process_output_queue():
             """
             Processes the output queue.
@@ -295,7 +270,6 @@ class ConsoleV31(BaseDevice):
                 None
 
             """
-            log_message(f"Output queue empty? {self.output_queue.empty()}")
             data_changed = False
             while not self.output_queue.empty():
                 data_changed = True
@@ -313,11 +287,10 @@ class ConsoleV31(BaseDevice):
         self.console_window.protocol("WM_DELETE_WINDOW", on_close)
         self.form_ready = True
         process_output_queue()
+        process_cursor()
         self.console_window.mainloop()
 
     def create_labels(self):
-        # todo: labels are growing in height when a character is assigned to them
-        # todo: there is a lot of space between each row of labels
         self.labels = []
         for _ in range(self._height):
             self.labels.append([tk.Label(self.console_window, text=DEFAULT_LABEL_CONTENTS,

@@ -1,6 +1,8 @@
 #  Copyright (c) 2024 Kyle D. Ross.  All rights reserved.
 #  Refer to LICENSE.md for license information.
 
+# lylt
+
 import sys
 
 
@@ -15,13 +17,9 @@ def intro():
     print("Version 1.0")
     print("Copyright (c) 2024 Kyle D. Ross")
     print()
-    print("Dedicated to my wife, Amy. (lylt)")
-    print()
     print("--help for help")
-    print()
+    print("-------------------------------")
     print("Session started.")
-    print()
-
 
 def check_python_version():
     """Checks the python version.  Returns True if the version is 3.10 or greater.  Returns False otherwise."""
@@ -83,9 +81,6 @@ def parse_command_line_arguments():
     parser.add_argument("--display", type=lambda x: x.split('='), nargs='+')
     # Parse the command-line arguments
     args = parser.parse_args()
-    print("Command line arguments:")
-    print(' '.join(sys.argv))
-    print()
     if args.help:
         show_help()
         exit()
@@ -161,10 +156,6 @@ def parse_command_line_arguments():
         size = compiler_args.get("size")
         check_required_parameters("Compiler", compiler_args, ["address", "program", "size"])
         device_groups.append({'device_name': 'compiler', 'address': address, 'program': program, 'size': size})
-
-    # Print the device groups
-    for device_group in device_groups:
-        print(device_group)
 
     return device_groups
 

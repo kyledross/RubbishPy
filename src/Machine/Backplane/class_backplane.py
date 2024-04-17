@@ -73,7 +73,6 @@ class BackPlane:
         Raises:
             SystemExit: If the HALT interrupt is detected.
         """
-        print("Backplane running.")
         while True:
             for device in self._devices:
                 device.cycle(self._addressBus, self._dataBus, self._controlBus, self._interruptBus)

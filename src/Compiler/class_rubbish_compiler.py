@@ -31,13 +31,6 @@ class RubbishCompiler:
         add_trace = False
         code = []
         try:
-            print("-----------------------------------")
-            print("Rubbish Compiler v1.4")
-            print(f"Compiling to address {self.address}...")
-            print("Code:")
-            print(self.source)
-            print("")
-
             lines = self.source.splitlines()
             temp_lines = []
             if add_trace:
@@ -84,19 +77,17 @@ class RubbishCompiler:
                             self.add_instruction(self.get_instruction_code(instruction), parameters, code, phase == 2)
 
                         else:
+                            print("Compile failed.")
                             out = f"Unknown instruction {instruction} at line {line_number}"
                             print(out)
-                            print("Compilation unsuccessful.")
                             raise Exception(out)
 
-            print("Compilation successful.")
-            print(f"{len(code)} bytes.")
             return code
 
         except Exception as ex:
             raise ex
         finally:
-            print("-----------------------------------")
+            pass
 
     # Function to cross-reference register
     @staticmethod

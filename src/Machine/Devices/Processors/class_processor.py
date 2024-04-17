@@ -85,7 +85,6 @@ class Processor(BaseProcessor):
                     self.finish_instruction(True)
 
                 case InstructionSet.DEBUG:
-                    # todo turn all print statements into a unified logging system
                     print("Processor: Debug instruction encountered.")
                     print("Current registers:")
                     print(self.registers)

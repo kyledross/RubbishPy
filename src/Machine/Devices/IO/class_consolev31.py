@@ -9,6 +9,7 @@ from queue import Queue
 from Constants.class_interrupts import Interrupts
 from Machine.Devices.Bases.class_base_device import BaseDevice
 
+REFRESH_RATE_MS = 10  # milliseconds between screen refreshes
 DEFAULT_LABEL_CONTENTS = ' '  # set to X if debugging so the labels may be seen
 FONT_UBUNTU_MONO_REGULAR = "Ubuntu Mono Regular"
 
@@ -302,7 +303,7 @@ class ConsoleV31(BaseDevice):
                 data = self.output_queue.get()
                 process_data(data)
             # Schedule the function to be called again after 100ms
-            self.console_window.after(100, process_output_queue)
+            self.console_window.after(REFRESH_RATE_MS, process_output_queue)
 
         self.console_window.bind("<KeyPress>", capture_keypress)
         self.console_window.protocol("WM_DELETE_WINDOW", on_close)

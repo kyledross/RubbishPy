@@ -1,6 +1,5 @@
 #  Copyright (c) 2024 Kyle D. Ross.  All rights reserved.
 #  Refer to LICENSE.md for license information.
-import string
 import threading
 import time
 import tkinter as tk
@@ -293,9 +292,11 @@ class ConsoleV31(BaseDevice):
     def create_labels(self):
         # todo: labels are growing in height when a character is assigned to them
         # todo: there is a lot of space between each row of labels
-        self.labels = [
-            [tk.Label(self.console_window, text=DEFAULT_LABEL_CONTENTS, font=(FONT_UBUNTU_MONO_REGULAR, 10), width=1, padx=0, pady=0) for _
-             in range(self._width)] for _ in range(self._height)]
+        self.labels = []
+        for _ in range(self._height):
+            self.labels.append([tk.Label(self.console_window, text=DEFAULT_LABEL_CONTENTS,
+                                         font=(FONT_UBUNTU_MONO_REGULAR, 10), width=1, padx=0, pady=0) for _
+                                in range(self._width)])
         for i in range(self._height):
             for j in range(self._width):
                 self.labels[i][j].grid(row=i, column=j, pady=0, padx=0)  # Set pady and padx to 0 in grid method

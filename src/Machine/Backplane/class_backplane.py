@@ -74,20 +74,10 @@ class BackPlane:
             SystemExit: If the HALT interrupt is detected.
         """
         print("Backplane running.")
-        loop_counter = 0
-        start_time = time.time()
         while True:
-            loop_counter += 1
             for device in self._devices:
                 device.cycle(self._addressBus, self._dataBus, self._controlBus, self._interruptBus)
                 if self._interruptBus.test_interrupt(Interrupts.halt):
                     print("HALT interrupt detected.")
-                    # noinspection PyProtectedMember,PyUnresolvedReferences
                     exit()
-                if loop_counter == 500000:
-                    end_time = time.time()
-                    speed = loop_counter / (end_time - start_time)
-                    print(f"{(speed / 1000):.0f} kHz")
-                    start_time = time.time()
-                    loop_counter = 0
-            time.sleep(0)
+            time.sleep(0)  # allow other threads (such as console 3.1) to run

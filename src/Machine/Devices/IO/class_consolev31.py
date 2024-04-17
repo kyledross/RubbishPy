@@ -77,7 +77,6 @@ class ConsoleV31(BaseDevice):
     _cursorX: int = 0
     _cursorY: int = 0
 
-# Todo: add switch to change cr/lf behavior
     def __init__(self, starting_address, width, height, interrupt_number: int):
         """
         Constructs all the necessary attributes for the console device.
@@ -110,7 +109,6 @@ class ConsoleV31(BaseDevice):
         row = address // self._width
         col = address % self._width
         self.console_buffer[row][col] = value
-        self.labels[row][col]['text'] = value
 
     def cycle(self, address_bus, data_bus, control_bus, interrupt_bus):
         """
@@ -144,14 +142,12 @@ class ConsoleV31(BaseDevice):
                 control_bus.set_write_request(False)
                 control_bus.set_response(True)
 
-    def scroll_labels_up(self):
+    def scroll_up(self):
         for i in range(self._height - 1):
             for j in range(self._width):
                 self.console_buffer[i][j] = self.console_buffer[i + 1][j]
-                self.labels[i][j]['text'] = self.labels[i + 1][j]['text']
         for j in range(self._width):
             self.console_buffer[self._height - 1][j] = ' '
-            self.labels[self._height - 1][j]['text'] = ' '
 
     def console_is_ready(self):
         """
@@ -248,7 +244,7 @@ class ConsoleV31(BaseDevice):
             elif data == 10:  # LF
                 self._cursorY += 1
                 if self._cursorY >= self._height:
-                    self.scroll_labels_up()
+                    self.scroll_up()
                     self._cursorY -= 1
             elif data == 8:
                 self._cursorX -= 1
@@ -263,7 +259,7 @@ class ConsoleV31(BaseDevice):
                     self._cursorX = 0
                     self._cursorY += 1
                 if self._cursorY >= self._height:
-                    self.scroll_labels_up()
+                    self.scroll_up()
                     self._cursorY -= 1
 
         def capture_keypress(event):
@@ -299,10 +295,17 @@ class ConsoleV31(BaseDevice):
 
             """
             log_message(f"Output queue empty? {self.output_queue.empty()}")
+            data_changed = False
             while not self.output_queue.empty():
-                data = self.output_queue.get()
+                data_changed = True
+                log_message(f"Queue size: {self.output_queue.qsize()}")
+                data = self.output_queue.get(block=True)
                 process_data(data)
-            # Schedule the function to be called again after 100ms
+                # Schedule the function to be called again after 100ms
+            if data_changed:
+                for i in range(self._height):
+                    for j in range(self._width):
+                        self.labels[i][j]['text'] = self.console_buffer[i][j]
             self.console_window.after(REFRESH_RATE_MS, process_output_queue)
 
         self.console_window.bind("<KeyPress>", capture_keypress)

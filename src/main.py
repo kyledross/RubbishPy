@@ -75,6 +75,7 @@ def parse_command_line_arguments():
     parser.add_argument('--console', type=lambda x: x.split('='), nargs='+')
     parser.add_argument('--consolev2', type=lambda x: x.split('='), nargs='+')
     parser.add_argument('--consolev3', type=lambda x: x.split('='), nargs='+')
+    parser.add_argument('--consolev31', type=lambda x: x.split('='), nargs='+')
     parser.add_argument("--compiler", type=lambda x: x.split('='), nargs='+')
     parser.add_argument("--display", type=lambda x: x.split('='), nargs='+')
     # Parse the command-line arguments
@@ -121,6 +122,16 @@ def parse_command_line_arguments():
         check_required_parameters("Consolev3", console_args, ["address", "interrupt", "width", "height"])
         device_groups.append(
             {'device_name': 'consolev3', 'address': address, 'interrupt': interrupt, 'width': width, 'height': height})
+
+    if args.consolev31:
+        console_args = dict(args.consolev31)
+        address = console_args.get("address")
+        interrupt = console_args.get("interrupt")
+        width = console_args.get("width")
+        height = console_args.get("height")
+        check_required_parameters("Consolev31", console_args, ["address", "interrupt", "width", "height"])
+        device_groups.append(
+            {'device_name': 'consolev31', 'address': address, 'interrupt': interrupt, 'width': width, 'height': height})
 
     if args.display:
         display_args = dict(args.display)

@@ -264,6 +264,11 @@ class ConsoleV31(BaseDevice):
             """
             self.console_closed = True
 
+        def show_display_buffer():
+            for i in range(self._height):
+                for j in range(self._width):
+                    self.labels[i][j]['text'] = self.display_buffer[i][j]
+
         def process_output_queue():
             """
             Processes the output queue.
@@ -278,11 +283,8 @@ class ConsoleV31(BaseDevice):
                 log_message(f"Queue size: {self.output_queue.qsize()}")
                 data = self.output_queue.get(block=True)
                 process_data(data)
-                # Schedule the function to be called again after 100ms
             if data_changed:
-                for i in range(self._height):
-                    for j in range(self._width):
-                        self.labels[i][j]['text'] = self.display_buffer[i][j]
+                show_display_buffer()
             self.console_window.after(REFRESH_RATE_MS, process_output_queue)
 
         self.console_window.bind("<KeyPress>", capture_keypress)

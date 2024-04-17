@@ -24,7 +24,19 @@ from Constants.class_compare_results import CompareResults
 # 1 internal stack
 # 1 external general purpose stack
 
+class Phases:
+    """
+    The Phases class represents the different phases a processor can be in during its operation.
+    It is a static class, meaning it does not need to be instantiated and its members can be accessed directly.
+    """
+    NothingPending = 0  # The processor has nothing pending.
+    AwaitingInstruction = 1  # The processor is awaiting an instruction.
+    AwaitingFirstOperand = 2  # The processor is awaiting the first operand.
+    AwaitingSecondOperand = 3  # The processor is awaiting the second operand.
+    AwaitingResponse = 4  # The processor is awaiting a response.
 
+
+# noinspection DuplicatedCode
 class Processor(BaseProcessor):
     # registers
     current_instruction: int = -1
@@ -51,7 +63,7 @@ class Processor(BaseProcessor):
     def cycle(self, address_bus: AddressBus, data_bus: DataBus, control_bus: ControlBus, interrupt_bus: InterruptBus):
 
         # Interrupt processing
-        if self.phase == self.Phases.NothingPending:
+        if self.phase == Phases.NothingPending:
             if not self.interrupt_in_progress:
                 for interruptBit in range(0, 32):
                     interrupt_number = 2 ** interruptBit
@@ -166,10 +178,10 @@ class Processor(BaseProcessor):
                     self.execute_siv(address_bus, control_bus, data_bus)
 
                 case InstructionSet.DEBUGOUT:
-                    self.execute_debugout()
+                    self.execute_debug_out()
 
                 case InstructionSet.DEBUGPUSH:
-                    self.execute_debugpush(address_bus, control_bus, data_bus)
+                    self.execute_debug_push(address_bus, control_bus, data_bus)
 
                 case _:
                     self.load_instruction(address_bus, control_bus, data_bus)
@@ -201,60 +213,60 @@ class Processor(BaseProcessor):
         self.finish_instruction(True)
 
     def load_instruction(self, address_bus, control_bus, data_bus):
-        if self.phase == self.Phases.NothingPending:
+        if self.phase == Phases.NothingPending:
             address_bus.set_address(self.data_pointer)
             control_bus.set_read_request(True)
-            self.phase = self.Phases.AwaitingInstruction
-        elif self.phase == self.Phases.AwaitingInstruction:
+            self.phase = Phases.AwaitingInstruction
+        elif self.phase == Phases.AwaitingInstruction:
             if control_bus.get_response():
                 self.current_instruction = data_bus.get_data()
-                self.phase = self.Phases.NothingPending
+                self.phase = Phases.NothingPending
 
     def execute_add(self):
-        if self.phase == self.Phases.NothingPending:
+        if self.phase == Phases.NothingPending:
             self.registers[3] = self.registers[1] + self.registers[2]
             self.finish_instruction(True)
 
     def execute_sub(self):
-        if self.phase == self.Phases.NothingPending:
+        if self.phase == Phases.NothingPending:
             self.registers[3] = self.registers[1] - self.registers[2]
             self.finish_instruction(True)
 
     def execute_integer_divide(self):
-        if self.phase == self.Phases.NothingPending:
+        if self.phase == Phases.NothingPending:
             self.registers[3] = self.registers[1] // self.registers[2]
             self.finish_instruction(True)
 
     def execute_multiply(self):
-        if self.phase == self.Phases.NothingPending:
+        if self.phase == Phases.NothingPending:
             self.registers[3] = self.registers[1] * self.registers[2]
             self.finish_instruction(True)
 
     def execute_lrr(self, address_bus, control_bus, data_bus):
-        if self.phase == self.Phases.NothingPending:
+        if self.phase == Phases.NothingPending:
             self.request_operand(address_bus, control_bus)
-            self.phase = self.Phases.AwaitingFirstOperand
-        elif self.phase == self.Phases.AwaitingFirstOperand:
+            self.phase = Phases.AwaitingFirstOperand
+        elif self.phase == Phases.AwaitingFirstOperand:
             if control_bus.get_response():
                 self.internal_stack.append(data_bus.get_data())  # save the destination register
                 self.request_operand(address_bus, control_bus)
-                self.phase = self.Phases.AwaitingSecondOperand
-        elif self.phase == self.Phases.AwaitingSecondOperand:
+                self.phase = Phases.AwaitingSecondOperand
+        elif self.phase == Phases.AwaitingSecondOperand:
             if control_bus.get_response():
                 destination_register = self.internal_stack.pop()
                 self.registers[destination_register] = self.registers[data_bus.get_data()]
                 self.finish_instruction(True)
 
     def execute_lrm(self, address_bus, control_bus, data_bus):
-        if self.phase == self.Phases.NothingPending:
+        if self.phase == Phases.NothingPending:
             self.request_operand(address_bus, control_bus)
-            self.phase = self.Phases.AwaitingFirstOperand
-        elif self.phase == self.Phases.AwaitingFirstOperand:
+            self.phase = Phases.AwaitingFirstOperand
+        elif self.phase == Phases.AwaitingFirstOperand:
             if control_bus.get_response():
                 self.internal_stack.append(data_bus.get_data())  # save the destination register
                 self.request_operand(address_bus, control_bus)
-                self.phase = self.Phases.AwaitingSecondOperand
-        elif self.phase == self.Phases.AwaitingSecondOperand:
+                self.phase = Phases.AwaitingSecondOperand
+        elif self.phase == Phases.AwaitingSecondOperand:
             if control_bus.get_response():
                 #  the data bus contains the memory address where the value destined for the register resides.
                 #  fetch the value from memory
@@ -266,22 +278,22 @@ class Processor(BaseProcessor):
                         address_bus.set_address(data_bus.get_data())
                 control_bus.set_read_request(True)
                 control_bus.set_response(False)
-                self.phase = self.Phases.AwaitingResponse
-        elif self.phase == self.Phases.AwaitingResponse:
+                self.phase = Phases.AwaitingResponse
+        elif self.phase == Phases.AwaitingResponse:
             if control_bus.get_response():
                 self.registers[self.internal_stack.pop()] = data_bus.get_data()
                 self.finish_instruction(True)
 
     def execute_mrm(self, address_bus, control_bus, data_bus):
-        if self.phase == self.Phases.NothingPending:
+        if self.phase == Phases.NothingPending:
             self.request_operand(address_bus, control_bus)
-            self.phase = self.Phases.AwaitingFirstOperand
-        elif self.phase == self.Phases.AwaitingFirstOperand:
+            self.phase = Phases.AwaitingFirstOperand
+        elif self.phase == Phases.AwaitingFirstOperand:
             if control_bus.get_response():
                 self.internal_stack.append(data_bus.get_data())  # save the destination register
                 self.request_operand(address_bus, control_bus)
-                self.phase = self.Phases.AwaitingSecondOperand
-        elif self.phase == self.Phases.AwaitingSecondOperand:
+                self.phase = Phases.AwaitingSecondOperand
+        elif self.phase == Phases.AwaitingSecondOperand:
             if control_bus.get_response():
                 #  the data bus contains the memory address where the register's value is destined.
                 #  send the value to memory
@@ -295,21 +307,21 @@ class Processor(BaseProcessor):
                 data_bus.set_data(self.registers[self.internal_stack.pop()])
                 control_bus.set_write_request(True)
                 control_bus.set_response(False)
-                self.phase = self.Phases.AwaitingResponse
-        elif self.phase == self.Phases.AwaitingResponse:
+                self.phase = Phases.AwaitingResponse
+        elif self.phase == Phases.AwaitingResponse:
             if control_bus.get_response():
                 self.finish_instruction(True)
 
     def execute_lr(self, address_bus, control_bus, data_bus):
-        if self.phase == self.Phases.NothingPending:
+        if self.phase == Phases.NothingPending:
             self.request_operand(address_bus, control_bus)
-            self.phase = self.Phases.AwaitingFirstOperand
-        elif self.phase == self.Phases.AwaitingFirstOperand:
+            self.phase = Phases.AwaitingFirstOperand
+        elif self.phase == Phases.AwaitingFirstOperand:
             if control_bus.get_response():
                 self.internal_stack.append(data_bus.get_data())  # save the destination register
                 self.request_operand(address_bus, control_bus)
-                self.phase = self.Phases.AwaitingSecondOperand
-        elif self.phase == self.Phases.AwaitingSecondOperand:
+                self.phase = Phases.AwaitingSecondOperand
+        elif self.phase == Phases.AwaitingSecondOperand:
             if control_bus.get_response():
                 value: int = data_bus.get_data()
                 destination_register = self.internal_stack.pop()
@@ -317,19 +329,19 @@ class Processor(BaseProcessor):
                 self.finish_instruction(True)
 
     def execute_jmp(self, address_bus, control_bus, data_bus):
-        if self.phase == self.Phases.NothingPending:
+        if self.phase == Phases.NothingPending:
             self.request_operand(address_bus, control_bus)
-            self.phase = self.Phases.AwaitingFirstOperand
-        elif self.phase == self.Phases.AwaitingFirstOperand:
+            self.phase = Phases.AwaitingFirstOperand
+        elif self.phase == Phases.AwaitingFirstOperand:
             if control_bus.get_response():
                 self.data_pointer = data_bus.get_data()
                 self.finish_instruction(False)
 
     def execute_je(self, address_bus, control_bus, data_bus):
-        if self.phase == self.Phases.NothingPending:
+        if self.phase == Phases.NothingPending:
             self.request_operand(address_bus, control_bus)
-            self.phase = self.Phases.AwaitingFirstOperand
-        elif self.phase == self.Phases.AwaitingFirstOperand:
+            self.phase = Phases.AwaitingFirstOperand
+        elif self.phase == Phases.AwaitingFirstOperand:
             if control_bus.get_response():
                 if self.compare_result == CompareResults.Equal:
                     self.data_pointer = data_bus.get_data()
@@ -338,10 +350,10 @@ class Processor(BaseProcessor):
                     self.finish_instruction(True)
 
     def execute_jne(self, address_bus, control_bus, data_bus):
-        if self.phase == self.Phases.NothingPending:
+        if self.phase == Phases.NothingPending:
             self.request_operand(address_bus, control_bus)
-            self.phase = self.Phases.AwaitingFirstOperand
-        elif self.phase == self.Phases.AwaitingFirstOperand:
+            self.phase = Phases.AwaitingFirstOperand
+        elif self.phase == Phases.AwaitingFirstOperand:
             if control_bus.get_response():
                 if (self.compare_result == CompareResults.GreaterThan
                         or self.compare_result == CompareResults.LessThan):
@@ -351,10 +363,10 @@ class Processor(BaseProcessor):
                     self.finish_instruction(True)
 
     def execute_jl(self, address_bus, control_bus, data_bus):
-        if self.phase == self.Phases.NothingPending:
+        if self.phase == Phases.NothingPending:
             self.request_operand(address_bus, control_bus)
-            self.phase = self.Phases.AwaitingFirstOperand
-        elif self.phase == self.Phases.AwaitingFirstOperand:
+            self.phase = Phases.AwaitingFirstOperand
+        elif self.phase == Phases.AwaitingFirstOperand:
             if control_bus.get_response():
                 if self.compare_result == CompareResults.LessThan:
                     self.data_pointer = data_bus.get_data()
@@ -363,10 +375,10 @@ class Processor(BaseProcessor):
                     self.finish_instruction(True)
 
     def execute_jg(self, address_bus, control_bus, data_bus):
-        if self.phase == self.Phases.NothingPending:
+        if self.phase == Phases.NothingPending:
             self.request_operand(address_bus, control_bus)
-            self.phase = self.Phases.AwaitingFirstOperand
-        elif self.phase == self.Phases.AwaitingFirstOperand:
+            self.phase = Phases.AwaitingFirstOperand
+        elif self.phase == Phases.AwaitingFirstOperand:
             if control_bus.get_response():
                 if self.compare_result == CompareResults.GreaterThan:
                     self.data_pointer = data_bus.get_data()
@@ -375,7 +387,7 @@ class Processor(BaseProcessor):
                     self.finish_instruction(True)
 
     def execute_cmp(self):
-        if self.phase == self.Phases.NothingPending:
+        if self.phase == Phases.NothingPending:
             if self.registers[1] == self.registers[2]:
                 self.compare_result = CompareResults.Equal
             elif self.registers[1] > self.registers[2]:
@@ -385,38 +397,38 @@ class Processor(BaseProcessor):
             self.finish_instruction(True)
 
     def execute_push(self, address_bus, control_bus, data_bus):
-        if self.phase == self.Phases.NothingPending:
+        if self.phase == Phases.NothingPending:
             self.request_operand(address_bus, control_bus)
-            self.phase = self.Phases.AwaitingFirstOperand
-        elif self.phase == self.Phases.AwaitingFirstOperand:
+            self.phase = Phases.AwaitingFirstOperand
+        elif self.phase == Phases.AwaitingFirstOperand:
             if control_bus.get_response():
                 self.general_purpose_stack.append(self.registers[data_bus.get_data()])
-                self.phase = self.Phases.NothingPending
+                self.phase = Phases.NothingPending
                 self.finish_instruction(True)
 
     def execute_pop(self, address_bus, control_bus, data_bus):
-        if self.phase == self.Phases.NothingPending:
+        if self.phase == Phases.NothingPending:
             self.request_operand(address_bus, control_bus)
-            self.phase = self.Phases.AwaitingFirstOperand
-        elif self.phase == self.Phases.AwaitingFirstOperand:
+            self.phase = Phases.AwaitingFirstOperand
+        elif self.phase == Phases.AwaitingFirstOperand:
             if control_bus.get_response():
                 self.registers[data_bus.get_data()] = self.general_purpose_stack.pop()
                 self.finish_instruction(True)
 
     def execute_peek(self, address_bus, control_bus, data_bus):
-        if self.phase == self.Phases.NothingPending:
+        if self.phase == Phases.NothingPending:
             self.request_operand(address_bus, control_bus)
-            self.phase = self.Phases.AwaitingFirstOperand
-        elif self.phase == self.Phases.AwaitingFirstOperand:
+            self.phase = Phases.AwaitingFirstOperand
+        elif self.phase == Phases.AwaitingFirstOperand:
             if control_bus.get_response():
                 self.registers[data_bus.get_data()] = self.general_purpose_stack[-1]()
                 self.finish_instruction(True)
 
     def execute_call(self, address_bus, control_bus, data_bus):
-        if self.phase == self.Phases.NothingPending:
+        if self.phase == Phases.NothingPending:
             self.request_operand(address_bus, control_bus)
-            self.phase = self.Phases.AwaitingFirstOperand
-        elif self.phase == self.Phases.AwaitingFirstOperand:
+            self.phase = Phases.AwaitingFirstOperand
+        elif self.phase == Phases.AwaitingFirstOperand:
             if control_bus.get_response():
                 self.call_stack.append(self.data_pointer)
                 self.push_registers()
@@ -424,7 +436,7 @@ class Processor(BaseProcessor):
                 self.finish_instruction(False)
 
     def execute_rtn(self):
-        if self.phase == self.Phases.NothingPending:
+        if self.phase == Phases.NothingPending:
             self.interrupt_in_progress = False
             self.data_pointer = self.call_stack.pop()
             self.pop_registers()
@@ -433,15 +445,15 @@ class Processor(BaseProcessor):
             self.finish_instruction(True)
 
     def execute_siv(self, address_bus, control_bus, data_bus):
-        if self.phase == self.Phases.NothingPending:
+        if self.phase == Phases.NothingPending:
             self.request_operand(address_bus, control_bus)
-            self.phase = self.Phases.AwaitingFirstOperand
-        elif self.phase == self.Phases.AwaitingFirstOperand:
+            self.phase = Phases.AwaitingFirstOperand
+        elif self.phase == Phases.AwaitingFirstOperand:
             if control_bus.get_response():
                 self.internal_stack.append(data_bus.get_data())  # save the interrupt number
                 self.request_operand(address_bus, control_bus)
-                self.phase = self.Phases.AwaitingSecondOperand
-        elif self.phase == self.Phases.AwaitingSecondOperand:
+                self.phase = Phases.AwaitingSecondOperand
+        elif self.phase == Phases.AwaitingSecondOperand:
             if control_bus.get_response():
                 call_address: int = data_bus.get_data()
                 interrupt_number = self.internal_stack.pop()
@@ -459,7 +471,7 @@ class Processor(BaseProcessor):
         if advance_pointer:
             self.data_pointer += 1
         self.current_instruction = -1
-        self.phase = self.Phases.NothingPending
+        self.phase = Phases.NothingPending
 
     def push_registers(self):
         self.register_stack.append(self.registers[0])
@@ -482,27 +494,27 @@ class Processor(BaseProcessor):
         self.registers[0] = self.register_stack.pop()
 
     def execute_or(self):
-        if self.phase == self.Phases.NothingPending:
+        if self.phase == Phases.NothingPending:
             self.registers[3] = self.registers[1] | self.registers[2]
             self.finish_instruction(True)
 
     def execute_and(self):
-        if self.phase == self.Phases.NothingPending:
+        if self.phase == Phases.NothingPending:
             self.registers[3] = self.registers[1] & self.registers[2]
             self.finish_instruction(True)
 
     def execute_xor(self):
-        if self.phase == self.Phases.NothingPending:
+        if self.phase == Phases.NothingPending:
             self.registers[3] = self.registers[1] ^ self.registers[2]
             self.finish_instruction(True)
 
     def execute_not(self):
-        if self.phase == self.Phases.NothingPending:
+        if self.phase == Phases.NothingPending:
             self.registers[3] = ~self.registers[1]
             self.finish_instruction(True)
 
-    def execute_debugout(self):
-        if self.phase == self.Phases.NothingPending:
+    def execute_debug_out(self):
+        if self.phase == Phases.NothingPending:
             # build a string in reverse by popping every byte off of the debug_stack and then print it
             output_string = ""
             self.debug_stack.reverse()
@@ -512,12 +524,12 @@ class Processor(BaseProcessor):
             print(output_string)
             self.finish_instruction(True)
 
-    def execute_debugpush(self, address_bus, control_bus, data_bus):
-        if self.phase == self.Phases.NothingPending:
+    def execute_debug_push(self, address_bus, control_bus, data_bus):
+        if self.phase == Phases.NothingPending:
             self.request_operand(address_bus, control_bus)
-            self.phase = self.Phases.AwaitingFirstOperand
-        elif self.phase == self.Phases.AwaitingFirstOperand:
+            self.phase = Phases.AwaitingFirstOperand
+        elif self.phase == Phases.AwaitingFirstOperand:
             if control_bus.get_response():
                 self.debug_stack.append(data_bus.get_data())
-                self.phase = self.Phases.NothingPending
+                self.phase = Phases.NothingPending
                 self.finish_instruction(True)

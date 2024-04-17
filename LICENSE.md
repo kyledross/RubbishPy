@@ -27,11 +27,11 @@ You may not modify, adapt, translate, reverse engineer, decompile, disassemble, 
 
 ## Termination
 
-This Agreement shall terminate immediately upon your breach of any of its terms. Licensor may also terminate this Agreement at any time for any reason. Upon termination, You shall cease all use of the Software.
+This Agreement shall terminate immediately upon your breach of its terms. Licensor may also terminate this Agreement at any time for any reason. Upon termination, You shall cease all use of the Software.
 
 ## Entire Agreement
 
-This Agreement constitutes the entire agreement between the parties with respect to the subject matter hereof and supersedes all prior or contemporaneous communications, representations, or agreements, whether oral or written.
+This Agreement constitutes the entire agreement between the parties with respect to the subject hereof and supersedes all prior or contemporaneous communications, representations, or agreements, whether oral or written.
 
 ## Governing Law
 

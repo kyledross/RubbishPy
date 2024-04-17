@@ -46,11 +46,11 @@ def start_machine():
 
 def check_required_parameters(device: str, parameters, keys):
     """
-    Checks if any of the specified keys are None in the parameters dictionary.
+    Checks if any of the specified keys are None in the "parameters" dictionary.
 
     Parameters:
     parameters (dict): The dictionary of parameters to check.
-    keys (list): The list of keys to check in the parameters dictionary.
+    keys (list): The list of keys to check in the "parameters" dictionary.
     """
     for key in keys:
         if parameters.get(key) is None:
@@ -73,8 +73,11 @@ def parse_command_line_arguments():
     parser.add_argument('--processor_with_cache', action='store_const', const=True)
     parser.add_argument('--debugger', action='store_const', const=True)
     parser.add_argument('--console', type=lambda x: x.split('='), nargs='+')
+    # noinspection SpellCheckingInspection
     parser.add_argument('--consolev2', type=lambda x: x.split('='), nargs='+')
+    # noinspection SpellCheckingInspection
     parser.add_argument('--consolev3', type=lambda x: x.split('='), nargs='+')
+    # noinspection SpellCheckingInspection
     parser.add_argument('--consolev31', type=lambda x: x.split('='), nargs='+')
     parser.add_argument("--compiler", type=lambda x: x.split('='), nargs='+')
     parser.add_argument("--display", type=lambda x: x.split('='), nargs='+')
@@ -110,7 +113,9 @@ def parse_command_line_arguments():
         console_args = dict(args.consolev2)
         address = console_args.get("address")
         interrupt = console_args.get("interrupt")
+        # noinspection SpellCheckingInspection
         check_required_parameters("Consolev2", console_args, ["address", "interrupt"])
+        # noinspection SpellCheckingInspection
         device_groups.append({'device_name': 'consolev2', 'address': address, 'interrupt': interrupt})
 
     if args.consolev3:
@@ -119,7 +124,9 @@ def parse_command_line_arguments():
         interrupt = console_args.get("interrupt")
         width = console_args.get("width")
         height = console_args.get("height")
+        # noinspection SpellCheckingInspection
         check_required_parameters("Consolev3", console_args, ["address", "interrupt", "width", "height"])
+        # noinspection SpellCheckingInspection
         device_groups.append(
             {'device_name': 'consolev3', 'address': address, 'interrupt': interrupt, 'width': width, 'height': height})
 
@@ -129,7 +136,9 @@ def parse_command_line_arguments():
         interrupt = console_args.get("interrupt")
         width = console_args.get("width")
         height = console_args.get("height")
+        # noinspection SpellCheckingInspection
         check_required_parameters("Consolev31", console_args, ["address", "interrupt", "width", "height"])
+        # noinspection SpellCheckingInspection
         device_groups.append(
             {'device_name': 'consolev31', 'address': address, 'interrupt': interrupt, 'width': width, 'height': height})
 
@@ -184,6 +193,7 @@ def show_help():
     print()
     print("   Note:  Console's size is always 1 and can't be changed.")
     print()
+    # noinspection SpellCheckingInspection
     print("--consolev2")
     print("   Adds a console device to the backplane which accepts keystrokes and displays output.")
     print()
@@ -194,6 +204,7 @@ def show_help():
     print("         --console address=1024 interrupt=2")
     print()
     print("   Note:  Console's size is always 1 and can't be changed.")
+    # noinspection SpellCheckingInspection
     print("          Consolev2 is a newer and more stable version of the console device.")
     print()
     print("--display")

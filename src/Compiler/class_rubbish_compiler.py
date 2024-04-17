@@ -198,21 +198,26 @@ class RubbishCompiler:
         except ValueError:
             return False
 
+    # noinspection SpellCheckingInspection
     @staticmethod
     def add_debug_trace(line):
+        # noinspection SpellCheckingInspection
         """
-        This method adds a debug trace for the given line.
-        It adds a DEBUGPUSH instruction for each character in the line and a DEBUGOUT instruction at the end.
-        :param line: The line to add a debug trace for.
-        :return: The debug trace for the given line.
-        """
+                This method adds a debug trace for the given line.
+                It will add a DEBUGPUSH instruction for each character in the
+                line and a DEBUGOUT instruction at the end.
+                :param line: The line to add a debug trace for.
+                :return: The debug trace for the given line.
+                """
         # add line to a list of strings called output
         # for each character in the line, add a debugpush of the ascii value
         # add a debugout instruction
         # return the lines
         output = []
         for char in line:
+            # noinspection SpellCheckingInspection
             output.append(f"DEBUGPUSH {ord(char)}")
+        # noinspection SpellCheckingInspection
         output.append("DEBUGOUT")
         output.append(line)
         return output

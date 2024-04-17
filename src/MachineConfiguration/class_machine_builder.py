@@ -129,6 +129,7 @@ class MachineBuilder:
         if 'height' in device:
             height: int = int(device['height'])
 
+        # noinspection SpellCheckingInspection
         match device_to_add:
             case 'ram':
                 self._backplane.add_device(RAM(starting_address=address, size=size))

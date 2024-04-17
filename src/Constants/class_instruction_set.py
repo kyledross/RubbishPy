@@ -37,5 +37,7 @@ class InstructionSet:
     SIV = 26  # Set interrupt vector instruction
     SLEEP = 28  # Sleep instruction
     WAKE = 29  # Wake instruction
+    # noinspection SpellCheckingInspection
     DEBUGOUT = 35  # Debug output instruction
+    # noinspection SpellCheckingInspection
     DEBUGPUSH = 36  # Debug push instruction

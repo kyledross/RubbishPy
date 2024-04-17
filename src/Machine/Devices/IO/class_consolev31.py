@@ -127,6 +127,9 @@ class ConsoleV31(BaseDevice):
             interrupt_bus.set_interrupt(Interrupts.halt)
             return
 
+        if self.input_queue.qsize() > 0:
+            interrupt_bus.set_interrupt(self.interrupt_number)
+
         self.process_keypress(interrupt_bus)
         if self.address_is_valid(address_bus):
             if control_bus.get_read_request():
@@ -170,7 +173,6 @@ class ConsoleV31(BaseDevice):
             self.input_queue.put(self.keypress)
             self.keypress_event.clear()
             log_message(f"Keypress: {self.keypress} cleared.")
-            interrupt_bus.set_interrupt(self.interrupt_number)
 
     def start_form(self):
         """

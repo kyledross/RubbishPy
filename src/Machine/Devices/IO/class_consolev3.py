@@ -1,7 +1,8 @@
 #  Copyright (c) 2024 Kyle D. Ross.  All rights reserved.
 #  Refer to LICENSE.md for license information.
-
+import threading
 import tkinter as tk
+from queue import Queue
 
 from Constants.class_interrupts import Interrupts
 from Machine.Devices.Bases.class_base_device import BaseDevice
@@ -22,6 +23,7 @@ class ConsoleV3(BaseDevice):
     _height: int = 0  # The height of the display
     _formClosing: bool = False  # Flag to indicate if the form is closing
     _interrupt_number: int = 0
+    _formReady: bool = False  # Flag to indicate if the form is ready
 
     # cursor management
     _cursorX: int = 0
@@ -36,20 +38,80 @@ class ConsoleV3(BaseDevice):
         :param width: The width of the display.
         :param height: The height of the display.
         """
+        self.interrupt_number = 0
+        self.keypress = ""
+        self.keystroke_buffer = Queue()
+        self.keypress_event = threading.Event()
+        self.labels = None
+        self.console_window = None
         self._interrupt_number = interrupt_number
         self._width = width
         self._height = height
         super().__init__(starting_address, 1)
         self.display = [[' '] * self._width for _ in range(self._height)]
-        self.window = tk.Tk()
+        self.start_form()
+
+    def process_keypress(self, interrupt_bus):
+        """
+        Processes the keypress event.
+
+        Parameters:
+            interrupt_bus (Bus): The interrupt bus.
+        """
+        if self.keypress_event.is_set():
+            self.keystroke_buffer.put(self.keypress)
+            self.keypress_event.clear()
+            interrupt_bus.set_interrupt(self.interrupt_number)
+
+    def start_form(self):
+        """
+        Starts the form in a separate thread.
+        """
+        form_thread = threading.Thread(target=self.run_form)
+        form_thread.start()
+
+    def run_form(self):
+        """
+        Runs the form.
+        """
+        self.console_window = tk.Tk()
+        self.console_window.protocol("WM_DELETE_WINDOW", self.on_closing)
         self.labels = \
-            [[tk.Label(self.window, text=' ', font=(FONT_UBUNTU_MONO_REGULAR, 10), width=1) for _ in
+            [[tk.Label(self.console_window, text=' ', font=(FONT_UBUNTU_MONO_REGULAR, 10), width=1) for _ in
               range(self._width)] for _ in
              range(self._height)]
         for i in range(self._height):
             for j in range(self._width):
                 self.labels[i][j].grid(row=i, column=j)
-        self.window.protocol("WM_DELETE_WINDOW", self.on_closing)
+        self.console_window.title("Console v3")
+        self._formReady = True
+
+        def on_close():
+            """
+            Closes the console window.
+            Returns:
+                None
+
+            """
+            self.console_closed = True
+
+        def capture_keypress(event):
+            """
+            Captures the keypress event.
+            Args:
+                event: The keypress event.
+
+            Returns: "break"
+
+            """
+            # todo: figure out how to handle control keypress
+            self.keypress = event.char
+            self.keypress_event.set()
+            return "break"
+
+        self.console_window.bind("<KeyPress>", capture_keypress)
+        self.console_window.protocol("WM_DELETE_WINDOW", on_close)
+        self.console_window.mainloop()
 
     def on_closing(self):
         """
@@ -124,33 +186,24 @@ class ConsoleV3(BaseDevice):
         :param control_bus: The control bus to interact with.
         :param interrupt_bus: The interrupt bus to interact with.
         """
+        if not self._formReady:
+            return
         if self._formClosing:
             interrupt_bus.set_interrupt(Interrupts.halt)
             return
         if self.address_is_valid(address_bus):
             if control_bus.get_read_request():
-                data_bus.set_data(ord(self.read(address_bus.get_address() - self.starting_address)))
-                control_bus.set_read_request(False)
-                control_bus.set_response(True)
+                if not self.keystroke_buffer.empty():
+                    buffer_data = self.keystroke_buffer.get()
+                    if len(buffer_data) > 0:
+                        data_bus.set_data(ord(buffer_data))
+                    control_bus.set_read_request(False)
+                    control_bus.set_response(True)
             if control_bus.get_write_request():
                 data = data_bus.get_data()
                 self.process_data(data)
                 control_bus.set_write_request(False)
                 control_bus.set_response(True)
-        self.update_window()
-
-    def update_window(self):
-        """
-        This method updates the window of the display.
-        """
-        self.window.update_idletasks()
-        self.window.update()
-
-    def run(self):
-        """
-        This method starts the main loop of the window.
-        """
-        self.window.mainloop()
 
     def scroll_labels_up(self):
         for i in range(self._height - 1):

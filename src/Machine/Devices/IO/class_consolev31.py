@@ -13,9 +13,12 @@ from queue import Queue
 from Constants.class_interrupts import Interrupts
 from Machine.Devices.Bases.class_base_device import BaseDevice
 
-REFRESH_RATE_MS = 10  # milliseconds between screen refreshes
+OUTPUT_QUEUE_PROCESSING_RATE = 10  # milliseconds between processing the output queue
 DEFAULT_LABEL_CONTENTS = ' '  # set to X if debugging so the labels may be seen
-FONT_UBUNTU_MONO_REGULAR = "Ubuntu Mono Regular"
+FONT_UBUNTU_MONO_REGULAR = "DejaVu Sans Mono"
+CURSOR_CHANGES_PER_SECOND: int = 3  # the number of times the cursor changes per second
+BACK_COLOR = Black = "#000000"
+TEXT_COLOR = Green = "#00FF00"
 
 
 def log_message(message):
@@ -40,6 +43,7 @@ def show_execution_time(func):
     Returns:
 
     """
+
     def wrapper(*args, **kwargs):
         log_message(f"{func.__name__} started")
         start_time = time.time()
@@ -59,7 +63,6 @@ class ConsoleV31(BaseDevice):
     # synthetic cursor control
     _cursor_is_displayed: bool = False
     _cursor_last_display_time: float = 0
-    _cursor_blinks_per_second: int = 3
 
     # cursor management
     _cursorX: int = 0
@@ -96,9 +99,9 @@ class ConsoleV31(BaseDevice):
         :param address: The address to write to.
         :param value: The character to write.
         """
-        row = address // self._width
-        col = address % self._width
-        self.display_buffer[row][col] = value
+        y = address // self._width
+        x = address % self._width
+        self.display_buffer[y][x] = value
 
     def cycle(self, address_bus, data_bus, control_bus, interrupt_bus):
         """
@@ -139,11 +142,11 @@ class ConsoleV31(BaseDevice):
         Returns:
 
         """
-        for i in range(self._height - 1):
-            for j in range(self._width):
-                self.display_buffer[i][j] = self.display_buffer[i + 1][j]
-        for j in range(self._width):
-            self.display_buffer[self._height - 1][j] = ' '
+        for y in range(self._height - 1):
+            for x in range(self._width):
+                self.display_buffer[y][x] = self.display_buffer[y + 1][x]
+        for x in range(self._width):
+            self.display_buffer[self._height - 1][x] = ' '
 
     def console_is_ready(self):
         """
@@ -190,7 +193,7 @@ class ConsoleV31(BaseDevice):
             else:
                 self.labels[self._cursorY][self._cursorX]['text'] = chr(32)
             self._cursor_is_displayed = not self._cursor_is_displayed
-            self.console_window.after(int(1000 / self._cursor_blinks_per_second), process_cursor)
+            self.console_window.after(int(1000 / CURSOR_CHANGES_PER_SECOND), process_cursor)
 
         def find_last_non_space_character_on_current_row():
             """
@@ -198,9 +201,9 @@ class ConsoleV31(BaseDevice):
             Returns:
                 int: The last non-space character on the current row.
             """
-            for i in range(self._width - 1, -1, -1):
-                if self.display_buffer[self._cursorY][i] != ' ':
-                    return i+1
+            for x in range(self._width - 1, -1, -1):
+                if self.display_buffer[self._cursorY][x] != ' ':
+                    return x + 1
             return 0
 
         def process_data(data):
@@ -265,9 +268,9 @@ class ConsoleV31(BaseDevice):
             self.console_closed = True
 
         def show_display_buffer():
-            for i in range(self._height):
-                for j in range(self._width):
-                    self.labels[i][j]['text'] = self.display_buffer[i][j]
+            for y in range(self._height):
+                for x in range(self._width):
+                    self.labels[y][x]['text'] = self.display_buffer[y][x]
 
         def process_output_queue():
             """
@@ -285,7 +288,7 @@ class ConsoleV31(BaseDevice):
                 process_data(data)
             if data_changed:
                 show_display_buffer()
-            self.console_window.after(REFRESH_RATE_MS, process_output_queue)
+            self.console_window.after(OUTPUT_QUEUE_PROCESSING_RATE, process_output_queue)
 
         self.console_window.bind("<KeyPress>", capture_keypress)
         self.console_window.protocol("WM_DELETE_WINDOW", on_close)
@@ -303,8 +306,8 @@ class ConsoleV31(BaseDevice):
         self.labels = []
         for _ in range(self._height):
             self.labels.append([tk.Label(self.console_window, text=DEFAULT_LABEL_CONTENTS,
-                                         font=(FONT_UBUNTU_MONO_REGULAR, 10), width=1, padx=0, pady=0) for _
-                                in range(self._width)])
-        for i in range(self._height):
-            for j in range(self._width):
-                self.labels[i][j].grid(row=i, column=j, pady=0, padx=0)  # Set pady and padx to 0 in grid method
+                                         font=(FONT_UBUNTU_MONO_REGULAR, 10), width=1, padx=0, pady=0,
+                                         bg=BACK_COLOR, fg=TEXT_COLOR) for _ in range(self._width)])
+        for y in range(self._height):
+            for x in range(self._width):
+                self.labels[y][x].grid(row=y, column=x, pady=0, padx=0)

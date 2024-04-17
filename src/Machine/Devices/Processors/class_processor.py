@@ -69,7 +69,6 @@ class Processor(BaseProcessor):
                     interrupt_number = 2 ** interruptBit
                     if interrupt_bus.test_interrupt(interrupt_number):
                         if interrupt_number in self.interrupt_vectors:
-                            print("Waking to process interrupt")
                             self.sleeping = False
                             self.call_stack.append(self.data_pointer)
                             self.data_pointer = self.interrupt_vectors[interrupt_number]

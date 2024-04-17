@@ -181,7 +181,9 @@ class ConsoleV31(BaseDevice):
         Runs the form.
         """
         self.console_window = tk.Tk()
-        self.console_window.title("Console v3.1")
+        self.console_window.title("RubbishPy Console v3.1")
+        window_icon = tk.PhotoImage(file="../Resources/graphics/console_icon.png")
+        self.console_window.iconphoto(True, window_icon)
         self.create_labels()
 
         def process_cursor():

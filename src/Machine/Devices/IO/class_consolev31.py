@@ -1,5 +1,6 @@
 #  Copyright (c) 2024 Kyle D. Ross.  All rights reserved.
 #  Refer to LICENSE.md for license information.
+import sys
 import threading
 import time
 import tkinter as tk
@@ -12,13 +13,17 @@ DEFAULT_LABEL_CONTENTS = ' '  # set to X if debugging so the labels may be seen
 FONT_UBUNTU_MONO_REGULAR = "Ubuntu Mono Regular"
 
 
+def log_message(message):
+    if sys.gettrace():
+        print(message)
+
 def show_execution_time(func):
     def wrapper(*args, **kwargs):
-        print(f"{func.__name__} started")
+        log_message(f"{func.__name__} started")
         start_time = time.time()
         result = func(*args, **kwargs)
         end_time = time.time()
-        print(f"{func.__name__} executed in {end_time - start_time} seconds")
+        log_message(f"{func.__name__} executed in {end_time - start_time} seconds")
         return result
 
     return wrapper
@@ -35,7 +40,7 @@ class ConsoleV31(BaseDevice):
     ----------
     interrupt_number : int
         the interrupt number for the console
-    keystroke_buffer : Queue
+    input_queue : Queue
         a queue to store the keystrokes
     console_buffer : str
         a string to store the console output
@@ -83,12 +88,12 @@ class ConsoleV31(BaseDevice):
         super().__init__(starting_address, 1)
         self.labels = None
         self.form_ready = False
-        self.console_is_busy = False
         self._width = width
         self._height = height
         self.console_buffer = [[' '] * self._width for _ in range(self._height)]
         self.interrupt_number = interrupt_number
-        self.keystroke_buffer = Queue()
+        self.input_queue = Queue()
+        self.output_queue = Queue()
         self.keypress = ""
         self.keypress_event = threading.Event()
         self.console_window = None
@@ -106,45 +111,6 @@ class ConsoleV31(BaseDevice):
         self.console_buffer[row][col] = value
         self.labels[row][col]['text'] = value
 
-    def process_data(self, data):
-        """
-        This method will take the data, and based off of the cursorX and cursorY position,
-        will compute the offset address to be passed to the write method.
-        It will then increment the cursorX value by one.
-        If cursorX is >= the width, it will set cursorX to 0 and increment the cursorY by one.
-        If cursorY is >= the height, it will scroll the labels up by one, setting the new line all blank.
-        If the data is 13, it will set cursorX to 0 and increment the cursorY by one.
-        If the data is 8, it will decrement cursorX by one. If cursorX is < 0, it will decrement the cursorY by one and
-        set cursorX to the width-1.
-        Args:
-            data:
-
-        Returns:
-
-        """
-        if data == 13:
-            self._cursorX = 0
-        elif data == 10:  # LF
-            self._cursorY += 1
-            if self._cursorY >= self._height:
-                self.scroll_labels_up()
-                self._cursorY -= 1
-        elif data == 8:
-            self._cursorX -= 1
-            if self._cursorX < 0:
-                self._cursorY -= 1
-                self._cursorX = self._width - 1  # todo: seek to the end of the current line
-            self.write(self._cursorY * self._width + self._cursorX, chr(32))
-        else:
-            self.write(self._cursorY * self._width + self._cursorX, chr(data))
-            self._cursorX += 1
-            if self._cursorX >= self._width:
-                self._cursorX = 0
-                self._cursorY += 1
-            if self._cursorY >= self._height:
-                self.scroll_labels_up()
-                self._cursorY -= 1
-
     def cycle(self, address_bus, data_bus, control_bus, interrupt_bus):
         """
         Executes a cycle of the console device.
@@ -160,25 +126,22 @@ class ConsoleV31(BaseDevice):
             interrupt_bus.set_interrupt(Interrupts.halt)
             return
 
-        if self.console_is_ready():
-            self.console_is_busy = True
-            self.process_cursor()
-            self.process_keypress(interrupt_bus)
-            if self.address_is_valid(address_bus):
-                if control_bus.get_read_request():
-                    if not self.keystroke_buffer.empty():
-                        buffer_data = self.keystroke_buffer.get()
-                        if len(buffer_data) > 0:
-                            data_bus.set_data(ord(buffer_data))
-                        control_bus.set_read_request(False)
-                        control_bus.set_response(True)
-                if control_bus.get_write_request():
-                    self.cursor_off()
-                    data = data_bus.get_data()
-                    self.process_data(data)
-                    control_bus.set_write_request(False)
+        self.process_cursor()
+        self.process_keypress(interrupt_bus)
+        if self.address_is_valid(address_bus):
+            if control_bus.get_read_request():
+                if not self.input_queue.empty():
+                    buffer_data = self.input_queue.get()
+                    if len(buffer_data) > 0:
+                        data_bus.set_data(ord(buffer_data))
+                    control_bus.set_read_request(False)
                     control_bus.set_response(True)
-            self.console_is_busy = False
+            if control_bus.get_write_request():
+                self.cursor_off()
+                data = data_bus.get_data()
+                self.output_queue.put(data)
+                control_bus.set_write_request(False)
+                control_bus.set_response(True)
 
     def scroll_labels_up(self):
         for i in range(self._height - 1):
@@ -196,7 +159,7 @@ class ConsoleV31(BaseDevice):
         Returns:
             bool: True if the console is ready, False otherwise.
         """
-        return not self.console_is_busy and self.console_window is not None and self.form_ready
+        return self.console_window is not None and self.form_ready
 
     def process_keypress(self, interrupt_bus):
         """
@@ -206,10 +169,10 @@ class ConsoleV31(BaseDevice):
             interrupt_bus (Bus): The interrupt bus.
         """
         if self.keypress_event.is_set():
-            print("Keypress detected")
-            self.keystroke_buffer.put(self.keypress)
+            log_message("Keypress detected")
+            self.input_queue.put(self.keypress)
             self.keypress_event.clear()
-            print(f"Keypress: {self.keypress} cleared.")
+            log_message(f"Keypress: {self.keypress} cleared.")
             interrupt_bus.set_interrupt(self.interrupt_number)
 
     @show_execution_time
@@ -261,6 +224,47 @@ class ConsoleV31(BaseDevice):
         self.console_window.title("Console v3.1")
         self.create_labels()
 
+        def process_data(data):
+            # todo: this should be called on the window thread on a timer
+            # pop the data off the output queue and call this with it
+            """
+            This method will take the data, and based off of the cursorX and cursorY position,
+            will compute the offset address to be passed to the write method.
+            It will then increment the cursorX value by one.
+            If cursorX is >= the width, it will set cursorX to 0 and increment the cursorY by one.
+            If cursorY is >= the height, it will scroll the labels up by one, setting the new line all blank.
+            If the data is 13, it will set cursorX to 0 and increment the cursorY by one.
+            If the data is 8, it will decrement cursorX by one. If cursorX is < 0, it will decrement the cursorY by one
+            and set cursorX to the width-1.
+            Args:
+                data:
+
+            Returns:
+
+            """
+            if data == 13:
+                self._cursorX = 0
+            elif data == 10:  # LF
+                self._cursorY += 1
+                if self._cursorY >= self._height:
+                    self.scroll_labels_up()
+                    self._cursorY -= 1
+            elif data == 8:
+                self._cursorX -= 1
+                if self._cursorX < 0:
+                    self._cursorY -= 1
+                    self._cursorX = self._width - 1  # todo: seek to the end of the current line
+                self.write(self._cursorY * self._width + self._cursorX, chr(32))
+            else:
+                self.write(self._cursorY * self._width + self._cursorX, chr(data))
+                self._cursorX += 1
+                if self._cursorX >= self._width:
+                    self._cursorX = 0
+                    self._cursorY += 1
+                if self._cursorY >= self._height:
+                    self.scroll_labels_up()
+                    self._cursorY -= 1
+
         def capture_keypress(event):
             """
             Captures the keypress event.
@@ -285,9 +289,25 @@ class ConsoleV31(BaseDevice):
             # todo: change cursor to wait while form is being closed
             self.console_closed = True
 
+        @show_execution_time
+        def process_output_queue():
+            """
+            Processes the output queue.
+            Returns:
+                None
+
+            """
+            log_message(f"Output queue empty? {self.output_queue.empty()}")
+            while not self.output_queue.empty():
+                data = self.output_queue.get()
+                process_data(data)
+            # Schedule the function to be called again after 100ms
+            self.console_window.after(100, process_output_queue)
+
         self.console_window.bind("<KeyPress>", capture_keypress)
         self.console_window.protocol("WM_DELETE_WINDOW", on_close)
         self.form_ready = True
+        process_output_queue()
         self.console_window.mainloop()
 
     def create_labels(self):

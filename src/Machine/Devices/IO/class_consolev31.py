@@ -20,9 +20,6 @@ CURSOR_CHANGES_PER_SECOND: int = 3  # the number of times the cursor changes per
 BACK_COLOR = Black = "#000000"
 TEXT_COLOR = Green = "#00FF00"
 
-current_text_color = TEXT_COLOR # the current color of the console.  New characters will use this color.
-current_back_color = BACK_COLOR # the current background color of the console.  New characters will use this color.
-
 
 def log_message(message):
     """
@@ -138,6 +135,11 @@ class ConsoleV31(BaseDevice):
     _cursorX: int = 0
     _cursorY: int = 0
 
+    current_text_color = TEXT_COLOR  # the current color of the console.  New characters will use this color.
+    current_back_color = BACK_COLOR  # the current background color of the console.  New characters will use this color.
+
+    ansi_sequence = None  # a variable to hold the current ANSI escape sequence being processed
+
     def __init__(self, starting_address, width, height, interrupt_number: int):
         """
         Constructs all the necessary attributes for the console device.
@@ -153,7 +155,7 @@ class ConsoleV31(BaseDevice):
         self.form_ready = False
         self._width = width
         self._height = height
-        self.display_buffer = [[ScreenElement(' ', current_text_color) for _ in range(self._width)] for _ in
+        self.display_buffer = [[ScreenElement(' ', self.current_text_color) for _ in range(self._width)] for _ in
                                range(self._height)]
         self.interrupt_number = interrupt_number
         self.input_queue = Queue()
@@ -164,6 +166,108 @@ class ConsoleV31(BaseDevice):
         self.console_closed = False
         self.start_form()
 
+    def find_last_non_space_character_on_current_row(self):
+        """
+        Finds the last non-space character on the current row.
+        Returns:
+            int: The last non-space character on the current row.
+        """
+        for x in range(self._width - 1, -1, -1):
+            if self.display_buffer[self._cursorY][x].get_character() != ' ':
+                return x + 1
+        return 0
+
+    def handle_meta_data(self, data: int):
+        """
+        Handles metadata, such as control characters and ANSI escape sequences.
+        This will get called for each character being received.
+
+        Args:
+            data: The data to process.
+
+        Returns: True if data is handled, False otherwise.
+
+        """
+
+        # check for control characters, first
+        if self.handle_control_character(data):
+            return True
+
+        if self.ansi_sequence is None:
+            if data == 27:
+                self.ansi_sequence = chr(data)
+                return True
+            return False
+        else:
+            self.ansi_sequence += chr(data)
+            # if sequence is for color, set the current_color accordingly then set ansi_sequence to None
+            # return True to indicate that no character is to be displayed, yet
+            if self.handle_ansi_color():
+                return True  # short-circuit the rest of the processing because this has been handled
+
+            # other ansi handling goes here
+
+            return True
+
+    def handle_control_character(self, data):
+        if data == 13:  # CR
+            self._cursorX = 0
+            return True
+        elif data == 10:  # LF
+            self._cursorY += 1
+            if self._cursorY >= self._height:
+                self.scroll_up()
+                self._cursorY -= 1
+            return True
+        elif data == 8:  # BS
+            self._cursorX -= 1
+            if self._cursorX < 0:
+                self._cursorY -= 1
+                if self._cursorY < 0:
+                    self._cursorY = 0
+                    self._cursorX = 0
+                self._cursorX = self.find_last_non_space_character_on_current_row()
+            self.write_to_display_buffer(self._cursorY * self._width + self._cursorX, chr(32))
+            return True
+        else:
+            return False
+
+    def handle_ansi_color(self):
+        """
+        Handles ANSI color sequences.
+        Returns:
+            bool: True the data is being handled, False otherwise.
+        """
+        if self.ansi_sequence.startswith("\x1b["):  # escape [ is for color
+            # validate that the sequence is complete
+            if self.ansi_sequence[-1] == "m":
+                # set the current color to the color specified in the sequence
+                color_code = self.ansi_sequence[2:-1]
+                # assume the color_code will be one of the 8 primary colors
+                # set the current color to the color specified
+                if color_code == "32":
+                    self.current_text_color = "#00FF00"
+                elif color_code == "31":
+                    self.current_text_color = "#FF0000"
+                elif color_code == "33":
+                    self.current_text_color = "#FFA500"
+                elif color_code == "34":
+                    self.current_text_color = "#0000FF"
+                elif color_code == "35":
+                    self.current_text_color = "#FF00FF"
+                elif color_code == "36":
+                    # noinspection SpellCheckingInspection
+                    self.current_text_color = "#00FFFF"
+                elif color_code == "37":
+                    self.current_text_color = "#FFFFFF"
+                elif color_code == "30":
+                    self.current_text_color = "#000000"
+                # clear the ansi_sequence since we're done with this sequence
+                self.ansi_sequence = None
+            return True  # this was handled
+        else:
+            return False  # this was not handled
+
     def write_to_display_buffer(self, address, value: str):
         """
         This method writes a character to the display buffer at a given address.
@@ -172,7 +276,7 @@ class ConsoleV31(BaseDevice):
         """
         y = address // self._width
         x = address % self._width
-        self.display_buffer[y][x].set_character_and_color(character=value, color=current_text_color)
+        self.display_buffer[y][x].set_character_and_color(character=value, color=self.current_text_color)
 
     def cycle(self, address_bus, data_bus, control_bus, interrupt_bus):
         """
@@ -218,6 +322,9 @@ class ConsoleV31(BaseDevice):
                 self.display_buffer[y][x].set_character_and_color(
                     character=self.display_buffer[y + 1][x].get_character(),
                     color=self.display_buffer[y + 1][x].get_color())
+        for x in range(self._width):
+            self.display_buffer[self._height - 1][x].set_character_and_color(character=' ',
+                                                                             color=self.current_text_color)
 
     def console_is_ready(self):
         """
@@ -264,18 +371,7 @@ class ConsoleV31(BaseDevice):
             self._cursor_is_displayed = not self._cursor_is_displayed
             self.console_window.after(int(1000 / CURSOR_CHANGES_PER_SECOND), process_cursor)
 
-        def find_last_non_space_character_on_current_row():
-            """
-            Finds the last non-space character on the current row.
-            Returns:
-                int: The last non-space character on the current row.
-            """
-            for x in range(self._width - 1, -1, -1):
-                if self.display_buffer[self._cursorY][x].get_character() != ' ':
-                    return x + 1
-            return 0
-
-        def process_data(data):
+        def process_data(data: int):
             """
             Processes the data to be displayed on the console.
             If the data is a CR, LF, or BS, the cursor is moved accordingly and the display buffer is updated.
@@ -287,31 +383,18 @@ class ConsoleV31(BaseDevice):
             Returns:
 
             """
-            if data == 13:
+
+            if self.handle_meta_data(data):
+                return
+
+            self.write_to_display_buffer(self._cursorY * self._width + self._cursorX, chr(data))
+            self._cursorX += 1
+            if self._cursorX >= self._width:
                 self._cursorX = 0
-            elif data == 10:  # LF
                 self._cursorY += 1
-                if self._cursorY >= self._height:
-                    self.scroll_up()
-                    self._cursorY -= 1
-            elif data == 8:
-                self._cursorX -= 1
-                if self._cursorX < 0:
-                    self._cursorY -= 1
-                    if self._cursorY < 0:
-                        self._cursorY = 0
-                        self._cursorX = 0
-                    self._cursorX = find_last_non_space_character_on_current_row()
-                self.write_to_display_buffer(self._cursorY * self._width + self._cursorX, chr(32))
-            else:
-                self.write_to_display_buffer(self._cursorY * self._width + self._cursorX, chr(data))
-                self._cursorX += 1
-                if self._cursorX >= self._width:
-                    self._cursorX = 0
-                    self._cursorY += 1
-                if self._cursorY >= self._height:
-                    self.scroll_up()
-                    self._cursorY -= 1
+            if self._cursorY >= self._height:
+                self.scroll_up()
+                self._cursorY -= 1
 
         def capture_keypress(event):
             """
@@ -351,7 +434,8 @@ class ConsoleV31(BaseDevice):
             for _ in range(self._height):
                 self.labels.append([tk.Label(self.console_window, text=DEFAULT_LABEL_CONTENTS,
                                              font=(CONSOLE_FONT, 10), width=1, padx=0, pady=0,
-                                             bg=current_back_color, fg=current_text_color) for _ in range(self._width)])
+                                             bg=self.current_back_color, fg=self.current_text_color) for _ in
+                                    range(self._width)])
             for y in range(self._height):
                 for x in range(self._width):
                     self.labels[y][x].grid(row=y, column=x, pady=0, padx=0)
@@ -385,5 +469,3 @@ class ConsoleV31(BaseDevice):
         process_output_queue()
         process_cursor()
         self.console_window.mainloop()
-
-

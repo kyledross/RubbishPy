@@ -149,7 +149,7 @@ class Processor(BaseProcessor):
                     self.execute_reset()
 
                 case InstructionSet.HALT:
-                    exit()
+                    exit()  # todo: raise a HALT interrupt instead
 
                 case InstructionSet.PUSH:
                     self.execute_push(address_bus, control_bus, data_bus)

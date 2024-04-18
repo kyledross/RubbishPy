@@ -21,7 +21,7 @@ DEFAULT_LABEL_CONTENTS = ' '  # set to X if debugging so the labels may be seen
 CONSOLE_FONT = "DejaVu Sans Mono"
 CURSOR_CHANGES_PER_SECOND: int = 3  # the number of times the cursor changes per second
 BACK_COLOR = Black = "#000000"
-TEXT_COLOR = Green = "#00FF00"
+TEXT_COLOR = White = "#FFFFFF"
 
 
 def log_message(message):
@@ -249,34 +249,25 @@ class ConsoleV31(BaseDevice):
         Returns:
             bool: True the data is being handled, False otherwise.
         """
-        if self.ansi_sequence.startswith("\x1b["):  # escape [ is for color
-            # todo: validate that sequence is within reason
-            # ex: that it's not impossibly too long
-            # if it is, clear the sequence and return False
+        # Map of ANSI color codes to their corresponding color values
+        color_map = {
+            "32": "#00FF00",  # green
+            "31": "#FF0000",  # red
+            "33": "#FFA500",  # orange
+            "34": "#0000FF",  # blue
+            "35": "#FF00FF",  # purple
+            "36": "#00FFFF",  # cyan
+            "37": "#FFFFFF",  # white
+            "30": "#000000"  # black
+        }
 
+        if self.ansi_sequence.startswith("\x1b["):  # escape [ is for color
             # validate that the sequence is complete
             if self.ansi_sequence[-1] == "m":
                 # set the current color to the color specified in the sequence
                 color_code = self.ansi_sequence[2:-1]
-                # assume the color_code will be one of the 8 primary colors
                 # set the current color to the color specified
-                if color_code == "32":
-                    self.current_text_color = "#00FF00"
-                elif color_code == "31":
-                    self.current_text_color = "#FF0000"
-                elif color_code == "33":
-                    self.current_text_color = "#FFA500"
-                elif color_code == "34":
-                    self.current_text_color = "#0000FF"
-                elif color_code == "35":
-                    self.current_text_color = "#FF00FF"
-                elif color_code == "36":
-                    # noinspection SpellCheckingInspection
-                    self.current_text_color = "#00FFFF"
-                elif color_code == "37":
-                    self.current_text_color = "#FFFFFF"
-                elif color_code == "30":
-                    self.current_text_color = "#000000"
+                self.current_text_color = color_map.get(color_code, self.current_text_color)
                 # clear the ansi_sequence since we're done with this sequence
                 self.ansi_sequence = None
             return True  # this was handled
@@ -329,17 +320,9 @@ class ConsoleV31(BaseDevice):
     def scroll_up(self):
         """
         Scrolls the display buffer up by one line.
-        Returns:
-
         """
-        for y in range(self._height - 1):
-            for x in range(self._width):
-                self.display_buffer[y][x].set_character_and_color(
-                    character=self.display_buffer[y + 1][x].get_character(),
-                    color=self.display_buffer[y + 1][x].get_color())
-        for x in range(self._width):
-            self.display_buffer[self._height - 1][x].set_character_and_color(character=' ',
-                                                                             color=self.current_text_color)
+        self.display_buffer = self.display_buffer[1:] + [
+            [ScreenElement(' ', self.current_text_color) for _ in range(self._width)]]
 
     def console_is_ready(self):
         """

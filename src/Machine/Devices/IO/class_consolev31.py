@@ -239,6 +239,10 @@ class ConsoleV31(BaseDevice):
             bool: True the data is being handled, False otherwise.
         """
         if self.ansi_sequence.startswith("\x1b["):  # escape [ is for color
+            # todo: validate that sequence is within reason
+            # ex: that it's not impossibly too long
+            # if it is, clear the sequence and return False
+
             # validate that the sequence is complete
             if self.ansi_sequence[-1] == "m":
                 # set the current color to the color specified in the sequence

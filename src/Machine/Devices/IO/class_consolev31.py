@@ -250,6 +250,7 @@ class ConsoleV31(BaseDevice):
             bool: True the data is being handled, False otherwise.
         """
         # Map of ANSI color codes to their corresponding color values
+        # noinspection SpellCheckingInspection
         color_map = {
             "32": "#00FF00",  # green
             "31": "#FF0000",  # red

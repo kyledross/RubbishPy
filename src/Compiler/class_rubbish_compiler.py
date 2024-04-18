@@ -28,6 +28,7 @@ class RubbishCompiler:
         :return: The compiled machine code.
         """
         # todo - add switch to add debug trace
+        # todo: add capability to include files (so things like print or ansi color code can be written once and reused)
         add_trace = False
         code = []
         try:

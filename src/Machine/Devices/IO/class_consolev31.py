@@ -3,6 +3,9 @@
 
 """
 The Console v3.1 device class.
+This class is a console device that is used to display output and receive input.
+It is a GUI-based console that uses tkinter.
+The console can handle a small subset ANSI escape sequences.
 """
 import sys
 import threading
@@ -210,6 +213,14 @@ class ConsoleV31(BaseDevice):
             return True
 
     def handle_control_character(self, data):
+        """
+        Handles control characters.
+        Args:
+            data: int: The data to process.
+
+        Returns:
+            True if the data was handled, False otherwise.
+        """
         if data == 13:  # CR
             self._cursorX = 0
             return True

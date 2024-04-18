@@ -180,12 +180,6 @@ class ConsoleV31(BaseDevice):
         """
         Runs the form.
         """
-        self.console_window = tk.Tk()
-        self.console_window.title("RubbishPy Console v3.1")
-        window_icon = tk.PhotoImage(file="../Resources/graphics/console_icon.png")
-        self.console_window.iconphoto(True, window_icon)
-        self.create_labels()
-
         def process_cursor():
             """
             Processes the cursor.
@@ -292,6 +286,11 @@ class ConsoleV31(BaseDevice):
                 show_display_buffer()
             self.console_window.after(OUTPUT_QUEUE_PROCESSING_RATE, process_output_queue)
 
+        self.console_window = tk.Tk()
+        self.console_window.title("RubbishPy Console v3.1")
+        window_icon = tk.PhotoImage(file="../Resources/graphics/console_icon.png")
+        self.console_window.iconphoto(True, window_icon)
+        self.create_labels()
         self.console_window.bind("<KeyPress>", capture_keypress)
         self.console_window.protocol("WM_DELETE_WINDOW", on_close)
         self.form_ready = True

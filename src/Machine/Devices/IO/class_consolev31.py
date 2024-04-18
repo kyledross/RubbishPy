@@ -192,19 +192,23 @@ class ConsoleV31(BaseDevice):
 
         """
 
-        # check for control characters, first
-        if self.handle_control_character(data):
-            return True
-
         if self.ansi_sequence is None:
+            # This is outside an ANSI sequence
+            # Check if a sequence is starting
             if data == 27:
                 self.ansi_sequence = chr(data)
+                return True
+            # a sequence has not started, so check for control characters
+            if self.handle_control_character(data):
                 return True
             return False
         else:
             self.ansi_sequence += chr(data)
             # if sequence is for color, set the current_color accordingly then set ansi_sequence to None
             # return True to indicate that no character is to be displayed, yet
+
+            if self.handle_ansi_escaped_escape():
+                return False  # it was handled, but we want the escape to be displayed
             if self.handle_ansi_color():
                 return True  # short-circuit the rest of the processing because this has been handled
 
@@ -468,3 +472,14 @@ class ConsoleV31(BaseDevice):
         process_output_queue()
         process_cursor()
         self.console_window.mainloop()
+
+    def handle_ansi_escaped_escape(self):
+        """
+        Handles ANSI escaped escape sequences.
+        Returns:
+            bool: Always returns False.
+        """
+        if self.ansi_sequence == "\x1b\x1b":
+            self.ansi_sequence = None
+            return True
+        return False

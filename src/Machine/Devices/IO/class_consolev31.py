@@ -15,10 +15,13 @@ from Machine.Devices.Bases.class_base_device import BaseDevice
 
 OUTPUT_QUEUE_PROCESSING_RATE = 10  # milliseconds between processing the output queue
 DEFAULT_LABEL_CONTENTS = ' '  # set to X if debugging so the labels may be seen
-FONT_UBUNTU_MONO_REGULAR = "DejaVu Sans Mono"
+CONSOLE_FONT = "DejaVu Sans Mono"
 CURSOR_CHANGES_PER_SECOND: int = 3  # the number of times the cursor changes per second
 BACK_COLOR = Black = "#000000"
 TEXT_COLOR = Green = "#00FF00"
+
+current_text_color = TEXT_COLOR # the current color of the console.  New characters will use this color.
+current_back_color = BACK_COLOR # the current background color of the console.  New characters will use this color.
 
 
 def log_message(message):
@@ -55,6 +58,73 @@ def show_execution_time(func):
     return wrapper
 
 
+class ScreenElement:
+    """
+    A class that represents a character on the screen.
+    It contains the character and any attributes associated with it, such as color.
+    """
+
+    __character: str = None
+    __color: str = None
+
+    def __init__(self, character: str, color: str):
+        """
+        Constructs the screen element.
+
+        Parameters:
+            character (str): The character to display.
+            color (str): The color of the character.
+        """
+        self.set_character_and_color(character, color)
+
+    def set_character_and_color(self, character: str, color: str):
+        """
+        Sets the character of the screen element.
+
+        Parameters:
+            color: (str): The color of the character.
+            character (str): The character to set.
+        """
+        self.__character = character
+        self.__color = color
+
+    def set_character(self, character: str):
+        """
+        Sets the character of the screen element.
+
+        Parameters:
+            character (str): The character to set.
+        """
+        self.__character = character
+
+    def get_character(self):
+        """
+        Gets the character of the screen element.
+
+        Returns:
+            str: The character of the screen element.
+        """
+        return self.__character
+
+    def get_color(self):
+        """
+        Gets the color of the screen element.
+
+        Returns:
+            str: The color of the screen element.
+        """
+        return self.__color
+
+    def set_color(self, color: str):
+        """
+        Sets the color of the screen element.
+
+        Parameters:
+            color (str): The color to set.
+        """
+        self.__color = color
+
+
 class ConsoleV31(BaseDevice):
     """
     The Console device class.
@@ -83,7 +153,8 @@ class ConsoleV31(BaseDevice):
         self.form_ready = False
         self._width = width
         self._height = height
-        self.display_buffer = [[' '] * self._width for _ in range(self._height)]
+        self.display_buffer = [[ScreenElement(' ', current_text_color) for _ in range(self._width)] for _ in
+                               range(self._height)]
         self.interrupt_number = interrupt_number
         self.input_queue = Queue()
         self.output_queue = Queue()
@@ -101,7 +172,7 @@ class ConsoleV31(BaseDevice):
         """
         y = address // self._width
         x = address % self._width
-        self.display_buffer[y][x] = value
+        self.display_buffer[y][x].set_character_and_color(character=value, color=current_text_color)
 
     def cycle(self, address_bus, data_bus, control_bus, interrupt_bus):
         """
@@ -144,9 +215,9 @@ class ConsoleV31(BaseDevice):
         """
         for y in range(self._height - 1):
             for x in range(self._width):
-                self.display_buffer[y][x] = self.display_buffer[y + 1][x]
-        for x in range(self._width):
-            self.display_buffer[self._height - 1][x] = ' '
+                self.display_buffer[y][x].set_character_and_color(
+                    character=self.display_buffer[y + 1][x].get_character(),
+                    color=self.display_buffer[y + 1][x].get_color())
 
     def console_is_ready(self):
         """
@@ -180,6 +251,8 @@ class ConsoleV31(BaseDevice):
         """
         Runs the form.
         """
+        self.labels = []
+
         def process_cursor():
             """
             Processes the cursor.
@@ -198,7 +271,7 @@ class ConsoleV31(BaseDevice):
                 int: The last non-space character on the current row.
             """
             for x in range(self._width - 1, -1, -1):
-                if self.display_buffer[self._cursorY][x] != ' ':
+                if self.display_buffer[self._cursorY][x].get_character() != ' ':
                     return x + 1
             return 0
 
@@ -266,7 +339,22 @@ class ConsoleV31(BaseDevice):
         def show_display_buffer():
             for y in range(self._height):
                 for x in range(self._width):
-                    self.labels[y][x]['text'] = self.display_buffer[y][x]
+                    self.labels[y][x]['text'] = self.display_buffer[y][x].get_character()
+                    self.labels[y][x]['fg'] = self.display_buffer[y][x].get_color()
+
+        def create_labels():
+            """
+            Creates the labels for the console.
+            Returns:
+
+            """
+            for _ in range(self._height):
+                self.labels.append([tk.Label(self.console_window, text=DEFAULT_LABEL_CONTENTS,
+                                             font=(CONSOLE_FONT, 10), width=1, padx=0, pady=0,
+                                             bg=current_back_color, fg=current_text_color) for _ in range(self._width)])
+            for y in range(self._height):
+                for x in range(self._width):
+                    self.labels[y][x].grid(row=y, column=x, pady=0, padx=0)
 
         def process_output_queue():
             """
@@ -290,7 +378,7 @@ class ConsoleV31(BaseDevice):
         self.console_window.title("RubbishPy Console v3.1")
         window_icon = tk.PhotoImage(file="../Resources/graphics/console_icon.png")
         self.console_window.iconphoto(True, window_icon)
-        self.create_labels()
+        create_labels()
         self.console_window.bind("<KeyPress>", capture_keypress)
         self.console_window.protocol("WM_DELETE_WINDOW", on_close)
         self.form_ready = True
@@ -298,17 +386,4 @@ class ConsoleV31(BaseDevice):
         process_cursor()
         self.console_window.mainloop()
 
-    def create_labels(self):
-        """
-        Creates the labels for the console.
-        Returns:
 
-        """
-        self.labels = []
-        for _ in range(self._height):
-            self.labels.append([tk.Label(self.console_window, text=DEFAULT_LABEL_CONTENTS,
-                                         font=(FONT_UBUNTU_MONO_REGULAR, 10), width=1, padx=0, pady=0,
-                                         bg=BACK_COLOR, fg=TEXT_COLOR) for _ in range(self._width)])
-        for y in range(self._height):
-            for x in range(self._width):
-                self.labels[y][x].grid(row=y, column=x, pady=0, padx=0)

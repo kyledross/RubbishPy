@@ -82,4 +82,5 @@ call m
 lr 1 98
 mrm 1 1024
 
+' halt
 jmp main

@@ -67,16 +67,16 @@ class BackPlane:
         """
         Runs the backplane.
         The backplane runs in an infinite loop, cycling through all the devices
-        connected to it.  When a HALT interrupt is detected, the emulator
-        is terminated.
+        connected to it.  When a HALT interrupt is detected, cycling stops.
 
         Raises:
-            SystemExit: If the HALT interrupt is detected.
+            None
         """
-        while True:
+        running: bool = True
+        while running:
             for device in self._devices:
                 device.cycle(self._addressBus, self._dataBus, self._controlBus, self._interruptBus)
                 if self._interruptBus.test_interrupt(Interrupts.halt):
-                    print("HALT interrupt detected.")
-                    exit()
+                    running = False
+                    break
             time.sleep(0)  # allow other threads (such as console 3.1) to run

@@ -16,10 +16,10 @@ def intro():
     print("RubbishPy")
     print("Version 1.0")
     print("Copyright (c) 2024 Kyle D. Ross")
-    print()
     print("--help for help")
-    print("-------------------------------")
+    print()
     print("Session started.")
+
 
 def check_python_version():
     """Checks the python version.  Returns True if the version is 3.10 or greater.  Returns False otherwise."""
@@ -40,6 +40,7 @@ def start_machine():
             builder.build_machine().run()
         else:
             show_help()
+    print("Session ended.")
 
 
 def check_required_parameters(device: str, parameters, keys):

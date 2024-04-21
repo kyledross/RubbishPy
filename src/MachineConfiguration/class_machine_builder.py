@@ -114,14 +114,14 @@ class MachineBuilder:
         interrupt: int = 0
         width: int = 0
         height: int = 0
-        program: str = ""
+        program_pathname: str = ""
         device_to_add: str = device['device_name']
         if 'address' in device:
             address: int = int(device['address'])
         if 'size' in device:
             size: int = int(device['size'])
         if 'program' in device:
-            program: str = device['program']
+            program_pathname: str = device['program']
         if 'interrupt' in device:
             interrupt: int = int(device['interrupt'])
         if 'width' in device:
@@ -150,11 +150,10 @@ class MachineBuilder:
             case 'rom':
                 self._backplane.add_device(ROM(starting_address=address))
             case 'compiler':
-                compiler = RubbishCompiler(source=self.read_file(program), address=address)
-                code = compiler.compile()
+                compiler = RubbishCompiler(address=address)
+                code = compiler.compile(program_pathname)
                 if len(code) > size:
                     print("Warning: The compiled program size exceeds the specified size.")
-
                 ram = RAM(starting_address=address, size=size)
                 ram.load_data(data=code)
                 self._backplane.add_device(ram)

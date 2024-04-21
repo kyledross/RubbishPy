@@ -1,0 +1,43 @@
+' color escape routines ----------------------'
+
+escape: lr 1 27
+mrm 1 1024
+' [
+lr 1 91
+mrm 1 1024
+rtn
+
+' 31 red
+red: lr 1 51
+mrm 1 1024
+lr 1 49
+mrm 1 1024
+rtn
+
+' 32 green
+green: lr 1 51
+mrm 1 1024
+lr 1 50
+mrm 1 1024
+rtn
+
+' 34 blue
+blue: lr 1 51
+mrm 1 1024
+lr 1 52
+mrm 1 1024
+rtn
+
+' 37 white
+white: lr 1 51
+mrm 1 1024
+lr 1 55
+mrm 1 1024
+rtn
+
+' m end of escape sequence
+m: lr 1 109
+mrm 1 1024
+rtn
+
+' --------------------------------------------------'

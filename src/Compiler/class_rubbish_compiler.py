@@ -8,31 +8,34 @@ class RubbishCompiler:
     It provides methods to compile the source code into machine code.
     """
 
-    def __init__(self, source, address: int):
+    def __init__(self, address: int):
         """
         Constructor for the RubbishCompiler class.
         Initializes the source code and the address to compile to.
-        :param source: The source code to compile.
         :param address: The address to compile to.
         """
         self.labels = {}
-        self.source: str = source
         self.address: int = address
 
-    def compile(self):
+    def compile(self, source_pathname):
         """
         This method compiles the source code into machine code.
         It goes through two phases:
         Phase 1 - compile code, so we know the offset of labels
         Phase 2 - compile code and use label address offsets
         :return: The compiled machine code.
+
+        Args:
+            source_pathname:
         """
         # todo - add switch to add debug trace
         # todo: add capability to include files (so things like print or ansi color code can be written once and reused)
         add_trace = False
         code = []
         try:
-            lines = self.source.splitlines()
+            lines = []
+            self.read_file(source_pathname, lines)
+
             temp_lines = []
             if add_trace:
                 for line in lines:
@@ -89,6 +92,15 @@ class RubbishCompiler:
             raise ex
         finally:
             pass
+
+    def read_file(self, source_pathname, lines):
+        with open(source_pathname, 'r') as file:
+            for line in file:
+                strip = line.strip()
+                if strip.startswith("include "):
+                    self.read_file(strip[8:], lines)
+                else:
+                    lines.append(strip)
 
     # Function to cross-reference register
     @staticmethod

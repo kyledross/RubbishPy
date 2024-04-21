@@ -245,6 +245,10 @@ Purpose: Directly inserts the string as bytes into the compiled program. Typical
 Example: someLabel: DATA This is a string.\r\n\0
 Compiler: v1.1
 
+Include pathname
+Purpose: Includes the contents of the file designated by the pathname at this location
+Example: Include ../Programs/file_to_include.txt
+
 '
 Purpose: Comment in code.  These lines are not compiled.
 Example: ' This is a comment

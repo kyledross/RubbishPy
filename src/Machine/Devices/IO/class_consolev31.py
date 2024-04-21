@@ -234,12 +234,12 @@ class ConsoleV31(BaseDevice):
                 self.scroll_up()
                 self._cursorY -= 1
             return True
-        elif data == 9: # TAB
+        elif data == 9:  # TAB
             self._cursorX += 4
             if self._cursorX >= self._width:
                 self._cursorX = self._width - 1
             return True
-        elif data == 12: # FF
+        elif data == 12:  # FF
             self.display_buffer = [[ScreenElement(' ', self.current_text_color) for _ in range(self._width)] for _ in
                                    range(self._height)]
             return True

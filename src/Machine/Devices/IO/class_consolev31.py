@@ -429,6 +429,9 @@ class ConsoleV31(BaseDevice):
                 None
 
             """
+            widgets = self.console_window.winfo_children()
+            for widget in widgets:
+                widget.destroy()
             self.console_closed = True
 
         def show_display_buffer():

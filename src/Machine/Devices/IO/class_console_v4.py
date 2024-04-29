@@ -15,7 +15,11 @@ from Machine.Devices.Bases.class_base_device import BaseDevice
 
 OUTPUT_QUEUE_PROCESSING_RATE = 10  # milliseconds between processing the output queue
 DEFAULT_LABEL_CONTENTS = ' '  # set to X if debugging so the labels may be seen
-CONSOLE_FONT = "DejaVu Sans Mono"
+CONSOLE_FONT = "Ubuntu Sans Mono"
+CHARACTER_WIDTH = 8  # todo: get this programmatically from the font
+CHARACTER_HEIGHT = 8  # todo: get this programmatically from the font
+VERTICAL_PIXEL_SEPARATION = 20
+HORIZONTAL_PIXEL_SEPARATION = 4
 CURSOR_CHANGES_PER_SECOND: int = 3  # the number of times the cursor changes per second
 BACK_COLOR = Black = "#000000"
 TEXT_COLOR = White = "#FFFFFF"
@@ -151,7 +155,7 @@ class ConsoleV4(BaseDevice):
             height (int): The height of the console.
         """
         super().__init__(starting_address, 1)
-        self.labels = None  # todo: get rid of labels
+        self.canvas = None
         self.form_ready = False
         self._width = width
         self._height = height
@@ -367,19 +371,13 @@ class ConsoleV4(BaseDevice):
         """
         Runs the form.
         """
-        self.labels = []
 
         def process_cursor():
             """
-            Processes the cursor.
+            Toggles the cursor.
             """
-            if self._cursor_is_displayed:
-                # todo: turn boolean to display cursor on and call routine to display buffer
-                self.labels[self._cursorY][self._cursorX]['text'] = '▌'  # left three-quarters block
-            else:
-                # todo: turn boolean to display cursor off and call routine to display the buffrer
-                self.labels[self._cursorY][self._cursorX]['text'] = chr(32)
             self._cursor_is_displayed = not self._cursor_is_displayed
+            show_display_buffer()
             self.console_window.after(int(1000 / CURSOR_CHANGES_PER_SECOND), process_cursor)
 
         def process_data(data: int):
@@ -423,7 +421,7 @@ class ConsoleV4(BaseDevice):
 
         def on_close():
             """
-            Captures the on_close event and sets the console_closed attribute to True.
+            Destroys console window widgets and set a flag to stop the console window.
             Returns:
                 None
 
@@ -434,31 +432,33 @@ class ConsoleV4(BaseDevice):
             self.console_closed = True
 
         def show_display_buffer():
-            # todo: create image of display buffer
-            # use the width and height to compute how big the image needs to be
-            # todo: update canvas with image
-            # todo: be mindful of boolean of cursor state, and add it visually if necessary while drawing the image
+            self.canvas.delete("all")
+            self.canvas.create_rectangle(0, 0, self.canvas.winfo_width(), self.canvas.winfo_height(),
+                                         fill=self.current_back_color)
+
             for y in range(self._height):
                 for x in range(self._width):
-                    self.labels[y][x]['text'] = self.display_buffer[y][x].get_character()
-                    self.labels[y][x]['fg'] = self.display_buffer[y][x].get_color()
+                    if self._cursor_is_displayed and self._cursorX == x and self._cursorY == y:
+                        character = '_'
+                    else:
+                        character = self.display_buffer[y][x].get_character()
+                    color = self.display_buffer[y][x].get_color()
+                    self.canvas.create_text((x * CHARACTER_WIDTH) + (x * HORIZONTAL_PIXEL_SEPARATION),
+                                            (y * CHARACTER_HEIGHT) + (y * VERTICAL_PIXEL_SEPARATION),
+                                            anchor="nw",
+                                            text=character,
+                                            fill=color, font=(CONSOLE_FONT, 16, ""))
 
-        def create_labels():
+        def create_canvas():
             """
-            Creates the labels for the console.
+            Creates the canvas for the console.
             Returns:
 
             """
-            # todo: create canvas and attach to window
-            # use the width and height to compute how big the canvas needs to be
-            for _ in range(self._height):
-                self.labels.append([tk.Label(self.console_window, text=DEFAULT_LABEL_CONTENTS,
-                                             font=(CONSOLE_FONT, 10), width=1, padx=0, pady=0,
-                                             bg=self.current_back_color, fg=self.current_text_color) for _ in
-                                    range(self._width)])
-            for y in range(self._height):
-                for x in range(self._width):
-                    self.labels[y][x].grid(row=y, column=x, pady=0, padx=0)
+            canvas_width = (self._width * CHARACTER_WIDTH) + (self._width * HORIZONTAL_PIXEL_SEPARATION)
+            canvas_height = (self._height * CHARACTER_HEIGHT) + (self._height * VERTICAL_PIXEL_SEPARATION)
+            self.canvas = tk.Canvas(self.console_window, width=canvas_width, height=canvas_height)
+            self.canvas.pack()
 
         def process_output_queue():
             """
@@ -479,10 +479,10 @@ class ConsoleV4(BaseDevice):
             self.console_window.after(OUTPUT_QUEUE_PROCESSING_RATE, process_output_queue)
 
         self.console_window = tk.Tk()
-        self.console_window.title("RubbishPy Console v3.1")
+        self.console_window.title("RubbishPy Console v4")
         window_icon = tk.PhotoImage(file="../Resources/graphics/console_icon.png")
         self.console_window.iconphoto(True, window_icon)
-        create_labels()
+        create_canvas()
         self.console_window.bind("<KeyPress>", capture_keypress)
         self.console_window.protocol("WM_DELETE_WINDOW", on_close)
         self.form_ready = True

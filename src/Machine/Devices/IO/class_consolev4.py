@@ -288,6 +288,9 @@ class ConsoleV4(BaseDevice):
                 self.ansi_sequence = None
             return True  # this was handled
         else:
+            # if the sequence we are building becomes too long to be valid, clear the sequence
+            if len(self.ansi_sequence) > 10:  # arbitrary limit
+                self.ansi_sequence = None
             return False  # this was not handled
 
     def write_to_display_buffer(self, address, value: str):

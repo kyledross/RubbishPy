@@ -2,6 +2,7 @@
 #  Refer to LICENSE.md for license information.
 
 from Compiler.class_rubbish_compiler import RubbishCompiler
+from Machine.Devices.IO.class_console_v4 import ConsoleV4
 from Machine.Devices.IO.class_consolev2 import ConsoleV2
 from Machine.Devices.IO.class_consolev3 import ConsoleV3
 from Machine.Devices.IO.class_consolev31 import ConsoleV31
@@ -145,6 +146,10 @@ class MachineBuilder:
             case 'consolev31':
                 self._backplane.add_device(ConsoleV31(starting_address=address, width=width, height=height,
                                                       interrupt_number=interrupt))
+            case 'consolev4':
+                self._backplane.add_device(ConsoleV4(starting_address=address, width=width, height=height,
+                                                     interrupt_number=interrupt))
+
             case 'display':
                 self._backplane.add_device(AddressableTextDisplay(starting_address=address, width=width, height=height))
             case 'rom':

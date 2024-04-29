@@ -5,7 +5,6 @@
 The Console v4 device class.
 """
 import os
-import sys
 import threading
 import time
 import tkinter as tk

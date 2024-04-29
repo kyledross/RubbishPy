@@ -4,6 +4,7 @@
 """
 The Console v4 device class.
 """
+import os
 import sys
 import threading
 import time
@@ -34,7 +35,7 @@ def log_message(message):
     Returns:
 
     """
-    if sys.gettrace():
+    if os.getenv('IS_DEBUGGING') == '1':
         print(message)
 
 

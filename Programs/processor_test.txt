@@ -13,7 +13,7 @@
 ' 2. Perform test.
 ' 3. If out-of-spec, jump to :problem.
 ' 4. At end of the last test, set register 0 to -69 and execute DEBUG instruction to indicate successful run of all tests.
-' 5. If register 0 is not -69, then the test that set register 0 to its current value has failed in some fashion.
+' 5. If, at the end of execution, register 0 is not -69, then the test that set register 0 to its current value has failed in some fashion.
 ' 6. Each test should be self-contained and not rely upon the state of any previous test.
 ' 7. If scratch memory is needed, use addresses >= 1024. Anything before that should be considered program memory.
 

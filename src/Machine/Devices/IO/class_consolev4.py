@@ -485,6 +485,7 @@ class ConsoleV4(BaseDevice):
 
         self.console_window = tk.Tk()
         self.console_window.title("RubbishPy Console v4")
+        self.console_window.resizable(False, False)
         window_icon = tk.PhotoImage(file="../Resources/graphics/console_icon.png")
         self.console_window.iconphoto(True, window_icon)
         create_canvas()

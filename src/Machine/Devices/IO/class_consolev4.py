@@ -4,6 +4,7 @@
 """
 The Console v4 device class.
 """
+import math
 import os
 import threading
 import time
@@ -13,13 +14,14 @@ from queue import Queue
 from Constants.class_interrupts import Interrupts
 from Machine.Devices.Bases.class_base_device import BaseDevice
 
+FONT_SIZE = 12  # todo: make this a parameter
+CHARACTER_WIDTH = math.ceil(FONT_SIZE * .66)
+CHARACTER_HEIGHT = math.ceil(FONT_SIZE * .66)
 OUTPUT_QUEUE_PROCESSING_RATE = 10  # milliseconds between processing the output queue
 DEFAULT_LABEL_CONTENTS = ' '  # set to X if debugging so the labels may be seen
 CONSOLE_FONT = "Ubuntu Sans Mono"
-CHARACTER_WIDTH = 8  # todo: get this programmatically from the font
-CHARACTER_HEIGHT = 8  # todo: get this programmatically from the font
-VERTICAL_PIXEL_SEPARATION = 20
-HORIZONTAL_PIXEL_SEPARATION = 4
+VERTICAL_PIXEL_SEPARATION = math.ceil(FONT_SIZE * .83)
+HORIZONTAL_PIXEL_SEPARATION = math.ceil(FONT_SIZE * .25)
 CURSOR_CHANGES_PER_SECOND: int = 3  # the number of times the cursor changes per second
 BACK_COLOR = Black = "#000000"
 TEXT_COLOR = White = "#FFFFFF"
@@ -178,7 +180,7 @@ class ConsoleV4(BaseDevice):
         """
         for x in range(self._width - 1, -1, -1):
             if self.display_buffer[self._cursorY][x].get_character() != ' ':
-                return x + 1
+                return x
         return 0
 
     def handle_meta_data(self, data: int):
@@ -450,7 +452,7 @@ class ConsoleV4(BaseDevice):
                                             (y * CHARACTER_HEIGHT) + (y * VERTICAL_PIXEL_SEPARATION),
                                             anchor="nw",
                                             text=character,
-                                            fill=color, font=(CONSOLE_FONT, 16, ""))
+                                            fill=color, font=(CONSOLE_FONT, FONT_SIZE, ""))
 
         def create_canvas():
             """

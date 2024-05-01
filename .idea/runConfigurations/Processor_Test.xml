@@ -8,11 +8,12 @@
       <env name="PYTHONUNBUFFERED" value="1" />
     </envs>
     <option name="SDK_HOME" value="" />
-    <option name="SDK_NAME" value="Python 3.11 (RubbishPy)" />
+    <option name="SDK_NAME" value="Python 3.12 (RubbishPy)" />
     <option name="WORKING_DIRECTORY" value="$Sourcepath$" />
     <option name="IS_MODULE_SDK" value="false" />
     <option name="ADD_CONTENT_ROOTS" value="true" />
     <option name="ADD_SOURCE_ROOTS" value="true" />
+    <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
     <option name="SCRIPT_NAME" value="$Sourcepath$/main.py" />
     <option name="PARAMETERS" value="--compiler address=0 size=2048 program=../Programs/processor_test.txt --processor" />
     <option name="SHOW_COMMAND_LINE" value="false" />

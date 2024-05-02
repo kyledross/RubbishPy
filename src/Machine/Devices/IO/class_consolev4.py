@@ -5,14 +5,13 @@
 The Console v4 device class.
 """
 import math
-import os
 import threading
 import time
 import tkinter as tk
 from queue import Queue
 
 from Constants.class_interrupts import Interrupts
-from Machine.Devices.Bases.class_base_device import BaseDevice
+from Machine.Devices.Bases.class_base_device import BaseDevice, log_message
 
 FONT_SIZE = 12  # todo: make this a parameter
 CHARACTER_WIDTH = math.ceil(FONT_SIZE * .66)
@@ -25,19 +24,6 @@ HORIZONTAL_PIXEL_SEPARATION = math.ceil(FONT_SIZE * .25)
 CURSOR_CHANGES_PER_SECOND: int = 3  # the number of times the cursor changes per second
 BACK_COLOR = Black = "#000000"
 TEXT_COLOR = White = "#FFFFFF"
-
-
-def log_message(message):
-    """
-    A function to log a message if a debugger is attached.
-    Args:
-        message:
-
-    Returns:
-
-    """
-    if os.getenv('IS_DEBUGGING') == '1':
-        print(message)
 
 
 def show_execution_time(func):

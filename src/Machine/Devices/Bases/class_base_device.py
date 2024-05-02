@@ -1,6 +1,6 @@
 #  Copyright (c) 2024 Kyle D. Ross.  All rights reserved.
 #  Refer to LICENSE.md for license information.
-
+import sys
 from abc import abstractmethod
 from Machine.Buses.class_interrupt_bus import InterruptBus
 from Machine.Buses.class_address_bus import AddressBus
@@ -71,3 +71,16 @@ class BaseDevice:
             return True
         else:
             return False
+
+
+def log_message(message):
+    """
+    A function to log a message if a debugger is attached.
+    Args:
+        message:
+
+    Returns:
+
+    """
+    if sys.gettrace() or 'pydevd' in sys.modules:
+        print(message)

@@ -7,14 +7,13 @@ This class is a console device that is used to display output and receive input.
 It is a GUI-based console that uses tkinter.
 The console can handle a small subset ANSI escape sequences.
 """
-import sys
 import threading
 import time
 import tkinter as tk
 from queue import Queue
 
 from Constants.class_interrupts import Interrupts
-from Machine.Devices.Bases.class_base_device import BaseDevice
+from Machine.Devices.Bases.class_base_device import BaseDevice, log_message
 
 OUTPUT_QUEUE_PROCESSING_RATE = 10  # milliseconds between processing the output queue
 DEFAULT_LABEL_CONTENTS = ' '  # set to X if debugging so the labels may be seen
@@ -22,19 +21,6 @@ CONSOLE_FONT = "DejaVu Sans Mono"
 CURSOR_CHANGES_PER_SECOND: int = 3  # the number of times the cursor changes per second
 BACK_COLOR = Black = "#000000"
 TEXT_COLOR = White = "#FFFFFF"
-
-
-def log_message(message):
-    """
-    A function to log a message if a debugger is attached.
-    Args:
-        message:
-
-    Returns:
-
-    """
-    if sys.gettrace():
-        print(message)
 
 
 def show_execution_time(func):

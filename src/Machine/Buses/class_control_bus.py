@@ -59,6 +59,13 @@ class ControlBus:
         else:
             return False
 
+    def read_response(self) -> bool:
+        """
+        This method returns the response on the bus without setting the response to False.
+        :return: The response on the bus.
+        """
+        return self._Response
+
     def set_response(self, value: bool):
         """
         This method sets the response on the bus.

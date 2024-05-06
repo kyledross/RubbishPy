@@ -77,6 +77,7 @@ def parse_command_line_arguments():
     # noinspection SpellCheckingInspection
     parser.add_argument('--consolev3', type=lambda x: x.split('='), nargs='+')
     parser.add_argument('--consolev4', type=lambda x: x.split('='), nargs='+')
+    parser.add_argument('--consolev5', type=lambda x: x.split('='), nargs='+')
     # noinspection SpellCheckingInspection
     parser.add_argument('--consolev31', type=lambda x: x.split('='), nargs='+')
     parser.add_argument("--compiler", type=lambda x: x.split('='), nargs='+')
@@ -150,6 +151,18 @@ def parse_command_line_arguments():
         # noinspection SpellCheckingInspection
         device_groups.append(
             {'device_name': 'consolev4', 'address': address, 'interrupt': interrupt, 'width': width, 'height': height})
+
+    if args.consolev5:
+        console_args = dict(args.consolev5)
+        address = console_args.get("address")
+        interrupt = console_args.get("interrupt")
+        width = console_args.get("width")
+        height = console_args.get("height")
+        # noinspection SpellCheckingInspection
+        check_required_parameters("Consolev5", console_args, ["address", "interrupt", "width", "height"])
+        # noinspection SpellCheckingInspection
+        device_groups.append(
+            {'device_name': 'consolev5', 'address': address, 'interrupt': interrupt, 'width': width, 'height': height})
 
     if args.display:
         display_args = dict(args.display)

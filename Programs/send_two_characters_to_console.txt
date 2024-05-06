@@ -1,3 +1,11 @@
 loop: lr 1 65
 mrm 1 1024
-jmp loop
+
+lr 1 65
+mrm 1 1024
+
+lr 1 65
+mrm 1 1024
+
+halt
+

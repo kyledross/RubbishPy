@@ -50,10 +50,10 @@ class DisplayElement(DisplayCommand):
         self.redraw = redraw
 
 
-
 class Consolev5(BaseDevice):
     class Display:
-        def __init__(self, output_q, input_q, display_width=80, display_height=25, character_width=10, character_height=10, font_size=12):
+        def __init__(self, output_q, input_q, display_width=80, display_height=25, character_width=10,
+                     character_height=10, font_size=12):
             self.display_queue = output_q  # a queue of DisplayElement objects to process
             self.input_queue = input_q
             self.character_width = character_width
@@ -215,7 +215,6 @@ class Consolev5(BaseDevice):
                 if self.display_buffer[y][x].redraw:
                     self.display_buffer[y][x].redraw = False
                     self.output_queue.put(self.display_buffer[y][x])
-
 
     def cycle(self, address_bus, data_bus, control_bus, interrupt_bus):
         # if the display thread has ended, raise the halt interrupt

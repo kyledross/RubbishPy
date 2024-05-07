@@ -81,8 +81,7 @@ class Consolev5(BaseDevice):
                     if isinstance(command, DisplayElement):
                         display_element: DisplayElement = command
                         text_to_display = display_element.get_character()
-                        # todo: remove anti-alias for speed?
-                        text = self.font.render(text_to_display, True, (255, 255, 255))
+                        text = self.font.render(text_to_display, False, (255, 255, 255))
                         self.screen.blit(text, (
                             display_element.x * self.character_width, display_element.y * self.character_height))
 

@@ -93,6 +93,7 @@ class Consolev5(BaseDevice):
     def __init__(self, starting_address: int, width: int, height: int, interrupt_number: int):
         super().__init__(starting_address, 1)
         pygame.init()
+        pygame.display.set_caption("RubbishPy Console v5")
         self.output_queue = queue.Queue()
         self.input_queue = queue.Queue()
         self.display = self.Display(self.output_queue, self.input_queue, display_width=width, display_height=height,
@@ -153,7 +154,6 @@ class Consolev5(BaseDevice):
         """
         if data == 13:  # CR
             self.cursor_x = 0
-            self.output_queue.put(DisplayControl('clear'))
             return True
         elif data == 10:  # LF
             self.cursor_y += 1
@@ -168,6 +168,7 @@ class Consolev5(BaseDevice):
             return True
         elif data == 12:  # FF
             self.display_buffer = [[DisplayElement(x, y, ' ') for x in range(80)] for y in range(25)]
+            self.output_queue.put(DisplayControl('clear'))
             return True
         elif data == 8:  # BS
             self.cursor_x -= 1
@@ -231,8 +232,7 @@ class Consolev5(BaseDevice):
             if control_bus.get_read_request():
                 if not self.input_queue.empty():
                     buffer_data = self.input_queue.get()
-                    if len(buffer_data) > 0:
-                        data_bus.set_data(ord(buffer_data))
+                    data_bus.set_data(buffer_data)
                     control_bus.set_read_request(False)
                     control_bus.set_response(True)
             if control_bus.get_write_request():

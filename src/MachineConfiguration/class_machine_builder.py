@@ -2,7 +2,7 @@
 #  Refer to LICENSE.md for license information.
 
 from Compiler.class_rubbish_compiler import RubbishCompiler
-from Machine.Devices.IO.class_consolev5 import  Consolev5
+from Machine.Devices.IO.class_consolev5 import Consolev5
 from Machine.Devices.IO.class_consolev4 import ConsoleV4
 from Machine.Devices.IO.class_consolev2 import ConsoleV2
 from Machine.Devices.IO.class_consolev3 import ConsoleV3

@@ -36,24 +36,31 @@ class DisplayElement(DisplayCommand):
         self.x = x
         self.y = y
         self.character = character
+        self.redraw = True
 
     def get_character(self):
         return self.character
 
     def set_character(self, character):
+        if character != self.character:
+            self.redraw = True
         self.character = character
+
+    def set_redraw(self, redraw):
+        self.redraw = redraw
+
 
 
 class Consolev5(BaseDevice):
     class Display:
-        def __init__(self, output_q, input_q):
+        def __init__(self, output_q, input_q, display_width=80, display_height=25, character_width=10, character_height=10, font_size=12):
             self.display_queue = output_q  # a queue of DisplayElement objects to process
             self.input_queue = input_q
-            self.screen = pygame.display.set_mode((800, 600))
-            self.character_width = 20
-            self.character_height = 20
+            self.character_width = character_width
+            self.character_height = character_height
+            self.screen = pygame.display.set_mode((display_width * character_width, display_height * character_height))
             self.clock = pygame.time.Clock()
-            self.font = pygame.font.Font('/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf', 36)
+            self.font = pygame.font.Font('/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf', font_size)
 
         def run(self):
             running = True
@@ -65,38 +72,41 @@ class Consolev5(BaseDevice):
                         # add to input queue
                         self.input_queue.put(event.key)
 
-                if self.display_queue.empty():
-                    continue
-                command = self.display_queue.get_nowait()
-                # if command is a DisplayControl object, process it
-                if isinstance(command, DisplayControl):
-                    if command.get_command() == 'clear':
-                        self.screen.fill((0, 0, 0))
-                if isinstance(command, DisplayElement):
-                    display_element: DisplayElement = command
-                    text_to_display = display_element.get_character()
-                    text = self.font.render(text_to_display, True, (255, 255, 255))
-                    self.screen.blit(text, (
-                        display_element.x * self.character_width, display_element.y * self.character_height))
+                while not self.display_queue.empty():
+                    command = self.display_queue.get_nowait()
+                    # if command is a DisplayControl object, process it
+                    if isinstance(command, DisplayControl):
+                        if command.get_command() == 'clear':
+                            self.screen.fill((0, 0, 0))
+                    if isinstance(command, DisplayElement):
+                        display_element: DisplayElement = command
+                        text_to_display = display_element.get_character()
+                        # todo: remove anti-alias for speed?
+                        text = self.font.render(text_to_display, True, (255, 255, 255))
+                        self.screen.blit(text, (
+                            display_element.x * self.character_width, display_element.y * self.character_height))
 
                 pygame.display.flip()
-                self.clock.tick(10)
+                self.clock.tick(20)
 
             pygame.quit()
 
-    def __init__(self, starting_address: int, size: int):
-        super().__init__(starting_address, size)
+    def __init__(self, starting_address: int, width: int, height: int, interrupt_number: int):
+        super().__init__(starting_address, 1)
         pygame.init()
         self.output_queue = queue.Queue()
         self.input_queue = queue.Queue()
-        self.display = self.Display(self.output_queue, self.input_queue)
+        self.display = self.Display(self.output_queue, self.input_queue, display_width=width, display_height=height,
+                                    character_width=10, character_height=10, font_size=12)
         self.cursor_x: int = 0
         self.cursor_y: int = 0
-        self.width: int = 80
-        self.height: int = 25
+        self.width: int = width
+        self.height: int = height
+        self.interrupt_number: int = interrupt_number
         self.display_buffer = [[DisplayElement(x, y, ' ') for x in range(80)] for y in range(25)]
         self.output_form = threading.Thread(target=self.display.run)
         self.output_form.start()
+        self.write_buffer_to_queue()
 
     def scroll_up(self):
         """
@@ -105,8 +115,12 @@ class Consolev5(BaseDevice):
         for y in range(1, self.height):
             for x in range(self.width):
                 self.display_buffer[y - 1][x].character = self.display_buffer[y][x].character
+                self.display_buffer[y - 1][x].redraw = True
         for x in range(self.width):
             self.display_buffer[self.height - 1][x].character = ' '
+            self.display_buffer[self.height - 1][x].redraw = True
+        # add a clear command to the output queue
+        self.output_queue.put(DisplayControl('clear'))
 
     def find_last_non_space_character_on_current_row(self):
         """
@@ -191,17 +205,29 @@ class Consolev5(BaseDevice):
                 self.scroll_up()
                 self.cursor_y -= 1
 
-        output_string = ''
+        self.display_buffer.append(DisplayElement(self.cursor_x, self.cursor_y, chr(data)))
+
+    def write_buffer_to_queue(self):
+        """
+        Writes the display buffer to the output queue.
+        """
         for y in range(self.height):
             for x in range(self.width):
-                output_string += self.display_buffer[y][x].get_character()
-        self.output_queue.put(output_string)
+                if self.display_buffer[y][x].redraw:
+                    self.display_buffer[y][x].redraw = False
+                    self.output_queue.put(self.display_buffer[y][x])
+
 
     def cycle(self, address_bus, data_bus, control_bus, interrupt_bus):
         # if the display thread has ended, raise the halt interrupt
         if not self.output_form.is_alive():
             interrupt_bus.set_interrupt(Interrupts.halt)
             return
+
+        # if there is data in the input queue,
+        # raise the interrupt to signal that there is data available
+        if not self.input_queue.empty():
+            interrupt_bus.set_interrupt(self.interrupt_number)
 
         if self.address_is_valid(address_bus):
             if control_bus.get_read_request():
@@ -214,5 +240,6 @@ class Consolev5(BaseDevice):
             if control_bus.get_write_request():
                 data = data_bus.get_data()
                 self.process_output(data)
+                self.write_buffer_to_queue()
                 control_bus.set_write_request(False)
                 control_bus.set_response(True)

@@ -205,7 +205,8 @@ class Consolev5(BaseDevice):
                 self.scroll_up()
                 self.cursor_y -= 1
 
-        self.display_buffer.append(DisplayElement(self.cursor_x, self.cursor_y, chr(data)))
+        # add the DisplayElement object to the output queue
+        self.output_queue.put(self.display_buffer[self.cursor_y][self.cursor_x])
 
     def write_buffer_to_queue(self):
         """

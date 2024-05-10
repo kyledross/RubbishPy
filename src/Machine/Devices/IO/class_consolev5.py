@@ -100,7 +100,7 @@ class Consolev5(BaseDevice):
                         # turn the cursor off before drawing the screen
                         self.cursor_state = False
                         self.update_cursor()
-                        text = self.font.render(text_to_display, False, (255, 255, 255))
+                        text = self.font.render(text_to_display, True, (255, 255, 255))
                         self.screen.blit(text, (
                             display_element.x * self.character_width, display_element.y * self.character_height))
 

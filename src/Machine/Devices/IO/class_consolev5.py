@@ -91,15 +91,15 @@ class Consolev5(BaseDevice):
                             self.screen.fill((0, 0, 0))
                     if isinstance(command, DisplayControl):
                         if command.get_command() == 'cursor_x':
+                            self.turn_cursor_off()
                             self.cursor_x = int(command.get_value())
                         if command.get_command() == 'cursor_y':
+                            self.turn_cursor_off()
                             self.cursor_y = int(command.get_value())
                     if isinstance(command, DisplayElement):
                         display_element: DisplayElement = command
                         text_to_display = display_element.get_character()
-                        # turn the cursor off before drawing the screen
-                        self.cursor_state = False
-                        self.update_cursor()
+                        self.turn_cursor_off()
                         text = self.font.render(text_to_display, True, (255, 255, 255))
                         self.screen.blit(text, (
                             display_element.x * self.character_width, display_element.y * self.character_height))
@@ -113,6 +113,11 @@ class Consolev5(BaseDevice):
                 self.clock.tick(20)
 
             pygame.quit()
+
+        def turn_cursor_off(self):
+            # turn the cursor off before drawing the screen
+            self.cursor_state = False
+            self.update_cursor()
 
         def update_cursor(self):
             if self.cursor_state:

@@ -241,6 +241,7 @@ class Consolev5(BaseDevice):
         if self.handle_control_character(data):
             return
 
+        # todo: handle non-printable keystrokes, like shift, ctrl, etc.
         self.write_to_display_buffer(self.cursor_y * self.width + self.cursor_x, chr(data))
 
         # add the DisplayElement object to the output queue

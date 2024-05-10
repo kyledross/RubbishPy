@@ -21,7 +21,8 @@ class DisplayControl(DisplayCommand):
 
     """
 
-    def __init__(self, command: str):
+    def __init__(self, command: str, value: str):
+        self.value = value
         self.command = command
 
     def get_command(self):
@@ -29,6 +30,12 @@ class DisplayControl(DisplayCommand):
 
     def set_command(self, command):
         self.command = command
+
+    def get_value(self):
+        return self.value
+
+    def set_value(self, value):
+        self.value = value
 
 
 class DisplayElement(DisplayCommand):
@@ -61,6 +68,10 @@ class Consolev5(BaseDevice):
             self.screen = pygame.display.set_mode((display_width * character_width, display_height * character_height))
             self.clock = pygame.time.Clock()
             self.font = pygame.font.Font('/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf', font_size)
+            self.cursor_state = False
+            self.last_cursor_change = pygame.time.get_ticks()
+            self.cursor_x: int = 0
+            self.cursor_y: int = 0
 
         def run(self):
             running = True
@@ -78,17 +89,40 @@ class Consolev5(BaseDevice):
                     if isinstance(command, DisplayControl):
                         if command.get_command() == 'clear':
                             self.screen.fill((0, 0, 0))
+                    if isinstance(command, DisplayControl):
+                        if command.get_command() == 'cursor_x':
+                            self.cursor_x = int(command.get_value())
+                        if command.get_command() == 'cursor_y':
+                            self.cursor_y = int(command.get_value())
                     if isinstance(command, DisplayElement):
                         display_element: DisplayElement = command
                         text_to_display = display_element.get_character()
+                        # turn the cursor off before drawing the screen
+                        self.cursor_state = False
+                        self.update_cursor()
                         text = self.font.render(text_to_display, False, (255, 255, 255))
                         self.screen.blit(text, (
                             display_element.x * self.character_width, display_element.y * self.character_height))
 
+                # draw the cursor
+                if pygame.time.get_ticks() - self.last_cursor_change > 500:
+                    self.update_cursor()
+                    self.cursor_state = not self.cursor_state
+                    self.last_cursor_change = pygame.time.get_ticks()
                 pygame.display.flip()
                 self.clock.tick(20)
 
             pygame.quit()
+
+        def update_cursor(self):
+            if self.cursor_state:
+                cursor = self.font.render('_', False, (255, 255, 255))
+                self.screen.blit(cursor, (self.cursor_x * self.character_width,
+                                          self.cursor_y * self.character_height))
+            else:
+                cursor = self.font.render('_', False, (0, 0, 0))
+                self.screen.blit(cursor, (self.cursor_x * self.character_width,
+                                          self.cursor_y * self.character_height))
 
     def __init__(self, starting_address: int, width: int, height: int, interrupt_number: int):
         super().__init__(starting_address, 1)
@@ -97,7 +131,7 @@ class Consolev5(BaseDevice):
         self.output_queue = queue.Queue()
         self.input_queue = queue.Queue()
         self.display = self.Display(self.output_queue, self.input_queue, display_width=width, display_height=height,
-                                    character_width=10, character_height=10, font_size=12)
+                                    character_width=15, character_height=25, font_size=20)
         self.cursor_x: int = 0
         self.cursor_y: int = 0
         self.width: int = width
@@ -107,6 +141,10 @@ class Consolev5(BaseDevice):
         self.output_form = threading.Thread(target=self.display.run)
         self.output_form.start()
         self.write_buffer_to_queue()
+
+    def send_cursor_location(self):
+        self.output_queue.put(DisplayControl('cursor_x', str(self.cursor_x)))
+        self.output_queue.put(DisplayControl('cursor_y', str(self.cursor_y)))
 
     def scroll_up(self):
         """
@@ -120,7 +158,7 @@ class Consolev5(BaseDevice):
             self.display_buffer[self.height - 1][x].character = ' '
             self.display_buffer[self.height - 1][x].redraw = True
         # add a clear command to the output queue
-        self.output_queue.put(DisplayControl('clear'))
+        self.output_queue.put(DisplayControl('clear', ''))
 
     def find_last_non_space_character_on_current_row(self):
         """
@@ -154,21 +192,27 @@ class Consolev5(BaseDevice):
         """
         if data == 13:  # CR
             self.cursor_x = 0
+            self.send_cursor_location()
             return True
         elif data == 10:  # LF
             self.cursor_y += 1
             if self.cursor_y >= self.height:
                 self.scroll_up()
                 self.cursor_y -= 1
+            self.send_cursor_location()
             return True
         elif data == 9:  # TAB
             self.cursor_x += 4
             if self.cursor_x >= self.width:
                 self.cursor_x = self.width - 1
+            self.send_cursor_location()
             return True
         elif data == 12:  # FF
             self.display_buffer = [[DisplayElement(x, y, ' ') for x in range(80)] for y in range(25)]
-            self.output_queue.put(DisplayControl('clear'))
+            self.output_queue.put(DisplayControl('clear', ''))
+            self.cursor_x = 0
+            self.cursor_y = 0
+            self.send_cursor_location()
             return True
         elif data == 8:  # BS
             self.cursor_x -= 1
@@ -179,6 +223,7 @@ class Consolev5(BaseDevice):
                     self.cursor_x = 0
                 self.cursor_x = self.find_last_non_space_character_on_current_row()
             self.write_to_display_buffer(self.cursor_y * self.width + self.cursor_x, chr(32))
+            self.send_cursor_location()
             return True
         else:
             return False
@@ -197,6 +242,9 @@ class Consolev5(BaseDevice):
             return
 
         self.write_to_display_buffer(self.cursor_y * self.width + self.cursor_x, chr(data))
+
+        # add the DisplayElement object to the output queue
+        self.output_queue.put(self.display_buffer[self.cursor_y][self.cursor_x])
         self.cursor_x += 1
         if self.cursor_x >= self.width:
             self.cursor_x = 0
@@ -204,9 +252,7 @@ class Consolev5(BaseDevice):
             if self.cursor_y >= self.height:
                 self.scroll_up()
                 self.cursor_y -= 1
-
-        # add the DisplayElement object to the output queue
-        self.output_queue.put(self.display_buffer[self.cursor_y][self.cursor_x])
+        self.send_cursor_location()
 
     def write_buffer_to_queue(self):
         """

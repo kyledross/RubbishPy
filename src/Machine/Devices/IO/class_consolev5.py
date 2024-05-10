@@ -6,6 +6,8 @@ import pygame
 from Constants.class_interrupts import Interrupts
 from Machine.Devices.Bases.class_base_device import BaseDevice
 
+cursor_blink_milliseconds = 250
+
 
 class DisplayCommand:
     """
@@ -110,7 +112,7 @@ class ConsoleV5(BaseDevice):
                             display_element.x * self.character_width, display_element.y * self.character_height))
 
                 # draw the cursor
-                if pygame.time.get_ticks() - self.last_cursor_change > 500:
+                if pygame.time.get_ticks() - self.last_cursor_change > cursor_blink_milliseconds:
                     self.update_cursor()
                     self.cursor_state = not self.cursor_state
                     self.last_cursor_change = pygame.time.get_ticks()

@@ -101,6 +101,11 @@ class ConsoleV5(BaseDevice):
                         text_to_display = display_element.get_character()
                         self.turn_cursor_off()
                         text = self.font.render(text_to_display, True, (255, 255, 255))
+                        # blank the area we are about to write to
+                        text_size = self.font.size(text_to_display)
+                        position = (display_element.x * self.character_width, display_element.y * self.character_height)
+                        pygame.draw.rect(self.screen, (0, 0, 0), (position[0], position[1], text_size[0], text_size[1]))
+                        # draw the character
                         self.screen.blit(text, (
                             display_element.x * self.character_width, display_element.y * self.character_height))
 
@@ -227,7 +232,7 @@ class ConsoleV5(BaseDevice):
                     self.cursor_y = 0
                     self.cursor_x = 0
                 self.cursor_x = self.find_last_non_space_character_on_current_row()
-            self.write_to_display_buffer(self.cursor_y * self.width + self.cursor_x, chr(32))
+            self.write_to_display_buffer(self.cursor_y * self.width + self.cursor_x, " ")
             self.send_cursor_location()
             return True
         else:

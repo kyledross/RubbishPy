@@ -57,7 +57,7 @@ class DisplayElement(DisplayCommand):
         self.redraw = redraw
 
 
-class Consolev5(BaseDevice):
+class ConsoleV5(BaseDevice):
     class Display:
         def __init__(self, output_q, input_q, display_width=80, display_height=25, character_width=10,
                      character_height=10, font_size=12):

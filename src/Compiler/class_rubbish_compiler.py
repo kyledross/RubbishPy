@@ -58,6 +58,8 @@ class RubbishCompiler:
                             parameters[0] = parameters[0].replace(label_name + ":", "")
                             if len(parameters[0]) == 0:
                                 parameters.pop(0)
+                            if len(parameters) == 0:  # this was a stand-alone label
+                                continue
 
                         instruction = parameters[0].strip().upper()
                         # noinspection SpellCheckingInspection

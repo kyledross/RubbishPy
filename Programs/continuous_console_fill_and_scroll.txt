@@ -5,7 +5,8 @@
 ' Send enough to cause the cursor to wrap to the next line
 
 ' char A
-begin: lr 1 65
+begin:
+lr 1 65
 mrm 1 1024
 
 ' char B

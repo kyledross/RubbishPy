@@ -83,7 +83,8 @@ class ConsoleV5(BaseDevice):
                         running = False
                     if event.type == pygame.KEYDOWN:
                         # add to input queue
-                        self.input_queue.put(event.key)
+                        if event.unicode:
+                            self.input_queue.put(ord(event.unicode))
 
                 while not self.display_queue.empty():
                     command = self.display_queue.get_nowait()
@@ -253,7 +254,6 @@ class ConsoleV5(BaseDevice):
         if self.handle_control_character(data):
             return
 
-        # todo: handle non-printable keystrokes, like shift, ctrl, etc.
         self.write_to_display_buffer(self.cursor_y * self.width + self.cursor_x, chr(data))
 
         # add the DisplayElement object to the output queue

@@ -8,7 +8,6 @@ from Machine.Buses.class_control_bus import ControlBus
 from Machine.Buses.class_data_bus import DataBus
 from Machine.Buses.class_interrupt_bus import InterruptBus
 from Machine.Devices.Bases.class_base_device import BaseDevice
-from Machine import Devices
 
 
 class BackPlane:

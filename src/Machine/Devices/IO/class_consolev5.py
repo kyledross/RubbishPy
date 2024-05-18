@@ -6,6 +6,8 @@ import pygame
 from Constants.class_interrupts import Interrupts
 from Machine.Devices.Bases.class_base_device import BaseDevice
 
+FRAMERATE = 90
+
 cursor_blink_milliseconds = 250
 
 
@@ -118,7 +120,7 @@ class ConsoleV5(BaseDevice):
                     self.cursor_state = not self.cursor_state
                     self.last_cursor_change = pygame.time.get_ticks()
                 pygame.display.flip()
-                self.clock.tick(20)
+                self.clock.tick(FRAMERATE)
 
             pygame.quit()
 

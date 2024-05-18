@@ -1,7 +1,7 @@
 #  Copyright (c) 2024 Kyle D. Ross.  All rights reserved.
 #  Refer to LICENSE.md for license information.
 
-# lylt
+# lylt <3
 
 import sys
 import warnings

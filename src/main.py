@@ -145,7 +145,7 @@ def add_console_v5(args, devices):
 
 def add_console_v4(args, devices):
     if args.consolev4:
-        warnings.warn("Warning: The consolev4 device is deprecated.  Use --consolev5 instead.")
+        warnings.warn("The consolev4 device is deprecated.  Use --consolev5 instead.")
         console_args = dict(args.consolev4)
         address = console_args.get("address")
         interrupt = console_args.get("interrupt")
@@ -160,7 +160,7 @@ def add_console_v4(args, devices):
 
 def add_console_v31(args, devices):
     if args.consolev31:
-        warnings.warn("Warning: The consolev31 device is deprecated.  Use --consolev5 instead.")
+        warnings.warn("The consolev31 device is deprecated.  Use --consolev5 instead.")
         console_args = dict(args.consolev31)
         address = console_args.get("address")
         interrupt = console_args.get("interrupt")
@@ -175,7 +175,7 @@ def add_console_v31(args, devices):
 
 def add_console_v3(args, devices):
     if args.consolev3:
-        warnings.warn("Warning: The consolev3 device is deprecated.  Use --consolev5 instead.")
+        warnings.warn("The consolev3 device is deprecated.  Use --consolev5 instead.")
         console_args = dict(args.consolev3)
         address = console_args.get("address")
         interrupt = console_args.get("interrupt")
@@ -190,7 +190,7 @@ def add_console_v3(args, devices):
 
 def add_console_v2(args, devices):
     if args.consolev2:
-        warnings.warn("Warning: The consolev2 device is deprecated.  Use --consolev5 instead.")
+        warnings.warn("The consolev2 device is deprecated.  Use --consolev5 instead.")
         console_args = dict(args.consolev2)
         address = console_args.get("address")
         interrupt = console_args.get("interrupt")
@@ -202,7 +202,7 @@ def add_console_v2(args, devices):
 
 def add_console_v1(args, devices):
     if args.console:
-        warnings.warn("Warning: The console device is deprecated.  Use --consolev5 instead.")
+        warnings.warn("The console device is deprecated.  Use --consolev5 instead.")
         console_args = dict(args.console)
         address = console_args.get("address")
         interrupt = console_args.get("interrupt")

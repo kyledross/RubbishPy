@@ -59,6 +59,7 @@ def check_required_parameters(device: str, parameters, keys):
             exit(1)
 
 
+# noinspection SpellCheckingInspection
 def parse_command_line():
     """Parses the command line arguments and returns a list of device groups.  Each device group is a dictionary"""
     devices = []
@@ -143,6 +144,7 @@ def add_console_v5(args, devices):
             {'device_name': 'consolev5', 'address': address, 'interrupt': interrupt, 'width': width, 'height': height})
 
 
+# noinspection SpellCheckingInspection
 def add_console_v4(args, devices):
     if args.consolev4:
         warnings.warn("The consolev4 device is deprecated.  Use --consolev5 instead.")
@@ -158,6 +160,7 @@ def add_console_v4(args, devices):
             {'device_name': 'consolev4', 'address': address, 'interrupt': interrupt, 'width': width, 'height': height})
 
 
+# noinspection SpellCheckingInspection
 def add_console_v31(args, devices):
     if args.consolev31:
         warnings.warn("The consolev31 device is deprecated.  Use --consolev5 instead.")
@@ -173,6 +176,7 @@ def add_console_v31(args, devices):
             {'device_name': 'consolev31', 'address': address, 'interrupt': interrupt, 'width': width, 'height': height})
 
 
+# noinspection SpellCheckingInspection
 def add_console_v3(args, devices):
     if args.consolev3:
         warnings.warn("The consolev3 device is deprecated.  Use --consolev5 instead.")
@@ -188,6 +192,7 @@ def add_console_v3(args, devices):
             {'device_name': 'consolev3', 'address': address, 'interrupt': interrupt, 'width': width, 'height': height})
 
 
+# noinspection SpellCheckingInspection
 def add_console_v2(args, devices):
     if args.consolev2:
         warnings.warn("The consolev2 device is deprecated.  Use --consolev5 instead.")
@@ -200,6 +205,7 @@ def add_console_v2(args, devices):
         devices.append({'device_name': 'consolev2', 'address': address, 'interrupt': interrupt})
 
 
+# noinspection SpellCheckingInspection
 def add_console_v1(args, devices):
     if args.console:
         warnings.warn("The console device is deprecated.  Use --consolev5 instead.")

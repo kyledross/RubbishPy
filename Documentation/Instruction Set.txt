@@ -1,6 +1,7 @@
- For licensing information, see LICENSE.txt
+Copyright 2024 Kyle D. Ross
+For licensing information, see LICENSE.txt
 
- Rubbish Instruction Set, Compiler Meta-commands, and Pointers
+Rubbish Instruction Set, Compiler Meta-commands, and Pointers
 --------------------------------------------------------------
 
 About labels

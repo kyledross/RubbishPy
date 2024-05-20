@@ -1,7 +1,3 @@
-' Copyright 2024 Kyle D. Ross
-' For licensing information, see LICENSE.txt
-
-
 ' Hello World example
 ' Pre-requisites:
 ' Compiler at address 0

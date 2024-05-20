@@ -44,7 +44,7 @@ rtn
 ' =======================================
 ' Next Line routine
 ' =======================================
-' Send a 13 (CR) then a 10 (LF) to the console (address 1024), the return from the interrupt handler
+' Send a 13 (CR) then a 10 (LF) to the console (address 1024), then return from the interrupt handler
 CR: lr 3 13
 mrm 3 1024
 lr 3 10

@@ -1,3 +1,6 @@
+' Copyright 2024 Kyle D. Ross
+' For licensing information, see LICENSE.txt
+
 ' color escape routines ----------------------'
 
 escape: lr 1 27

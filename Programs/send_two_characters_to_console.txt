@@ -1,3 +1,6 @@
+' Copyright 2024 Kyle D. Ross
+' For licensing information, see LICENSE.txt
+
 loop: lr 1 65
 mrm 1 1024
 

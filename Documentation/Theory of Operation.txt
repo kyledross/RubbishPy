@@ -1,8 +1,4 @@
-Copyright 2024 Kyle D. Ross
-For licensing information, see LICENSE.txt
-
-
- The backplane consists of a bus and a clock control.
+The backplane consists of a bus and a clock control.
 
 The bus consists collectively of:
  - The address lines (32-bit)

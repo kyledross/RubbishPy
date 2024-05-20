@@ -1,6 +1,3 @@
-' Copyright 2024 Kyle D. Ross
-' For licensing information, see LICENSE.txt
-
 ' Send the letters A through Z to the console with no CR/LF
 ' Send enough to cause the cursor to wrap to the next line
 

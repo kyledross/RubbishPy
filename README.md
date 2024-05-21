@@ -1,5 +1,5 @@
 # RubbishPy
-A Python implementation of a Von Neumann-architecture computer.  
+A Python implementation of a Von Neumann-architecture computer emulator.  
 Refer to LICENSE.txt for license information.
  
 

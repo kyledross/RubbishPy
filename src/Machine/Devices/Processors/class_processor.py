@@ -12,15 +12,6 @@ from Constants.class_instruction_set import InstructionSet
 from Constants.class_compare_results import CompareResults
 
 
-# It begins by requesting data from address 0x00000000 on the first clock cycle.  This is the beginning of the machine's
-# address space.
-# The processor contains:
-# 8 general purpose registers (each 32-bits, read/write)
-# 1 instruction pointer register (32-bits, read-only, can only be set by the processor's direct logic)
-# 1 call stack
-# 1 internal stack
-# 1 external general purpose stack
-
 class Phases:
     """
     The Phases class represents the different phases a processor can be in during its operation.

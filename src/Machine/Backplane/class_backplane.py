@@ -89,6 +89,7 @@ class BackPlane:
                     device.cycle(self._addressBus, self._dataBus, self._controlBus, self._interruptBus)
 
                 if self._interruptBus.test_interrupt(Interrupts.halt):
+                    print("HALT interrupt detected.")
                     running = False
                     break
             time.sleep(0)  # allow other threads (such as console 3.1) to run

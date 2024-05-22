@@ -3,6 +3,7 @@
 import collections
 from collections import deque
 
+import Constants.class_interrupts
 from Machine.Buses.class_address_bus import AddressBus
 from Machine.Buses.class_control_bus import ControlBus
 from Machine.Buses.class_data_bus import DataBus
@@ -22,6 +23,10 @@ class Phases:
     AwaitingFirstOperand = 2  # The processor is awaiting the first operand.
     AwaitingSecondOperand = 3  # The processor is awaiting the second operand.
     AwaitingResponse = 4  # The processor is awaiting a response.
+
+
+def execute_halt(interrupt_bus):
+    interrupt_bus.set_interrupt(Constants.class_interrupts.Interrupts.halt)
 
 
 # noinspection DuplicatedCode
@@ -137,7 +142,7 @@ class Processor(BaseProcessor):
                     self.execute_reset()
 
                 case InstructionSet.HALT:
-                    exit()  # todo: raise a HALT interrupt instead
+                    execute_halt(interrupt_bus)
 
                 case InstructionSet.PUSH:
                     self.execute_push(address_bus, control_bus, data_bus)

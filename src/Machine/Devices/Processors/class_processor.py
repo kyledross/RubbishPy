@@ -81,7 +81,6 @@ class Processor(BaseProcessor):
                     print("Processor: Debug instruction encountered.")
                     print("Current registers:")
                     print(self.registers)
-                    breakpoint()
                     self.finish_instruction(True)
 
                 case InstructionSet.JMP:

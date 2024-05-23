@@ -496,4 +496,3 @@ class Processor(BaseProcessor):
         if self.phase == Phases.NothingPending:
             self.registers[3] = ~self.registers[1]
             self.finish_instruction(True)
-

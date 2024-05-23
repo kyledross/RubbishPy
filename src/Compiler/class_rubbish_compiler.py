@@ -24,20 +24,11 @@ class RubbishCompiler:
         Args:
             source_pathname:
         """
-        # todo - add switch to add debug trace
-        add_trace = False
         code = []
         try:
             lines = []
             self.read_file(source_pathname, lines)
 
-            temp_lines = []
-            if add_trace:
-                for line in lines:
-                    if len(line.strip()) != 0:
-                        debug_lines = self.add_debug_trace(line)
-                        temp_lines.extend(debug_lines)
-                lines = temp_lines
             for phase in range(1, 3):
                 # phase 1 - compile code, so we know the offset of labels
                 # phase 2 - compile code and use label address offsets
@@ -74,7 +65,7 @@ class RubbishCompiler:
                         elif instruction in {"LR", "LRM", "LRR", "MRM", "ADD", "DIV", "MUL", "SUB", "JMP", "HALT",
                                              "DEBUG", "RST", "CMP", "JE", "JNE", "JL", "JG", "PUSH", "POP", "CALL",
                                              "RTN", "SIV", "SLEEP", "WAKE", "FDIV", "FADD", "FSUB", "FMUL", "TOIEEE",
-                                             "PEEK", "OR", "AND", "XOR", "NOT", "DEBUGOUT", "DEBUGPUSH"}:
+                                             "PEEK", "OR", "AND", "XOR", "NOT"}:
                             self.add_instruction(self.get_instruction_code(instruction), parameters, code, phase == 2)
 
                         else:
@@ -179,8 +170,7 @@ class RubbishCompiler:
             "LR": 1, "LRM": 2, "LRR": 3, "MRM": 4, "ADD": 5, "DIV": 8, "MUL": 7, "SUB": 6, "JMP": 11, "HALT": 9,
             "DEBUG": 10, "RST": 12, "CMP": 13, "JE": 14, "JNE": 15, "JL": 16, "JG": 17, "PUSH": 18, "POP": 19,
             "CALL": 20, "RTN": 21, "SIV": 26, "SLEEP": 28, "WAKE": 29, "FDIV": 27, "FADD": 30, "FSUB": 31,
-            "FMUL": 32, "TOIEEE": 33, "PEEK": 34, "OR": 23, "AND": 24, "XOR": 25, "NOT": 22, "DEBUGOUT": 35,
-            "DEBUGPUSH": 36
+            "FMUL": 32, "TOIEEE": 33, "PEEK": 34, "OR": 23, "AND": 24, "XOR": 25, "NOT": 22
         }
         return op_codes[instruction]
 
@@ -199,26 +189,3 @@ class RubbishCompiler:
         except ValueError:
             return False
 
-    # noinspection SpellCheckingInspection
-    @staticmethod
-    def add_debug_trace(line):
-        # noinspection SpellCheckingInspection
-        """
-                This method adds a debug trace for the given line.
-                It will add a DEBUGPUSH instruction for each character in the
-                line and a DEBUGOUT instruction at the end.
-                :param line: The line to add a debug trace for.
-                :return: The debug trace for the given line.
-                """
-        # add line to a list of strings called output
-        # for each character in the line, add a debugpush of the ascii value
-        # add a debugout instruction
-        # return the lines
-        output = []
-        for char in line:
-            # noinspection SpellCheckingInspection
-            output.append(f"DEBUGPUSH {ord(char)}")
-        # noinspection SpellCheckingInspection
-        output.append("DEBUGOUT")
-        output.append(line)
-        return output

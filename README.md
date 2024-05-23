@@ -8,10 +8,10 @@ RubbishPy is a Python-based emulator of a Von Neumann architecture computer.  It
 
 ## Purpose
 This project serves two purposes:
-1. To provide an example of emulating a Von Neumann architecture computer in Python, with the hope that it can be adapted for other projects, or that it will inspire new projects.
-2. To provide myself with a project that I am interested in that I can learn Python with.
+1. To provide an example of emulating a Von Neumann architecture computer in Python, and
+2. To provide myself with a project that I am interested in that I can use to learn Python.
 
-This is by no means a perfect design or implementation.  But, it works and I have learned a lot.
+This is by no means a perfect design or implementation.  But, it works.
 
 ## Requirements
 RubbishPy requires Python 3.11 or later.  

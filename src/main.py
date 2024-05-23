@@ -12,7 +12,6 @@ import warnings
 
 def intro():
     print("RubbishPy")
-    print("Version 1.0")
     print("Copyright (c) 2024 Kyle D. Ross")
     print("--help for help")
     print()

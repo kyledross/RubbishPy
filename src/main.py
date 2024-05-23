@@ -8,7 +8,7 @@ import warnings
 # This entry point will create an instance of the machine builder.
 # The machine builder will return an instance of the backplane with all devices attached.
 # This entry point will start the backplane.
-# The backplane will begin iterating through each attached device and calling the Cycle method.
+# The backplane will begin iterating through each attached devices and calling the Cycle method.
 
 def intro():
     print("RubbishPy")

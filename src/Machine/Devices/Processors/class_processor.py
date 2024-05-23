@@ -168,12 +168,6 @@ class Processor(BaseProcessor):
                 case InstructionSet.SIV:
                     self.execute_siv(address_bus, control_bus, data_bus)
 
-                case InstructionSet.DEBUGOUT:
-                    self.execute_debug_out()
-
-                case InstructionSet.DEBUGPUSH:
-                    self.execute_debug_push(address_bus, control_bus, data_bus)
-
                 case _:
                     self.load_instruction(address_bus, control_bus, data_bus)
 

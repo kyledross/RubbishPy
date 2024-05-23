@@ -218,17 +218,6 @@ Opcode: 29
 Purpose: Causes processor to resume processing instructions. Cancels any previous SLEEP instruction.  Typically found in the code of an interrupt vector, as it can't be reached in any other fashion if the processor is already asleep from a prior SLEEP instruction.
 Processor: v1
 
-Debug Out
-DEBUGOUT
-Opcode: 35
-Purpose: Causes the processor to output the contents of the debug_stack to the local console
-Processor: v3
-
-Debug Push
-DEBUGPUSH value
-Opcode: 36
-Purpose: Pushes the value onto the debug_stack
-Processor: v3
 
 =======================================================
 Compiler Meta-commands

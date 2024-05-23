@@ -498,23 +498,3 @@ class Processor(BaseProcessor):
             self.registers[3] = ~self.registers[1]
             self.finish_instruction(True)
 
-    def execute_debug_out(self):
-        if self.phase == Phases.NothingPending:
-            # build a string in reverse by popping every byte off of the debug_stack and then print it
-            output_string = ""
-            self.debug_stack.reverse()
-            while len(self.debug_stack) > 0:
-                output_string += chr(self.debug_stack.pop())
-            self.debug_stack.reverse()
-            print(output_string)
-            self.finish_instruction(True)
-
-    def execute_debug_push(self, address_bus, control_bus, data_bus):
-        if self.phase == Phases.NothingPending:
-            self.request_operand(address_bus, control_bus)
-            self.phase = Phases.AwaitingFirstOperand
-        elif self.phase == Phases.AwaitingFirstOperand:
-            if control_bus.get_response():
-                self.debug_stack.append(data_bus.get_data())
-                self.phase = Phases.NothingPending
-                self.finish_instruction(True)

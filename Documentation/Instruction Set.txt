@@ -1,4 +1,4 @@
-Rubbish Instruction Set, Compiler Meta-commands, and Pointers x
+Rubbish Instruction Set, Compiler Meta-commands, and Pointers
 --------------------------------------------------------------
 
 About labels

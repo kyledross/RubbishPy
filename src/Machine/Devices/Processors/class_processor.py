@@ -63,7 +63,7 @@ class Processor(BaseProcessor):
     def cycle(self, address_bus: AddressBus, data_bus: DataBus, control_bus: ControlBus, interrupt_bus: InterruptBus):
         self.cache_instruction(address_bus, control_bus, data_bus)
 
-        while True:  # loop until a cached data request is not fulfilled
+        while True:  # loop until a cached instruction request is not fulfilled
             # Interrupt processing
             if self.phase == Phases.NothingPending:
                 if not self.interrupt_in_progress:
@@ -188,6 +188,19 @@ class Processor(BaseProcessor):
                 break
 
     def cached_instruction_will_be_used(self, address_bus, control_bus, data_bus):
+        """
+        Check if the cached instruction will be used in the current cycle.
+        If instruction will be used, it is placed on the data bus and the control bus is updated, as if it were
+        fetched from memory.
+        Args:
+            address_bus:
+            control_bus:
+            data_bus:
+
+        Returns:
+            True if the cached instruction will be used, False otherwise.
+
+        """
         if self.disable_instruction_caching:
             return False
         if (self.phase in [Phases.AwaitingInstruction, Phases.AwaitingFirstOperand, Phases.AwaitingSecondOperand]
@@ -221,6 +234,11 @@ class Processor(BaseProcessor):
 
     # instruction fetching and execution
     def execute_reset(self):
+        """
+        Reset the processor's state.
+        Returns:
+
+        """
         self.current_instruction: int = -1
         self.data_pointer: int = 0
         self.phase: int = 0
@@ -440,24 +458,12 @@ class Processor(BaseProcessor):
         self.phase = Phases.NothingPending
 
     def push_registers(self):
-        self.register_stack.append(self.registers[0])
-        self.register_stack.append(self.registers[1])
-        self.register_stack.append(self.registers[2])
-        self.register_stack.append(self.registers[3])
-        self.register_stack.append(self.registers[4])
-        self.register_stack.append(self.registers[5])
-        self.register_stack.append(self.registers[6])
-        self.register_stack.append(self.registers[7])
+        for i in range(8):
+            self.register_stack.append(self.registers[i])
 
     def pop_registers(self):
-        self.registers[7] = self.register_stack.pop()
-        self.registers[6] = self.register_stack.pop()
-        self.registers[5] = self.register_stack.pop()
-        self.registers[4] = self.register_stack.pop()
-        self.registers[3] = self.register_stack.pop()
-        self.registers[2] = self.register_stack.pop()
-        self.registers[1] = self.register_stack.pop()
-        self.registers[0] = self.register_stack.pop()
+        for i in range(7, -1, -1):
+            self.registers[i] = self.register_stack.pop()
 
     def execute_or(self):
         if self.phase == Phases.NothingPending:
@@ -495,6 +501,17 @@ class Processor(BaseProcessor):
         return None
 
     def request_two_operands(self, address_bus, control_bus, data_bus):
+        """
+        Request two operands from the address bus and data bus.
+        Args:
+            address_bus:
+            control_bus:
+            data_bus:
+
+        Returns:
+            The second operand if the first operand has been received, otherwise None.
+            The first operand is on the stack.
+        """
         value = self.request_single_operand(address_bus, control_bus, data_bus)
         if value is not None:
             self.internal_stack.append(value)

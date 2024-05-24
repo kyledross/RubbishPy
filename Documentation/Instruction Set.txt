@@ -71,36 +71,6 @@ SUB
 Opcode:6
 Processor: v1
 
-
-=======================================================
--- Floating math instructions
--- All floating point instructions (except for ToIEEE) assume the values are 32-bit IEEE floating point numbers.
-
-Floating point divide (Divides register 1 by register 2, result into register 3)
-FDIV
-Opcode: 27
-Processor: v1.2
-
-Floating point add (Adds register 1 and register 2, result into register 3)
-FADD
-Opcode: 30
-Processor: v1.2
-
-Floating point subtract (subtracts register 2 from register 1, result into register 3)
-FSUB
-Opcode: 31
-Processor: v1.2
-
-Floating point multiply (multiplies register 1 by register 2, result into register 3)
-FMUL
-Opcode: 32
-Processor: v1.2
-
-Convert integer value to 32-bit IEEE floating point value
-ToIEEE reg
-Opcode: 33
-Processor: v1.2
-
 =======================================================
 -- Logic instructions
 

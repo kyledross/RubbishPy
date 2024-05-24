@@ -35,6 +35,11 @@ MRM reg @registerAddress (requires RSC2008 Processor v1.1 or later) (see @regist
 Opcode:4
 Processor: v1, v1.1
 
+Increment Register
+INC reg
+Opcode: 27
+
+
 =======================================================
 -- Stack instructions
 

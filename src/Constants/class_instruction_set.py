@@ -10,12 +10,12 @@ class InstructionSet:
     LRR = 3  # Load register from register instruction
     MRM = 4  # Move register to memory instruction
     ADD = 5  # Addition instruction
-    DIV = 8  # Division instruction
-    MUL = 7  # Multiplication instruction
     SUB = 6  # Subtraction instruction
+    MUL = 7  # Multiplication instruction
+    DIV = 8  # Division instruction
+    HALT = 9  # Halt instruction
     DEBUG = 10  # Debug instruction
     JMP = 11  # Jump instruction
-    HALT = 9  # Halt instruction
     RST = 12  # Reset instruction
     CMP = 13  # Compare instruction
     JE = 14  # Jump if equal instruction
@@ -24,7 +24,6 @@ class InstructionSet:
     JG = 17  # Jump if greater instruction
     PUSH = 18  # Push to stack instruction
     POP = 19  # Pop from stack instruction
-    PEEK = 34  # Peek at top of stack instruction
     CALL = 20  # Call subroutine instruction
     RTN = 21  # Return from subroutine instruction
     NOT = 22  # Bitwise NOT instruction
@@ -32,5 +31,7 @@ class InstructionSet:
     AND = 24  # Bitwise AND instruction
     XOR = 25  # Bitwise XOR instruction
     SIV = 26  # Set interrupt vector instruction
+    INC = 27  # Increment instruction
     SLEEP = 28  # Sleep instruction
     WAKE = 29  # Wake instruction
+    PEEK = 34  # Peek at top of stack instruction

@@ -59,5 +59,5 @@ The RubbishVM project also included an experimental and proof-of-concept BASIC c
 ### RubbishPy
 Language: Python
 
-This is the current incarnation of the Rubbish emulator.  It has been completely rewritten in Python.  It is code-compatible with RubbishVM programs, and offers compatible devices.  With this edition of the emulator, there will be no further development of the prior emulator.  Going forward, new features and functionality will be added to this emulator.
+This is the current incarnation of the Rubbish emulator.  It has been completely rewritten in Python.  It is mostly code-compatible with RubbishVM programs, and offers compatible devices.  With this edition of the emulator, there will be no further development of the prior emulator.  Going forward, new features and functionality will be added to this emulator.
 

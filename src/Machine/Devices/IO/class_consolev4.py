@@ -11,7 +11,7 @@ from queue import Queue
 from Constants.class_interrupts import Interrupts
 from Machine.Devices.Bases.class_base_device import BaseDevice, log_message
 
-FONT_SIZE = 12  # todo: make this a parameter
+FONT_SIZE = 12
 CHARACTER_WIDTH = math.ceil(FONT_SIZE * .66)
 CHARACTER_HEIGHT = math.ceil(FONT_SIZE * .66)
 OUTPUT_QUEUE_PROCESSING_RATE = 10  # milliseconds between processing the output queue

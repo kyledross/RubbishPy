@@ -77,7 +77,7 @@ class BackPlane:
             for device in self._devices:
                 device.cycle(self._addressBus, self._dataBus, self._controlBus, self._interruptBus)
                 # if the device has set the response line, save the address it responded to
-                if self._controlBus.read_response():
+                if self._controlBus.peek_response():
                     self._cataloged_devices[self._addressBus.get_address()] = device
                 # if the device is requesting an address, and we've cataloged the responding device for the address,
                 # cycle the responding device

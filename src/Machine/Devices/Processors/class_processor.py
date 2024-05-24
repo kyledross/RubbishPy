@@ -1,5 +1,3 @@
-# Processor v1.2
-
 import collections
 from collections import deque
 
@@ -23,6 +21,8 @@ class Phases:
     AwaitingFirstOperand = 2  # The processor is awaiting the first operand.
     AwaitingSecondOperand = 3  # The processor is awaiting the second operand.
     AwaitingResponse = 4  # The processor is awaiting a response.
+    # Developer: if a new phase is added, remember to update
+    # the Processor class's cycle method in regard to data caching.
 
 
 def execute_halt(interrupt_bus):
@@ -57,14 +57,9 @@ class Processor(BaseProcessor):
     data_cache = {}
 
     def cycle(self, address_bus: AddressBus, data_bus: DataBus, control_bus: ControlBus, interrupt_bus: InterruptBus):
-        # if the processor is awaiting an instruction, and a response has been received, cache it
-        if (self.phase == Phases.AwaitingInstruction or
-                self.phase == Phases.AwaitingFirstOperand or
-                self.phase == Phases.AwaitingSecondOperand):
-            if control_bus.peek_response():
-                self.data_cache[address_bus.get_address()] = data_bus.get_data()
+        self.cache_incoming_data(address_bus, control_bus, data_bus)
 
-        while True:
+        while True:  # loop until a cached data request is not fulfilled
             # Interrupt processing
             if self.phase == Phases.NothingPending:
                 if not self.interrupt_in_progress:
@@ -182,22 +177,36 @@ class Processor(BaseProcessor):
                     case _:
                         self.load_instruction(address_bus, control_bus, data_bus)
 
-                exit_cycle = True
-                # if processor is awaiting instruction, see if a read request has been made
-                if (self.phase == Phases.AwaitingInstruction or
-                        self.phase == Phases.AwaitingFirstOperand or
-                        self.phase == Phases.AwaitingSecondOperand):
-                    if control_bus.get_read_request():
-                        # if the address has been previously cached, act as if the data bus has the data
-                        if address_bus.get_address() in self.data_cache:
-                            data_bus.set_data(self.data_cache[address_bus.get_address()])
-                            # set the response to true to indicate that the data is ready
-                            control_bus.set_read_request(False)
-                            control_bus.set_response(True)
-                            exit_cycle = False
+            if not self.cached_data_will_be_used(address_bus, control_bus, data_bus):
+                break
 
-                if exit_cycle:
-                    break
+    def cached_data_will_be_used(self, address_bus, control_bus, data_bus):
+        if (self.phase in [Phases.AwaitingInstruction, Phases.AwaitingFirstOperand, Phases.AwaitingSecondOperand]
+                and control_bus.get_read_request()
+                and address_bus.get_address() in self.data_cache):
+            data_bus.set_data(self.data_cache[address_bus.get_address()])
+            control_bus.set_read_request(False)
+            control_bus.set_response(True)
+            return True
+        return False
+
+    def cache_incoming_data(self, address_bus, control_bus, data_bus):
+        """
+        Cache incoming data from the data bus if the processor is awaiting an instruction or operand.
+        Args:
+            address_bus:
+            control_bus:
+            data_bus:
+
+        Returns:
+
+        """
+        # if the processor is awaiting an instruction, and a response has been received, cache it
+        if (self.phase == Phases.AwaitingInstruction or
+                self.phase == Phases.AwaitingFirstOperand or
+                self.phase == Phases.AwaitingSecondOperand):
+            if control_bus.peek_response():
+                self.data_cache[address_bus.get_address()] = data_bus.get_data()
 
     # instruction fetching and execution
     def execute_reset(self):

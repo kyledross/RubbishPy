@@ -143,6 +143,8 @@ class ConsoleV5(BaseDevice):
         super().__init__(starting_address, 1)
         pygame.init()
         pygame.display.set_caption("RubbishPy Console v5")
+        icon = pygame.image.load('../Resources/graphics/console_icon.png')
+        pygame.display.set_icon(icon)
         self.output_queue = queue.Queue()
         self.input_queue = queue.Queue()
         self.display = self.Display(self.output_queue, self.input_queue, display_width=width, display_height=height,

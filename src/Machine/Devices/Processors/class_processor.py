@@ -58,14 +58,11 @@ class Processor(BaseProcessor):
 
     def cycle(self, address_bus: AddressBus, data_bus: DataBus, control_bus: ControlBus, interrupt_bus: InterruptBus):
         # if the processor is awaiting an instruction, and a response has been received, cache it
-        if self.phase == Phases.AwaitingInstruction or self.phase == Phases.AwaitingFirstOperand or self.phase == Phases.AwaitingSecondOperand:
+        if (self.phase == Phases.AwaitingInstruction or
+                self.phase == Phases.AwaitingFirstOperand or
+                self.phase == Phases.AwaitingSecondOperand):
             if control_bus.peek_response():
-                # if the cache contains the address, update the data
-                if address_bus.get_address() in self.data_cache:
-                    self.data_cache[address_bus.get_address()][1] = data_bus.get_data()
-                else:
-                    # add the data to the cache
-                    self.data_cache[address_bus.get_address()] = data_bus.get_data()
+                self.data_cache[address_bus.get_address()] = data_bus.get_data()
 
         while True:
             # Interrupt processing
@@ -83,123 +80,124 @@ class Processor(BaseProcessor):
                                 self.interrupt_in_progress = True
                                 break
 
-
             # Instruction routing
-            if not self.sleeping:
+            if self.sleeping:
+                break
+            else:
+                match self.current_instruction:
 
-                    match self.current_instruction:
+                    case InstructionSet.NOP:
+                        self.finish_instruction(True)
 
-                        case InstructionSet.NOP:
-                            self.finish_instruction(True)
+                    case InstructionSet.DEBUG:
+                        print("Processor: Debug instruction encountered.")
+                        print("Current registers:")
+                        print(self.registers)
+                        self.finish_instruction(True)
 
-                        case InstructionSet.DEBUG:
-                            print("Processor: Debug instruction encountered.")
-                            print("Current registers:")
-                            print(self.registers)
-                            self.finish_instruction(True)
+                    case InstructionSet.JMP:
+                        self.execute_jmp(address_bus, control_bus, data_bus)
 
-                        case InstructionSet.JMP:
-                            self.execute_jmp(address_bus, control_bus, data_bus)
+                    case InstructionSet.LR:
+                        self.execute_lr(address_bus, control_bus, data_bus)
 
-                        case InstructionSet.LR:
-                            self.execute_lr(address_bus, control_bus, data_bus)
+                    case InstructionSet.LRM:
+                        self.execute_lrm(address_bus, control_bus, data_bus)
 
-                        case InstructionSet.LRM:
-                            self.execute_lrm(address_bus, control_bus, data_bus)
+                    case InstructionSet.MRM:
+                        self.execute_mrm(address_bus, control_bus, data_bus)
 
-                        case InstructionSet.MRM:
-                            self.execute_mrm(address_bus, control_bus, data_bus)
+                    case InstructionSet.LRR:
+                        self.execute_lrr(address_bus, control_bus, data_bus)
 
-                        case InstructionSet.LRR:
-                            self.execute_lrr(address_bus, control_bus, data_bus)
+                    case InstructionSet.ADD:
+                        self.execute_add()
 
-                        case InstructionSet.ADD:
-                            self.execute_add()
+                    case InstructionSet.DIV:
+                        self.execute_integer_divide()
 
-                        case InstructionSet.DIV:
-                            self.execute_integer_divide()
+                    case InstructionSet.MUL:
+                        self.execute_multiply()
 
-                        case InstructionSet.MUL:
-                            self.execute_multiply()
+                    case InstructionSet.SUB:
+                        self.execute_sub()
 
-                        case InstructionSet.SUB:
-                            self.execute_sub()
+                    case InstructionSet.OR:
+                        self.execute_or()
 
-                        case InstructionSet.OR:
-                            self.execute_or()
+                    case InstructionSet.AND:
+                        self.execute_and()
 
-                        case InstructionSet.AND:
-                            self.execute_and()
+                    case InstructionSet.XOR:
+                        self.execute_xor()
 
-                        case InstructionSet.XOR:
-                            self.execute_xor()
+                    case InstructionSet.NOT:
+                        self.execute_not()
 
-                        case InstructionSet.NOT:
-                            self.execute_not()
+                    case InstructionSet.CMP:
+                        self.execute_cmp()
 
-                        case InstructionSet.CMP:
-                            self.execute_cmp()
+                    case InstructionSet.JE:
+                        self.execute_je(address_bus, control_bus, data_bus)
 
-                        case InstructionSet.JE:
-                            self.execute_je(address_bus, control_bus, data_bus)
+                    case InstructionSet.JNE:
+                        self.execute_jne(address_bus, control_bus, data_bus)
 
-                        case InstructionSet.JNE:
-                            self.execute_jne(address_bus, control_bus, data_bus)
+                    case InstructionSet.JL:
+                        self.execute_jl(address_bus, control_bus, data_bus)
 
-                        case InstructionSet.JL:
-                            self.execute_jl(address_bus, control_bus, data_bus)
+                    case InstructionSet.JG:
+                        self.execute_jg(address_bus, control_bus, data_bus)
 
-                        case InstructionSet.JG:
-                            self.execute_jg(address_bus, control_bus, data_bus)
+                    case InstructionSet.RST:
+                        self.execute_reset()
 
-                        case InstructionSet.RST:
-                            self.execute_reset()
+                    case InstructionSet.HALT:
+                        execute_halt(interrupt_bus)
 
-                        case InstructionSet.HALT:
-                            execute_halt(interrupt_bus)
+                    case InstructionSet.PUSH:
+                        self.execute_push(address_bus, control_bus, data_bus)
 
-                        case InstructionSet.PUSH:
-                            self.execute_push(address_bus, control_bus, data_bus)
+                    case InstructionSet.POP:
+                        self.execute_pop(address_bus, control_bus, data_bus)
 
-                        case InstructionSet.POP:
-                            self.execute_pop(address_bus, control_bus, data_bus)
+                    case InstructionSet.PEEK:
+                        self.execute_peek(address_bus, control_bus, data_bus)
 
-                        case InstructionSet.PEEK:
-                            self.execute_peek(address_bus, control_bus, data_bus)
+                    case InstructionSet.CALL:
+                        self.execute_call(address_bus, control_bus, data_bus)
 
-                        case InstructionSet.CALL:
-                            self.execute_call(address_bus, control_bus, data_bus)
+                    case InstructionSet.RTN:
+                        self.execute_rtn()
 
-                        case InstructionSet.RTN:
-                            self.execute_rtn()
+                    case InstructionSet.SLEEP:
+                        self.execute_sleep()
 
-                        case InstructionSet.SLEEP:
-                            self.execute_sleep()
+                    case InstructionSet.WAKE:
+                        self.execute_wake()
 
-                        case InstructionSet.WAKE:
-                            self.execute_wake()
+                    case InstructionSet.SIV:
+                        self.execute_siv(address_bus, control_bus, data_bus)
 
-                        case InstructionSet.SIV:
-                            self.execute_siv(address_bus, control_bus, data_bus)
+                    case _:
+                        self.load_instruction(address_bus, control_bus, data_bus)
 
-                        case _:
-                            self.load_instruction(address_bus, control_bus, data_bus)
+                exit_cycle = True
+                # if processor is awaiting instruction, see if a read request has been made
+                if (self.phase == Phases.AwaitingInstruction or
+                        self.phase == Phases.AwaitingFirstOperand or
+                        self.phase == Phases.AwaitingSecondOperand):
+                    if control_bus.get_read_request():
+                        # if the address has been previously cached, act as if the data bus has the data
+                        if address_bus.get_address() in self.data_cache:
+                            data_bus.set_data(self.data_cache[address_bus.get_address()])
+                            # set the response to true to indicate that the data is ready
+                            control_bus.set_read_request(False)
+                            control_bus.set_response(True)
+                            exit_cycle = False
 
-                    exit_cycle = True
-                    # if processor is awaiting instruction, see if a read request has been made
-                    if self.phase == Phases.AwaitingInstruction or self.phase == Phases.AwaitingFirstOperand or self.phase == Phases.AwaitingSecondOperand:
-                        if control_bus.get_read_request():
-                            # if the address has been previously cached, act as if the data bus has the data
-                            if address_bus.get_address() in self.data_cache:
-                                data_bus.set_data(self.data_cache[address_bus.get_address()])
-                                # set the response to true to indicate that the data is ready
-                                control_bus.set_response(True)
-                                exit_cycle = False
-
-                    if exit_cycle:
-                        break
-
-
+                if exit_cycle:
+                    break
 
     # instruction fetching and execution
     def execute_reset(self):

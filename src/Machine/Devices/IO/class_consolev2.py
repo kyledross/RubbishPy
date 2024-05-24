@@ -213,7 +213,6 @@ class ConsoleV2(BaseDevice):
             Returns: "break"
 
             """
-            # todo: figure out how to handle control keypress
             self.keypress = event.char
             self.keypress_event.set()
             return "break"

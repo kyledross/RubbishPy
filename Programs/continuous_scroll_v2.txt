@@ -1,0 +1,13 @@
+' console at 1024
+
+start:
+lr 2 64
+loop:
+lr 1 1
+add
+lrr 2 3
+lr 1 91
+cmp
+je start
+mrm 2 1024
+jmp loop

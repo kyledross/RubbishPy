@@ -105,6 +105,9 @@ class Processor(BaseProcessor):
                     case InstructionSet.LRR:
                         self.execute_lrr(address_bus, control_bus, data_bus)
 
+                    case InstructionSet.INC:
+                        self.execute_inc(address_bus, control_bus, data_bus)
+
                     case InstructionSet.ADD:
                         self.execute_add()
 
@@ -534,3 +537,12 @@ class Processor(BaseProcessor):
         if self.phase == Phases.NothingPending:
             self.registers[3] = ~self.registers[1]
             self.finish_instruction(True)
+
+    def execute_inc(self, address_bus, control_bus, data_bus):
+        if self.phase == Phases.NothingPending:
+            self.request_operand(address_bus, control_bus)
+            self.phase = Phases.AwaitingFirstOperand
+        elif self.phase == Phases.AwaitingFirstOperand:
+            if control_bus.get_response():
+                self.registers[data_bus.get_data()] += 1
+                self.finish_instruction(True)

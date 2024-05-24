@@ -133,7 +133,8 @@ class MachineBuilder:
             case 'ram':
                 self._backplane.add_device(RAM(starting_address=address, size=size))
             case 'processor':
-                self._backplane.add_device(Processor(size=size, starting_address=address))
+                self._backplane.add_device(Processor(size=size, starting_address=address,
+                                                     disable_instruction_caching=False))
             case 'console':
                 self._backplane.add_device(Console(starting_address=address, interrupt=interrupt))
             case 'consolev2':

@@ -79,6 +79,7 @@ class ConsoleV5(BaseDevice):
 
         def run(self):
             running = True
+            pygame.key.set_repeat(500, 50)
             while running:
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:

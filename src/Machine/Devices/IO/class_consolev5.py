@@ -63,7 +63,7 @@ class DisplayElement(DisplayCommand):
 
 class ConsoleV5(BaseDevice):
     class Display:
-        def __init__(self, output_q, input_q, display_width, display_height, character_width,
+        def __init__(self, output_q: queue.Queue, input_q: queue.Queue, display_width, display_height, character_width,
                      character_height, font_size):
             self.display_queue = output_q  # a queue of DisplayElement objects to process
             self.input_queue = input_q

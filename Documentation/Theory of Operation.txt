@@ -1,9 +1,7 @@
-The backplane consists of a bus and a clock control.
-
-The bus consists collectively of:
- - The address lines (32-bit)
- - The data lines (32-bit)
- - The control lines (32-bit)
+The backplane consists of three buses:
+ - Address bus
+ - Data bus
+ - Control bus
 
 The backplane can have devices attached to it.
 This is implemented by a public list of type BaseDevice.

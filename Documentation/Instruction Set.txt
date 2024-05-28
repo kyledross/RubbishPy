@@ -11,29 +11,24 @@ For example, CALL :labelAddress and CALL labelAddress are both valid.
 
 Load Register
 LR reg value
-Opcode:1
-Processor: v1
 
 Load Register from Register
 LRR reg_to reg_from
 Opcode:3
-Processor: v1
 
 Load Register from Memory
 LRM reg address
 LRM reg :labelAddress
 LRM reg labelAddress
-LRM reg @registerAddress (requires RSC2008 Processor v1.1 or later) (see @register pointer, below)
+LRM reg @registerAddress
 Opcode:2
-Processor: v1, v1.1
 
 Move Register to Memory
 MRM reg address
 MRM reg :labelAddress
 MRM reg labelAddress
-MRM reg @registerAddress (requires RSC2008 Processor v1.1 or later) (see @register pointer, below)
+MRM reg @registerAddress
 Opcode:4
-Processor: v1, v1.1
 
 Increment Register
 INC reg
@@ -46,12 +41,10 @@ Opcode: 27
 Push Register Onto Common Stack
 PUSH reg
 Opcode: 18
-Processor: v1
 
 Pop Off Of Common Stack (into register)
 POP reg
 Opcode: 19
-Processor: v1
 
 =======================================================
 -- Integer math instructions
@@ -59,22 +52,18 @@ Processor: v1
 Add Registers 1 and 2 (Result stored in Register 3)
 ADD
 Opcode:5
-Processor: v1
 
 Divide (Integer) Registers 1 and 2 (Result stored in Register 3)
 DIV
 Opcode:8
-Processor: v1
 
 Multiply Registers 1 and 2 (Result stored in Register 3)
 MUL
 Opcode:7
-Processor: v1
 
 Subtract Registers 1 and 2 (Result stored in Register 3)
 SUB
 Opcode:6
-Processor: v1
 
 =======================================================
 -- Logic instructions
@@ -82,22 +71,18 @@ Processor: v1
 Or (Or register 1 and 2, result into register 3)
 Or
 Opcode: 23
-Processor: v1
 
 And (And register 1 and 2, result into register 3)
 And
 Opcode: 24
-Processor: v1
 
 Xor (Xor register 1 and 2, result into register 3)
 Xor
 Opcode: 25
-Processor: v1
 
 Not (Not register 1, result into register 3)
 Not
 Opcode: 22
-Processor: v1.2
 
 =======================================================
 -- Evaluation and branching
@@ -107,40 +92,34 @@ JMP address
 JMP :labelAddress
 JMP labelAddress
 Opcode:11
-Processor: v1
 
 Compare Register 1 to 2
 CMP
 Opcode:13
-Processor: v1
 
 Jump if Equal
 JE address
 JE :labelAddress
 JE labelAddress
 Opcode:14
-Processor: v1
 
 Jump not Equal
 JNE address
 JNE :labelAddress
 JNE labelAddress
 Opcode:15
-Processor: v1
 
 Jump if Less-than
 JL address
 JL :labelAddress
 JL labelAddress
 Opcode:16
-Processor: v1
 
 Jump if Greater-than
 JG address
 JG :labelAddress
 JG labelAddress
 Opcode:17
-Processor: v1
 
 Set Interrupt Vector
 SIV interrupt address
@@ -148,7 +127,6 @@ SIV interrupt :labelAddress
 SIV interrupt labelAddress
 Opcode: 26
 Purpose: When the interrupt occurs, the current instruction pointer is pushed into an instruction pointer cache and processor jumps to the address.
-Processor: v1
 
 Call code
 CALL address
@@ -156,13 +134,11 @@ CALL :labelAddress
 CALL labelAddress
 Opcode: 20
 Purpose: Pushes current instruction pointer into an instruction pointer stack, pushes all general purpose registers into a register stack, and jumps to the address.
-Processor: v1
 
 Return
 RETURN
 Opcode: 21
 Purpose: Pops instruction pointer off instruction pointer stack, pops general purpose registers off of the register stack, and continues executing at the next address.
-Processor: v1
 
 =======================================================
 -- Processor control
@@ -170,28 +146,23 @@ Processor: v1
 Halt Processor
 HALT
 Opcode:9
-Processor: v1
 
 Debug
 DEBUG
 Opcode:10
-Processor: v1
 
 Reset Processor (not supported by Rubbish Processor)
 RST
-Opcode:12
 
 Sleep
 SLEEP
 Opcode: 28
 Purpose: Causes processor to remain in a state where no instructions are processed until an interrupt is handled.  The processor will return to sleep after a RTN.
-Processor: v1
 
 Wake
 WAKE
 Opcode: 29
 Purpose: Causes processor to resume processing instructions. Cancels any previous SLEEP instruction.  Typically found in the code of an interrupt vector, as it can't be reached in any other fashion if the processor is already asleep from a prior SLEEP instruction.
-Processor: v1
 
 
 =======================================================
@@ -200,12 +171,10 @@ Compiler Meta-commands
 labelname:
 Purpose: Represents an address in the compiled code.  Typically used as an address for jumps and interrupt vectors as well as for locating data in the program.
 Example: someLabel:
-Compiler: v1
 
 DATA string
 Purpose: Directly inserts the string as bytes into the compiled program. Typically used with a label so that the data can be located.  Supports \r, \n, and \0 for carriage returns, line feeds, and ASCII NUL.
 Example: someLabel: DATA This is a string.\r\n\0
-Compiler: v1.1
 
 Include pathname
 Purpose: Includes the contents of the file designated by the pathname at this location
@@ -214,7 +183,6 @@ Example: Include ../Programs/file_to_include.txt
 '
 Purpose: Comment in code.  These lines are not compiled.
 Example: ' This is a comment
-Compiler: v1
 
 =======================================================
 Pointers
@@ -225,13 +193,9 @@ Purpose: Represents the address where the label is found.
 Example: LRM 4 :someLabel   - would move the value located at the specified label into register 4
 Example: LRM 4 someLabel    - would move the value located at the specified label into register 4
 Any instruction that takes an address as a parameter can use the :labelAddress or labelAddress pointer
-Processor: v1.0
-Compiler: v1.1
 
 @register pointer
 Purpose: Represents an address of a value to use.  Typically used to load a value from memory whose address is in a register.
 Example:  LRM 2 @4    - would load the value at the address located in register 4 into register 2
 The @register pointer can only be used with certain instructions (see the instruction's information for details)
 Note: This pointer generates code that requires Rubbish Processor Version 1.1 or later
-Processor: v1.1
-Compiler: v1.1

@@ -1,7 +1,8 @@
-The backplane consists of three buses:
+The backplane consists of four buses:
  - Address bus
  - Data bus
  - Control bus
+ - Interrupt bus
 
 The backplane can have devices attached to it.
 This is implemented by a public list of type BaseDevice.

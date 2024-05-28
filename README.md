@@ -23,5 +23,5 @@ python3 main.py  {options}
 
 example:  
 *cd RubbishPy/src*  
-*python3 main.py --compiler address=0 size=1024 program=../Programs/typewriter.txt --processor --consolev5 width=80 height=25 address=1024 interrupt=2
+*python3 main.py --compiler address=0 size=1024 program=../Programs/typewriter.txt --processor --consolev5 width=80 height=25 address=1024 interrupt=2*
 

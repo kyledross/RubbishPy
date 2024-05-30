@@ -9,6 +9,10 @@ import tkinter as tk
 from queue import Queue
 
 from Constants.class_interrupts import Interrupts
+from Machine.Buses.class_address_bus import AddressBus
+from Machine.Buses.class_control_bus import ControlBus
+from Machine.Buses.class_data_bus import DataBus
+from Machine.Buses.class_interrupt_bus import InterruptBus
 from Machine.Devices.Bases.class_base_device import BaseDevice, log_message
 
 FONT_SIZE = 12
@@ -130,7 +134,8 @@ class ConsoleV4(BaseDevice):
 
     ansi_sequence = None  # a variable to hold the current ANSI escape sequence being processed
 
-    def __init__(self, starting_address, width, height, interrupt_number: int):
+    def __init__(self, starting_address, width, height, interrupt_number: int, address_bus: AddressBus,
+                 data_bus: DataBus, control_bus: ControlBus, interrupt_bus: InterruptBus):
         """
         Constructs all the necessary attributes for the console device.
 
@@ -140,7 +145,7 @@ class ConsoleV4(BaseDevice):
             width (int): The width of the console.
             height (int): The height of the console.
         """
-        super().__init__(starting_address, 1)
+        super().__init__(starting_address, 1, address_bus, data_bus, control_bus, interrupt_bus)
         self.canvas = None
         self.form_ready = False
         self._width = width

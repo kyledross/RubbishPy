@@ -27,7 +27,8 @@ class ROM(BaseDevice):
 
     _memory = []
 
-    def __init__(self, starting_address):
+    def __init__(self, starting_address, address_bus: AddressBus, data_bus: DataBus,
+                 control_bus: ControlBus, interrupt_bus: InterruptBus):
         """
         Constructs all the necessary attributes for the ROM device.
 
@@ -44,7 +45,7 @@ class ROM(BaseDevice):
         self._memory.append(InstructionSet.DEBUG)
         self._memory.append(InstructionSet.JMP)
         self._memory.append(0)
-        super().__init__(starting_address, len(self._memory))
+        super().__init__(starting_address, len(self._memory), address_bus, data_bus, control_bus, interrupt_bus)
 
     def cycle(self, address_bus: AddressBus, data_bus: DataBus, control_bus: ControlBus, interrupt_bus: InterruptBus):
         """

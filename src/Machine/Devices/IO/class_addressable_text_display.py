@@ -1,6 +1,10 @@
 import tkinter as tk
 
 from Constants.class_interrupts import Interrupts
+from Machine.Buses.class_address_bus import AddressBus
+from Machine.Buses.class_control_bus import ControlBus
+from Machine.Buses.class_data_bus import DataBus
+from Machine.Buses.class_interrupt_bus import InterruptBus
 from Machine.Devices.Bases.class_base_device import BaseDevice
 
 FONT_UBUNTU_MONO_REGULAR = "Ubuntu Mono Regular"
@@ -19,7 +23,8 @@ class AddressableTextDisplay(BaseDevice):
     _height: int = 0  # The height of the display
     _formClosing: bool = False  # Flag to indicate if the form is closing
 
-    def __init__(self, starting_address, width, height):
+    def __init__(self, starting_address, width, height, address_bus: AddressBus, data_bus: DataBus,
+                 control_bus: ControlBus, interrupt_bus: InterruptBus):
         """
         Constructor for the AddressableTextDisplay class.
         Initializes the starting address, width, and height of the display.
@@ -30,7 +35,8 @@ class AddressableTextDisplay(BaseDevice):
         """
         self._width = width
         self._height = height
-        super().__init__(starting_address, self._width * self._height)
+        super().__init__(starting_address, self._width * self._height, address_bus, data_bus, control_bus,
+                         interrupt_bus)
         self.display = [[' '] * self._width for _ in range(self._height)]
         self.window = tk.Tk()
         self.labels = \

@@ -3,6 +3,10 @@ import tkinter as tk
 from queue import Queue
 
 from Constants.class_interrupts import Interrupts
+from Machine.Buses.class_address_bus import AddressBus
+from Machine.Buses.class_control_bus import ControlBus
+from Machine.Buses.class_data_bus import DataBus
+from Machine.Buses.class_interrupt_bus import InterruptBus
 from Machine.Devices.Bases.class_base_device import BaseDevice
 
 FONT_UBUNTU_MONO_REGULAR = "Ubuntu Mono Regular"
@@ -27,7 +31,8 @@ class ConsoleV3(BaseDevice):
     _cursorX: int = 0
     _cursorY: int = 0
 
-    def __init__(self, starting_address, width, height, interrupt_number: int):
+    def __init__(self, starting_address, width, height, interrupt_number: int, address_bus: AddressBus,
+                 data_bus: DataBus, control_bus: ControlBus, interrupt_bus: InterruptBus):
         """
         Constructor for the AddressableTextDisplay class.
         Initializes the starting address, width, and height of the display.
@@ -45,7 +50,7 @@ class ConsoleV3(BaseDevice):
         self._interrupt_number = interrupt_number
         self._width = width
         self._height = height
-        super().__init__(starting_address, 1)
+        super().__init__(starting_address, 1, address_bus, data_bus, control_bus, interrupt_bus)
         self.display = [[' '] * self._width for _ in range(self._height)]
         self.start_form()
 

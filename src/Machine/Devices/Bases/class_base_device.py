@@ -16,7 +16,8 @@ class BaseDevice:
     _startingAddress: int = 0  # The starting address of the device
     _size: int = 0  # The size of the device
 
-    def __init__(self, starting_address: int, size: int):
+    def __init__(self, starting_address: int, size: int, address_bus: AddressBus, data_bus: DataBus,
+                 control_bus: ControlBus, interrupt_bus: InterruptBus):
         """
         Constructor for the BaseDevice class.
         Initializes the starting address and size of the device.
@@ -25,6 +26,22 @@ class BaseDevice:
         """
         self._startingAddress = starting_address
         self._size = size
+        self._addressBus = address_bus
+        self._dataBus = data_bus
+        self._controlBus = control_bus
+        self._interruptBus = interrupt_bus
+
+    def address_bus(self):
+        return self._addressBus
+
+    def data_bus(self):
+        return self._dataBus
+
+    def control_bus(self):
+        return self._controlBus
+
+    def interrupt_bus(self):
+        return self._interruptBus
 
     @property
     def starting_address(self) -> int:

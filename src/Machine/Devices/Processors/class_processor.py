@@ -32,9 +32,10 @@ def execute_halt(interrupt_bus):
 # noinspection DuplicatedCode
 class Processor(BaseProcessor):
 
-    def __init__(self, starting_address: int, size: int, disable_instruction_caching: bool):
+    def __init__(self, starting_address: int, size: int, disable_instruction_caching: bool,
+                 address_bus: AddressBus, data_bus: DataBus, control_bus: ControlBus, interrupt_bus: InterruptBus):
         # registers
-        super().__init__(starting_address, size)
+        super().__init__(starting_address, size, address_bus, data_bus, control_bus, interrupt_bus)
         self.disable_instruction_caching = disable_instruction_caching
         self.current_instruction: int = -1
         self.data_pointer: int = 0

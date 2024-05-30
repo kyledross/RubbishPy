@@ -110,6 +110,7 @@ class Console(BaseDevice):
 
             while self.running:
                 pygame.event.pump()
+                time.sleep(0)
                 while not self.display_queue.empty():
                     command = self.display_queue.get_nowait()
                     # if command is a DisplayControl object, process it

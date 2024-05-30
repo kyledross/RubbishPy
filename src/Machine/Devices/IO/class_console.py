@@ -1,3 +1,4 @@
+import os
 import queue
 import threading
 import time
@@ -76,7 +77,11 @@ class Console(BaseDevice):
             self.character_height = character_height
             self.screen = pygame.display.set_mode((display_width * character_width, display_height * character_height))
             self.clock = pygame.time.Clock()
-            self.font = pygame.font.Font('/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf', font_size)
+            if os.name == 'nt':  # Windows
+                font_path = 'C:\\%windir%\\Fonts\\consola.ttf'  # Consolas is a monospace font in Windows
+            else:  # Unix/Linux/MacOS/BSD/etc
+                font_path = '/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf'
+            self.font = pygame.font.Font(font_path, font_size)
             self.cursor_state = False
             self.last_cursor_change = pygame.time.get_ticks()
             self.cursor_x: int = 0

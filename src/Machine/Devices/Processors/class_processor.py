@@ -72,30 +72,31 @@ class Processor(BaseProcessor):
     def process_cycle(self):
         while self.is_running():
             time.sleep(0)
-            # if halt interrupt has been raised, stop the thread
-            if self.interrupt_bus().test_interrupt(Interrupts.halt):
-                self._running = False
-                return
-            address_bus = self.address_bus()
-            control_bus = self.control_bus()
-            data_bus = self.data_bus()
-            interrupt_bus = self.interrupt_bus()
-            self.cache_instruction(address_bus, control_bus, data_bus)
-            while True:  # loop until a cached instruction request is not fulfilled
-                # Interrupt processing
-                if self.phase == Phases.NothingPending:
-                    if not self.interrupt_in_progress:
-                        for interruptBit in range(0, 32):
-                            interrupt_number = 2 ** interruptBit
-                            if interrupt_bus.test_interrupt(interrupt_number):
-                                if interrupt_number in self.interrupt_vectors:
-                                    self.sleeping = False
-                                    self.call_stack.append(self.data_pointer)
-                                    self.data_pointer = self.interrupt_vectors[interrupt_number]
-                                    self.push_registers()
-                                    interrupt_bus.clear_interrupt(interrupt_number)
-                                    self.interrupt_in_progress = True
-                                    break
+            self.stop_running_if_halt_detected()
+            if self.control_bus().is_running():
+                self.perform_instruction_processing()
+
+    def perform_instruction_processing(self):
+        address_bus = self.address_bus()
+        control_bus = self.control_bus()
+        data_bus = self.data_bus()
+        interrupt_bus = self.interrupt_bus()
+        self.cache_instruction(address_bus, control_bus, data_bus)
+        while True:  # loop until a cached instruction request is not fulfilled
+            # Interrupt processing
+            if self.phase == Phases.NothingPending:
+                if not self.interrupt_in_progress:
+                    for interruptBit in range(0, 32):
+                        interrupt_number = 2 ** interruptBit
+                        if interrupt_bus.test_interrupt(interrupt_number):
+                            if interrupt_number in self.interrupt_vectors:
+                                self.sleeping = False
+                                self.call_stack.append(self.data_pointer)
+                                self.data_pointer = self.interrupt_vectors[interrupt_number]
+                                self.push_registers()
+                                interrupt_bus.clear_interrupt(interrupt_number)
+                                self.interrupt_in_progress = True
+                                break
 
             # Instruction routing
             if self.sleeping:

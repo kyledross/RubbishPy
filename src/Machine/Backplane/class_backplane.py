@@ -84,24 +84,10 @@ class BackPlane:
         Raises:
             None
         """
-        running: bool = True
-        while running:
-            for device in self._devices:
-                device.cycle(self._addressBus, self._dataBus, self._controlBus, self._interruptBus)
-                # if the device has set the response line, save the address it responded to
-                if self._controlBus.peek_response():
-                    self._cataloged_devices[self._addressBus.get_address()] = device
-                # if the device is requesting an address, and we've cataloged the responding device for the address,
-                # cycle the responding device
-                if ((self._controlBus.get_read_request() or self._controlBus.get_write_request())
-                        and self._addressBus.get_address() in self._cataloged_devices):
-                    cataloged_device = self._cataloged_devices[self._addressBus.get_address()]
-                    cataloged_device.cycle(self._addressBus, self._dataBus, self._controlBus, self._interruptBus)
-                    # now cycle the current device again to give it a chance to respond to the read/write request
-                    device.cycle(self._addressBus, self._dataBus, self._controlBus, self._interruptBus)
-
-                if self._interruptBus.test_interrupt(Interrupts.halt):
-                    print("HALT interrupt detected.")
-                    running = False
-                    break
+        self.control_bus().start_running()
+        while self.control_bus().is_running():
+            if self._interruptBus.test_interrupt(Interrupts.halt):
+                print("HALT interrupt detected.")
+                self.control_bus().stop_running()
+                break
             time.sleep(0)  # allow other threads (such as console 3.1) to run

@@ -61,14 +61,16 @@ class ROM(BaseDevice):
             control_bus (ControlBus): The control bus.
             interrupt_bus (InterruptBus): The interrupt bus.
         """
-        pass # todo: remove cycle
+        pass  # todo: remove cycle
 
     def process_buses(self):
         while self.is_running():
             time.sleep(0)
             self.stop_running_if_halt_detected()
-            if self.address_is_valid(self.address_bus()):
-                if self.control_bus().get_read_request():
-                    self.data_bus().set_data(self._memory[self.address_bus().get_address() - super().starting_address])
-                    self.control_bus().set_read_request(False)
-                    self.control_bus().set_response(True)
+            if self.control_bus().is_running():
+                if self.address_is_valid(self.address_bus()):
+                    if self.control_bus().get_read_request():
+                        self.data_bus().set_data(
+                            self._memory[self.address_bus().get_address() - super().starting_address])
+                        self.control_bus().set_read_request(False)
+                        self.control_bus().set_response(True)

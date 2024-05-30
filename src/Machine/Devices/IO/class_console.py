@@ -107,8 +107,6 @@ class Console(BaseDevice):
 
             def process_events():
                 while self.running:
-                    print("Pump!")
-                    pygame.event.pump()
                     for event in pygame.event.get():
                         if event.type == pygame.QUIT:
                             self.running = False
@@ -156,6 +154,7 @@ class Console(BaseDevice):
                     self.last_cursor_change = pygame.time.get_ticks()
                 pygame.display.flip()
                 self.clock.tick(FRAMERATE)
+                pygame.event.pump()
 
             pygame.quit()
 

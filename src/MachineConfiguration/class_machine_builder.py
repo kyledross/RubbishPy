@@ -131,40 +131,102 @@ class MachineBuilder:
         # noinspection SpellCheckingInspection
         match device_to_add:
             case 'ram':
-                self._backplane.add_device(RAM(starting_address=address, size=size))
+                self._backplane.add_device(RAM(starting_address=address,
+                                               size=size,
+                                               address_bus=self._backplane.address_bus(),
+                                               data_bus=self._backplane.data_bus(),
+                                               control_bus=self._backplane.control_bus(),
+                                               interrupt_bus=self._backplane.interrupt_bus()))
             case 'processor':
-                self._backplane.add_device(Processor(size=size, starting_address=address,
-                                                     disable_instruction_caching=False))
+                self._backplane.add_device(Processor(size=size,
+                                                     starting_address=address,
+                                                     disable_instruction_caching=False,
+                                                     address_bus=self._backplane.address_bus(),
+                                                     data_bus=self._backplane.data_bus(),
+                                                     control_bus=self._backplane.control_bus(),
+                                                     interrupt_bus=self._backplane.interrupt_bus()))
             case 'console':
-                self._backplane.add_device(Console(starting_address=address, interrupt=interrupt))
+                self._backplane.add_device(Console(starting_address=address,
+                                                   interrupt=interrupt,
+                                                   address_bus=self._backplane.address_bus(),
+                                                   data_bus=self._backplane.data_bus(),
+                                                   control_bus=self._backplane.control_bus(),
+                                                   interrupt_bus=self._backplane.interrupt_bus()))
             case 'consolev2':
-                self._backplane.add_device(ConsoleV2(starting_address=address, interrupt_number=interrupt))
+                self._backplane.add_device(ConsoleV2(starting_address=address,
+                                                     interrupt_number=interrupt,
+                                                     address_bus=self._backplane.address_bus(),
+                                                     data_bus=self._backplane.data_bus(),
+                                                     control_bus=self._backplane.control_bus(),
+                                                     interrupt_bus=self._backplane.interrupt_bus()))
             case 'consolev3':
-                self._backplane.add_device(ConsoleV3(starting_address=address, width=width, height=height,
-                                                     interrupt_number=interrupt))
+                self._backplane.add_device(ConsoleV3(starting_address=address,
+                                                     width=width,
+                                                     height=height,
+                                                     interrupt_number=interrupt,
+                                                     address_bus=self._backplane.address_bus(),
+                                                     data_bus=self._backplane.data_bus(),
+                                                     control_bus=self._backplane.control_bus(),
+                                                     interrupt_bus=self._backplane.interrupt_bus()))
             case 'consolev31':
-                self._backplane.add_device(ConsoleV31(starting_address=address, width=width, height=height,
-                                                      interrupt_number=interrupt))
+                self._backplane.add_device(ConsoleV31(starting_address=address,
+                                                      width=width,
+                                                      height=height,
+                                                      interrupt_number=interrupt,
+                                                      address_bus=self._backplane.address_bus(),
+                                                      data_bus=self._backplane.data_bus(),
+                                                      control_bus=self._backplane.control_bus(),
+                                                      interrupt_bus=self._backplane.interrupt_bus()))
             case 'consolev4':
-                self._backplane.add_device(ConsoleV4(starting_address=address, width=width, height=height,
-                                                     interrupt_number=interrupt))
+                self._backplane.add_device(ConsoleV4(starting_address=address,
+                                                     width=width,
+                                                     height=height,
+                                                     interrupt_number=interrupt,
+                                                     address_bus=self._backplane.address_bus(),
+                                                     data_bus=self._backplane.data_bus(),
+                                                     control_bus=self._backplane.control_bus(),
+                                                     interrupt_bus=self._backplane.interrupt_bus()))
             case 'consolev5':
-                self._backplane.add_device(ConsoleV5(starting_address=address, width=width, height=height,
-                                                     interrupt_number=interrupt))
+                self._backplane.add_device(ConsoleV5(starting_address=address,
+                                                     width=width,
+                                                     height=height,
+                                                     interrupt_number=interrupt,
+                                                     address_bus=self._backplane.address_bus(),
+                                                     data_bus=self._backplane.data_bus(),
+                                                     control_bus=self._backplane.control_bus(),
+                                                     interrupt_bus=self._backplane.interrupt_bus()))
             case 'display':
-                self._backplane.add_device(AddressableTextDisplay(starting_address=address, width=width, height=height))
+                self._backplane.add_device(AddressableTextDisplay(starting_address=address,
+                                                                  width=width,
+                                                                  height=height,
+                                                                  address_bus=self._backplane.address_bus(),
+                                                                  data_bus=self._backplane.data_bus(),
+                                                                  control_bus=self._backplane.control_bus(),
+                                                                  interrupt_bus=self._backplane.interrupt_bus()))
             case 'rom':
-                self._backplane.add_device(ROM(starting_address=address))
+                self._backplane.add_device(ROM(starting_address=address,
+                                               address_bus=self._backplane.address_bus(),
+                                               data_bus=self._backplane.data_bus(),
+                                               control_bus=self._backplane.control_bus(),
+                                               interrupt_bus=self._backplane.interrupt_bus()))
             case 'compiler':
                 compiler = RubbishCompiler(address=address)
                 code = compiler.compile(program_pathname)
                 if len(code) > size:
                     print("Warning: The compiled program size exceeds the specified size.")
-                ram = RAM(starting_address=address, size=size)
+                ram = RAM(starting_address=address,
+                          size=size,
+                          address_bus=self._backplane.address_bus(),
+                          data_bus=self._backplane.data_bus(),
+                          control_bus=self._backplane.control_bus(),
+                          interrupt_bus=self._backplane.interrupt_bus())
                 ram.load_data(data=code)
                 self._backplane.add_device(ram)
             case 'debugger':
-                self._backplane.add_device(Debugger())
+                self._backplane.add_device(Debugger(address_bus=self._backplane.address_bus(),
+                                                    data_bus=self._backplane.data_bus(),
+                                                    control_bus=self._backplane.control_bus(),
+                                                    interrupt_bus=self._backplane.interrupt_bus()))
             case _:
                 print(f"Device {device_to_add} not found.")
 

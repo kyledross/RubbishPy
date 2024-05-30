@@ -4,6 +4,10 @@ import tkinter as tk
 from queue import Queue
 
 from Constants.class_interrupts import Interrupts
+from Machine.Buses.class_address_bus import AddressBus
+from Machine.Buses.class_control_bus import ControlBus
+from Machine.Buses.class_data_bus import DataBus
+from Machine.Buses.class_interrupt_bus import InterruptBus
 from Machine.Devices.Bases.class_base_device import BaseDevice
 
 
@@ -53,7 +57,8 @@ class ConsoleV2(BaseDevice):
     _cursor_last_display_time: float = 0
     _cursor_blinks_per_second: int = 2
 
-    def __init__(self, starting_address: int, interrupt_number: int):
+    def __init__(self, starting_address: int, interrupt_number: int, address_bus: AddressBus, data_bus: DataBus,
+                 control_bus: ControlBus, interrupt_bus: InterruptBus):
         """
         Constructs all the necessary attributes for the console device.
 
@@ -61,7 +66,7 @@ class ConsoleV2(BaseDevice):
             starting_address (int): The starting address of the console device.
             interrupt_number (int): The interrupt number for the console device.
         """
-        super().__init__(starting_address, 1)
+        super().__init__(starting_address, 1, address_bus, data_bus, control_bus, interrupt_bus)
         self.interrupt_number = interrupt_number
         self.keystroke_buffer = Queue()
         self.console_output_buffer = ""

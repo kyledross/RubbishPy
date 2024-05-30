@@ -45,6 +45,18 @@ class BackPlane:
 
     _cataloged_devices = {}
 
+    def address_bus(self):
+        return self._addressBus
+
+    def data_bus(self):
+        return self._dataBus
+
+    def control_bus(self):
+        return self._controlBus
+
+    def interrupt_bus(self):
+        return self._interruptBus
+
     def __init__(self):
         """
         Constructs all the necessary attributes for the backplane.

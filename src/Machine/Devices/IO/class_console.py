@@ -4,6 +4,10 @@ import tkinter as tk
 from queue import Queue
 
 from Constants.class_interrupts import Interrupts as Interrupts
+from Machine.Buses.class_address_bus import AddressBus
+from Machine.Buses.class_control_bus import ControlBus
+from Machine.Buses.class_data_bus import DataBus
+from Machine.Buses.class_interrupt_bus import InterruptBus
 from Machine.Devices.Bases.class_base_device import BaseDevice
 
 
@@ -51,8 +55,9 @@ class Console(BaseDevice):
     interrupt_number: int = Interrupts.irq2
     console_window: tk.Tk = None
 
-    def __init__(self, starting_address: int, interrupt: int):
-        super().__init__(starting_address, 1)
+    def __init__(self, starting_address: int, interrupt: int, address_bus: AddressBus, data_bus: DataBus,
+                 control_bus: ControlBus, interrupt_bus: InterruptBus):
+        super().__init__(starting_address, 1, address_bus, data_bus, control_bus, interrupt_bus)
         self.interrupt_number = interrupt
         self.keypress_event = threading.Event()
         self.keypress = None  # Shared variable to store the pressed key

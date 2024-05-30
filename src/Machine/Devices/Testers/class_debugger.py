@@ -7,8 +7,9 @@ from Machine.Devices.Bases.class_base_device import BaseDevice
 
 class Debugger(BaseDevice):
 
-    def __init__(self):
-        super().__init__(0, 0)
+    def __init__(self, address_bus: AddressBus, data_bus: DataBus,
+                 control_bus: ControlBus, interrupt_bus: InterruptBus):
+        super().__init__(0, 0, address_bus, data_bus, control_bus, interrupt_bus)
 
     def cycle(self, address_bus: AddressBus, data_bus: DataBus, control_bus: ControlBus, interrupt_bus: InterruptBus):
         print("Debugger")

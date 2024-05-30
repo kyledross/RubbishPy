@@ -28,7 +28,8 @@ class RAM(BaseDevice):
 
     _memory = []
 
-    def __init__(self, starting_address, size):
+    def __init__(self, starting_address, size, address_bus: AddressBus, data_bus: DataBus,
+                 control_bus: ControlBus, interrupt_bus: InterruptBus):
         """
         Constructs all the necessary attributes for the RAM device.
 
@@ -36,7 +37,7 @@ class RAM(BaseDevice):
             starting_address (int): The starting address of the RAM device.
             size (int): The size of the RAM device.
         """
-        super().__init__(starting_address, size)
+        super().__init__(starting_address, size, address_bus, data_bus, control_bus, interrupt_bus)
         self._memory = [0] * size
 
     def load_data(self, data):
@@ -66,12 +67,13 @@ class RAM(BaseDevice):
             control_bus (ControlBus): The control bus.
             interrupt_bus (InterruptBus): The interrupt bus.
         """
-        if self.address_is_valid(address_bus):
+        if self.address_is_valid(super().address_bus()):
             if control_bus.get_read_request():
-                data_bus.set_data(self._memory[address_bus.get_address() - super().starting_address])
+                data_bus.set_data(self._memory[super().address_bus().get_address() - super().starting_address])
                 control_bus.set_read_request(False)
                 control_bus.set_response(True)
             if control_bus.get_write_request():
-                self._memory[address_bus.get_address() - super().starting_address] = data_bus.get_data()
+                self._memory[super().address_bus().get_address() - super().starting_address] = (
+                    super().data_bus().get_data())
                 control_bus.set_write_request(False)
                 control_bus.set_response(True)

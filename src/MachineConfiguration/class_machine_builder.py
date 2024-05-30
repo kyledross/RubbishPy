@@ -1,5 +1,5 @@
 from Compiler.class_rubbish_compiler import RubbishCompiler
-from Machine.Devices.IO.class_consolev5 import ConsoleV5
+from Machine.Devices.IO.class_console import Console
 from Machine.Devices.Memory.class_ram import RAM
 from Machine.Devices.Memory.class_rom import ROM
 from Machine.Devices.Processors.class_processor import Processor
@@ -139,15 +139,15 @@ class MachineBuilder:
                                                      data_bus=self._backplane.data_bus(),
                                                      control_bus=self._backplane.control_bus(),
                                                      interrupt_bus=self._backplane.interrupt_bus()))
-            case 'consolev5':
-                self._backplane.add_device(ConsoleV5(starting_address=address,
-                                                     width=width,
-                                                     height=height,
-                                                     interrupt_number=interrupt,
-                                                     address_bus=self._backplane.address_bus(),
-                                                     data_bus=self._backplane.data_bus(),
-                                                     control_bus=self._backplane.control_bus(),
-                                                     interrupt_bus=self._backplane.interrupt_bus()))
+            case 'console':
+                self._backplane.add_device(Console(starting_address=address,
+                                                   width=width,
+                                                   height=height,
+                                                   interrupt_number=interrupt,
+                                                   address_bus=self._backplane.address_bus(),
+                                                   data_bus=self._backplane.data_bus(),
+                                                   control_bus=self._backplane.control_bus(),
+                                                   interrupt_bus=self._backplane.interrupt_bus()))
             case 'rom':
                 self._backplane.add_device(ROM(starting_address=address,
                                                address_bus=self._backplane.address_bus(),

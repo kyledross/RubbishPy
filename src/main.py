@@ -68,7 +68,7 @@ def parse_command_line():
     parser.add_argument('--processor', action='store_const', const=True)
     parser.add_argument('--processor_with_cache', action='store_const', const=True)
     parser.add_argument('--debugger', action='store_const', const=True)
-    parser.add_argument('--consolev5', type=lambda x: x.split('='), nargs='+')
+    parser.add_argument('--console', type=lambda x: x.split('='), nargs='+')
     parser.add_argument("--compiler", type=lambda x: x.split('='), nargs='+')
     parser.add_argument("--display", type=lambda x: x.split('='), nargs='+')
 
@@ -82,8 +82,7 @@ def parse_command_line():
     add_processor_with_cache(args, devices)
     add_debugger(args, devices)
     add_ram(args, devices)
-    add_console_v5(args, devices)
-    add_addressable_display(args, devices)
+    add_console(args, devices)
     add_compiler(args, devices)
     return devices
 
@@ -98,32 +97,18 @@ def add_compiler(args, devices):
         devices.append({'device_name': 'compiler', 'address': address, 'program': program, 'size': size})
 
 
-def add_addressable_display(args, devices):
-    if args.display:
-        display_args = dict(args.display)
-        address = display_args.get("address")
-        width = 80
-        height = 25
-        if "width" in display_args:
-            width = display_args.get("width")
-        if "height" in display_args:
-            height = display_args.get("height")
-        check_required_parameters("Display", display_args, ["address"])
-        devices.append({'device_name': 'display', 'address': address, 'width': width, 'height': height})
-
-
-def add_console_v5(args, devices):
-    if args.consolev5:
-        console_args = dict(args.consolev5)
+def add_console(args, devices):
+    if args.console:
+        console_args = dict(args.console)
         address = console_args.get("address")
         interrupt = console_args.get("interrupt")
         width = console_args.get("width")
         height = console_args.get("height")
         # noinspection SpellCheckingInspection
-        check_required_parameters("Consolev5", console_args, ["address", "interrupt", "width", "height"])
+        check_required_parameters("Console", console_args, ["address", "interrupt", "width", "height"])
         # noinspection SpellCheckingInspection
         devices.append(
-            {'device_name': 'consolev5', 'address': address, 'interrupt': interrupt, 'width': width, 'height': height})
+            {'device_name': 'console', 'address': address, 'interrupt': interrupt, 'width': width, 'height': height})
 
 
 def add_ram(args, devices):
@@ -169,42 +154,12 @@ def show_help():
     print()
     print("   Syntax:")
     print("         --console address={starting address} interrupt={interrupt to be raised upon keystroke}")
+    print("           width={width of console} height={height of console}")
     print()
     print("   Example:")
     print("         --console address=1024 interrupt=2")
     print()
     print("   Note:  Console's size is always 1 and can't be changed.")
-    print()
-    # noinspection SpellCheckingInspection
-    print("--consolev2")
-    print("   Adds a console device to the backplane which accepts keystrokes and displays output.")
-    print()
-    print("   Syntax:")
-    print("         --console address={starting address} interrupt={interrupt to be raised upon keystroke}")
-    print()
-    print("   Example:")
-    print("         --console address=1024 interrupt=2")
-    print()
-    print("   Note:  Console's size is always 1 and can't be changed.")
-    # noinspection SpellCheckingInspection
-    print("          Consolev2 is a newer and more stable version of the console device.")
-    print()
-    print("--display")
-    print("   Adds an 80x25 addressable text display device.")
-    print()
-    print("   Syntax:")
-    print("         --display address={starting address} [width={width of display}] [height={height of display}]")
-    print()
-    print("   Example:")
-    print("         --display address=2048")
-    print("         --display address=2048 width=40 height=20")
-    print()
-    print("   Note:  The display's size is 80x25 by default. Width and height may be specified.")
-    print("          The display's memory is linearly addressed with position 0x0 at the starting address.")
-    print("          The display is not scrollable.")
-    print("          The display occupies [width x height] bytes of address space starting at the specified address.")
-    print("          The display memory is readable and writeable.")
-    print("          The display does not accept keyboard input.")
     print()
     print("--processor")
     print("   Adds a processor device to the backplane.")

@@ -163,6 +163,7 @@ def show_help():
     print("   Example:")
     print("         --ram address=0 size=1024")
     print()
+    # todo: cleanup and add reference to console v5 (and rename that one to console when done)
     print("--console")
     print("   Adds a console device to the backplane which accepts keystrokes and displays output.")
     print()

@@ -5,7 +5,6 @@ from Machine.Devices.Memory.class_rom import ROM
 from Machine.Devices.Processors.class_processor import Processor
 from Machine.Devices.Testers.class_debugger import Debugger
 from Machine.Backplane.class_backplane import BackPlane
-from Machine.Devices.IO.class_addressable_text_display import AddressableTextDisplay
 
 device_group = []
 
@@ -149,14 +148,6 @@ class MachineBuilder:
                                                      data_bus=self._backplane.data_bus(),
                                                      control_bus=self._backplane.control_bus(),
                                                      interrupt_bus=self._backplane.interrupt_bus()))
-            case 'display':
-                self._backplane.add_device(AddressableTextDisplay(starting_address=address,
-                                                                  width=width,
-                                                                  height=height,
-                                                                  address_bus=self._backplane.address_bus(),
-                                                                  data_bus=self._backplane.data_bus(),
-                                                                  control_bus=self._backplane.control_bus(),
-                                                                  interrupt_bus=self._backplane.interrupt_bus()))
             case 'rom':
                 self._backplane.add_device(ROM(starting_address=address,
                                                address_bus=self._backplane.address_bus(),

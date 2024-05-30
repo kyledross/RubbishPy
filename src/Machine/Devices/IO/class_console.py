@@ -86,20 +86,29 @@ class Console(BaseDevice):
             self.last_cursor_change = pygame.time.get_ticks()
             self.cursor_x: int = 0
             self.cursor_y: int = 0
+            self.running: bool = False
 
         def run(self):
-            running = True
+            self.running = True
             pygame.key.set_repeat(500, 50)
-            while running:
-                pygame.event.pump()
-                for event in pygame.event.get():
-                    if event.type == pygame.QUIT:
-                        running = False
-                    if event.type == pygame.KEYDOWN:
-                        # add to input queue
-                        if event.unicode:
-                            self.input_queue.put(ord(event.unicode))
 
+            def process_events():
+                while self.running:
+                    pygame.event.pump()
+                    for event in pygame.event.get():
+                        if event.type == pygame.QUIT:
+                            self.running = False
+                        if event.type == pygame.KEYDOWN:
+                            # add to input queue
+                            if event.unicode:
+                                self.input_queue.put(ord(event.unicode))
+                    time.sleep(0)
+
+            # Start the event processing in a separate thread
+            event_thread = threading.Thread(target=process_events)
+            event_thread.start()
+
+            while self.running:
                 while not self.display_queue.empty():
                     command = self.display_queue.get_nowait()
                     # if command is a DisplayControl object, process it

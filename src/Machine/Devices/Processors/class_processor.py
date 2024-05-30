@@ -67,7 +67,7 @@ class Processor(BaseProcessor):
         threading.Thread(target=self.process_cycle).start()
 
     def cycle(self, address_bus: AddressBus, data_bus: DataBus, control_bus: ControlBus, interrupt_bus: InterruptBus):
-        pass # todo: remove cycle
+        pass  # todo: remove cycle
 
     def process_cycle(self):
         while self.is_running():
@@ -97,113 +97,113 @@ class Processor(BaseProcessor):
                                     self.interrupt_in_progress = True
                                     break
 
-                # Instruction routing
-                if self.sleeping:
-                    break
-                else:
-                    match self.current_instruction:
+            # Instruction routing
+            if self.sleeping:
+                break
+            else:
+                match self.current_instruction:
 
-                        case InstructionSet.NOP:
-                            self.finish_instruction(True)
+                    case InstructionSet.NOP:
+                        self.finish_instruction(True)
 
-                        case InstructionSet.DEBUG:
-                            print("Processor: Debug instruction encountered.")
-                            print("Current registers:")
-                            print(self.registers)
-                            self.finish_instruction(True)
+                    case InstructionSet.DEBUG:
+                        print("Processor: Debug instruction encountered.")
+                        print("Current registers:")
+                        print(self.registers)
+                        self.finish_instruction(True)
 
-                        case InstructionSet.JMP:
-                            self.execute_jmp(address_bus, control_bus, data_bus)
+                    case InstructionSet.JMP:
+                        self.execute_jmp(address_bus, control_bus, data_bus)
 
-                        case InstructionSet.LR:
-                            self.execute_lr(address_bus, control_bus, data_bus)
+                    case InstructionSet.LR:
+                        self.execute_lr(address_bus, control_bus, data_bus)
 
-                        case InstructionSet.LRM:
-                            self.execute_lrm(address_bus, control_bus, data_bus)
+                    case InstructionSet.LRM:
+                        self.execute_lrm(address_bus, control_bus, data_bus)
 
-                        case InstructionSet.MRM:
-                            self.execute_mrm(address_bus, control_bus, data_bus)
+                    case InstructionSet.MRM:
+                        self.execute_mrm(address_bus, control_bus, data_bus)
 
-                        case InstructionSet.LRR:
-                            self.execute_lrr(address_bus, control_bus, data_bus)
+                    case InstructionSet.LRR:
+                        self.execute_lrr(address_bus, control_bus, data_bus)
 
-                        case InstructionSet.INC:
-                            self.execute_inc(address_bus, control_bus, data_bus)
+                    case InstructionSet.INC:
+                        self.execute_inc(address_bus, control_bus, data_bus)
 
-                        case InstructionSet.ADD:
-                            self.execute_add()
+                    case InstructionSet.ADD:
+                        self.execute_add()
 
-                        case InstructionSet.DIV:
-                            self.execute_integer_divide()
+                    case InstructionSet.DIV:
+                        self.execute_integer_divide()
 
-                        case InstructionSet.MUL:
-                            self.execute_multiply()
+                    case InstructionSet.MUL:
+                        self.execute_multiply()
 
-                        case InstructionSet.SUB:
-                            self.execute_sub()
+                    case InstructionSet.SUB:
+                        self.execute_sub()
 
-                        case InstructionSet.OR:
-                            self.execute_or()
+                    case InstructionSet.OR:
+                        self.execute_or()
 
-                        case InstructionSet.AND:
-                            self.execute_and()
+                    case InstructionSet.AND:
+                        self.execute_and()
 
-                        case InstructionSet.XOR:
-                            self.execute_xor()
+                    case InstructionSet.XOR:
+                        self.execute_xor()
 
-                        case InstructionSet.NOT:
-                            self.execute_not()
+                    case InstructionSet.NOT:
+                        self.execute_not()
 
-                        case InstructionSet.CMP:
-                            self.execute_cmp()
+                    case InstructionSet.CMP:
+                        self.execute_cmp()
 
-                        case InstructionSet.JE:
-                            self.execute_je(address_bus, control_bus, data_bus)
+                    case InstructionSet.JE:
+                        self.execute_je(address_bus, control_bus, data_bus)
 
-                        case InstructionSet.JNE:
-                            self.execute_jne(address_bus, control_bus, data_bus)
+                    case InstructionSet.JNE:
+                        self.execute_jne(address_bus, control_bus, data_bus)
 
-                        case InstructionSet.JL:
-                            self.execute_jl(address_bus, control_bus, data_bus)
+                    case InstructionSet.JL:
+                        self.execute_jl(address_bus, control_bus, data_bus)
 
-                        case InstructionSet.JG:
-                            self.execute_jg(address_bus, control_bus, data_bus)
+                    case InstructionSet.JG:
+                        self.execute_jg(address_bus, control_bus, data_bus)
 
-                        case InstructionSet.RST:
-                            self.execute_reset()
+                    case InstructionSet.RST:
+                        self.execute_reset()
 
-                        case InstructionSet.HALT:
-                            execute_halt(interrupt_bus)
+                    case InstructionSet.HALT:
+                        execute_halt(interrupt_bus)
 
-                        case InstructionSet.PUSH:
-                            self.execute_push(address_bus, control_bus, data_bus)
+                    case InstructionSet.PUSH:
+                        self.execute_push(address_bus, control_bus, data_bus)
 
-                        case InstructionSet.POP:
-                            self.execute_pop(address_bus, control_bus, data_bus)
+                    case InstructionSet.POP:
+                        self.execute_pop(address_bus, control_bus, data_bus)
 
-                        case InstructionSet.PEEK:
-                            self.execute_peek(address_bus, control_bus, data_bus)
+                    case InstructionSet.PEEK:
+                        self.execute_peek(address_bus, control_bus, data_bus)
 
-                        case InstructionSet.CALL:
-                            self.execute_call(address_bus, control_bus, data_bus)
+                    case InstructionSet.CALL:
+                        self.execute_call(address_bus, control_bus, data_bus)
 
-                        case InstructionSet.RTN:
-                            self.execute_rtn()
+                    case InstructionSet.RTN:
+                        self.execute_rtn()
 
-                        case InstructionSet.SLEEP:
-                            self.execute_sleep()
+                    case InstructionSet.SLEEP:
+                        self.execute_sleep()
 
-                        case InstructionSet.WAKE:
-                            self.execute_wake()
+                    case InstructionSet.WAKE:
+                        self.execute_wake()
 
-                        case InstructionSet.SIV:
-                            self.execute_siv(address_bus, control_bus, data_bus)
+                    case InstructionSet.SIV:
+                        self.execute_siv(address_bus, control_bus, data_bus)
 
-                        case _:
-                            self.load_instruction(address_bus, control_bus, data_bus)
+                    case _:
+                        self.load_instruction(address_bus, control_bus, data_bus)
 
-                if not self.cached_instruction_will_be_used(address_bus, control_bus, data_bus):
-                    break
+            if not self.cached_instruction_will_be_used(address_bus, control_bus, data_bus):
+                break
 
     def cached_instruction_will_be_used(self, address_bus, control_bus, data_bus):
         """

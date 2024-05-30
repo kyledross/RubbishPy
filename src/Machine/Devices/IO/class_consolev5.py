@@ -290,30 +290,30 @@ class ConsoleV5(BaseDevice):
                     self.output_queue.put(self.display_buffer[y][x])
 
     def cycle(self, address_bus, data_bus, control_bus, interrupt_bus):
-        pass # todo: remove cycle
+        pass  # todo: remove cycle
 
     def process_buses(self):
         while self.is_running():
             time.sleep(0)
             self.stop_running_if_halt_detected()
-
-            # if the display thread has ended, raise the halt interrupt
-            if not self.output_form.is_alive():
-                self.interrupt_bus().set_interrupt(Interrupts.halt)
-            # if there is data in the input queue,
-            # raise the interrupt to signal that there is data available
-            if not self.input_queue.empty():
-                self.interrupt_bus().set_interrupt(self.interrupt_number)
-            if self.address_is_valid(self.address_bus()):
-                if self.control_bus().get_read_request():
-                    if not self.input_queue.empty():
-                        buffer_data = self.input_queue.get()
-                        self.data_bus().set_data(buffer_data)
-                        self.control_bus().set_read_request(False)
+            if self.control_bus().is_running():
+                # if the display thread has ended, raise the halt interrupt
+                if not self.output_form.is_alive():
+                    self.interrupt_bus().set_interrupt(Interrupts.halt)
+                # if there is data in the input queue,
+                # raise the interrupt to signal that there is data available
+                if not self.input_queue.empty():
+                    self.interrupt_bus().set_interrupt(self.interrupt_number)
+                if self.address_is_valid(self.address_bus()):
+                    if self.control_bus().get_read_request():
+                        if not self.input_queue.empty():
+                            buffer_data = self.input_queue.get()
+                            self.data_bus().set_data(buffer_data)
+                            self.control_bus().set_read_request(False)
+                            self.control_bus().set_response(True)
+                    if self.control_bus().get_write_request():
+                        data = self.data_bus().get_data()
+                        self.process_output(data)
+                        self.write_buffer_to_queue()
+                        self.control_bus().set_write_request(False)
                         self.control_bus().set_response(True)
-                if self.control_bus().get_write_request():
-                    data = self.data_bus().get_data()
-                    self.process_output(data)
-                    self.write_buffer_to_queue()
-                    self.control_bus().set_write_request(False)
-                    self.control_bus().set_response(True)

@@ -3,7 +3,6 @@ from Machine.Devices.IO.class_console import Console
 from Machine.Devices.Memory.class_ram import RAM
 from Machine.Devices.Memory.class_rom import ROM
 from Machine.Devices.Processors.class_processor import Processor
-from Machine.Devices.Testers.class_debugger import Debugger
 from Machine.Backplane.class_backplane import BackPlane
 
 device_group = []
@@ -167,11 +166,7 @@ class MachineBuilder:
                           interrupt_bus=self._backplane.interrupt_bus())
                 ram.load_data(data=code)
                 self._backplane.add_device(ram)
-            case 'debugger':
-                self._backplane.add_device(Debugger(address_bus=self._backplane.address_bus(),
-                                                    data_bus=self._backplane.data_bus(),
-                                                    control_bus=self._backplane.control_bus(),
-                                                    interrupt_bus=self._backplane.interrupt_bus()))
+
             case _:
                 print(f"Device {device_to_add} not found.")
 

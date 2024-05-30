@@ -1,5 +1,4 @@
 import sys
-from abc import abstractmethod
 
 from Constants.class_interrupts import Interrupts
 from Machine.Buses.class_interrupt_bus import InterruptBus
@@ -69,21 +68,6 @@ class BaseDevice:
         :return: The size of the device.
         """
         return self._size
-
-    @abstractmethod
-    def cycle(self, address_bus: AddressBus, data_bus: DataBus,
-              control_bus: ControlBus, interrupt_bus: InterruptBus):
-        """
-        This method is an abstract method that must be implemented by all subclasses.
-        It represents a cycle of the device, which involves interaction with the buses.
-        :param address_bus: The address bus to interact with.
-        :param data_bus: The data bus to interact with.
-        :param control_bus: The control bus to interact with.
-        :param interrupt_bus: The interrupt bus to interact with.
-        :raise NotImplementedError: If this method is called directly from the base class.
-        """
-        raise NotImplementedError("BaseDevice.Cycle: You may not call this method directly. It must be implemented by "
-                                  "a subclass.")
 
     def address_is_valid(self, address_bus: AddressBus) -> bool:
         """

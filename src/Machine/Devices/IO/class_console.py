@@ -289,9 +289,6 @@ class Console(BaseDevice):
                     self.display_buffer[y][x].redraw = False
                     self.output_queue.put(self.display_buffer[y][x])
 
-    def cycle(self, address_bus, data_bus, control_bus, interrupt_bus):
-        pass  # todo: remove cycle
-
     def process_buses(self):
         while self.is_running():
             time.sleep(0)

@@ -51,18 +51,6 @@ class ROM(BaseDevice):
         super().__init__(starting_address, len(self._memory), address_bus, data_bus, control_bus, interrupt_bus)
         threading.Thread(target=self.process_buses).start()
 
-    def cycle(self, address_bus: AddressBus, data_bus: DataBus, control_bus: ControlBus, interrupt_bus: InterruptBus):
-        """
-        Executes a cycle of the ROM device.
-
-        Parameters:
-            address_bus (AddressBus): The address bus.
-            data_bus (DataBus): The data bus.
-            control_bus (ControlBus): The control bus.
-            interrupt_bus (InterruptBus): The interrupt bus.
-        """
-        pass  # todo: remove cycle
-
     def process_buses(self):
         while self.is_running():
             time.sleep(0)

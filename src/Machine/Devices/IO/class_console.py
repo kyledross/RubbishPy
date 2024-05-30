@@ -91,6 +91,7 @@ class Console(BaseDevice):
             running = True
             pygame.key.set_repeat(500, 50)
             while running:
+                pygame.event.pump()
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         running = False

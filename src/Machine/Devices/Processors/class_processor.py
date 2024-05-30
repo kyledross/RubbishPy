@@ -66,9 +66,6 @@ class Processor(BaseProcessor):
 
         threading.Thread(target=self.process_cycle).start()
 
-    def cycle(self, address_bus: AddressBus, data_bus: DataBus, control_bus: ControlBus, interrupt_bus: InterruptBus):
-        pass  # todo: remove cycle
-
     def process_cycle(self):
         while self.is_running():
             time.sleep(0)

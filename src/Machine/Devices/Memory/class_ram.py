@@ -61,19 +61,6 @@ class RAM(BaseDevice):
         self._memory += data
         self._memory += [0] * (memory_size - len(self._memory))
 
-    def cycle(self, address_bus: AddressBus, data_bus: DataBus, control_bus: ControlBus, interrupt_bus: InterruptBus):
-        """
-        Executes a cycle of the RAM device.
-
-        Parameters:
-            address_bus (AddressBus): The address bus.
-            data_bus (DataBus): The data bus.
-            control_bus (ControlBus): The control bus.
-            interrupt_bus (InterruptBus): The interrupt bus.
-        """
-        # todo: remove cycle
-        pass
-
     def process_buses(self):
         while self.is_running():
             time.sleep(0)

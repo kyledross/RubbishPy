@@ -1,5 +1,7 @@
 import sys
 from abc import abstractmethod
+
+from Constants.class_interrupts import Interrupts
 from Machine.Buses.class_interrupt_bus import InterruptBus
 from Machine.Buses.class_address_bus import AddressBus
 from Machine.Buses.class_data_bus import DataBus
@@ -13,6 +15,7 @@ class BaseDevice:
     cycle the device and check if an address is valid.
     """
 
+    _running: bool = False
     _startingAddress: int = 0  # The starting address of the device
     _size: int = 0  # The size of the device
 
@@ -30,6 +33,14 @@ class BaseDevice:
         self._dataBus = data_bus
         self._controlBus = control_bus
         self._interruptBus = interrupt_bus
+        self._running = True
+
+    def is_running(self) -> bool:
+        """
+        This method returns whether the device is running or not.
+        :return: True if the device is running, False otherwise.
+        """
+        return self._running
 
     def address_bus(self):
         return self._addressBus
@@ -86,6 +97,11 @@ class BaseDevice:
             return True
         else:
             return False
+
+    def stop_running_if_halt_detected(self):
+        # if halt interrupt has been raised, stop the thread
+        if self.interrupt_bus().test_interrupt(Interrupts.halt):
+            self._running = False
 
 
 def log_message(message):

@@ -109,6 +109,7 @@ class Console(BaseDevice):
             event_thread.start()
 
             while self.running:
+                pygame.event.pump()
                 while not self.display_queue.empty():
                     command = self.display_queue.get_nowait()
                     # if command is a DisplayControl object, process it
@@ -141,7 +142,6 @@ class Console(BaseDevice):
                     self.cursor_state = not self.cursor_state
                     self.last_cursor_change = pygame.time.get_ticks()
                 pygame.display.flip()
-                pygame.display.update()
                 self.clock.tick(FRAMERATE)
 
             pygame.quit()

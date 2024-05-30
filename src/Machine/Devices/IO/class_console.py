@@ -141,6 +141,7 @@ class Console(BaseDevice):
                     self.cursor_state = not self.cursor_state
                     self.last_cursor_change = pygame.time.get_ticks()
                 pygame.display.flip()
+                pygame.display.update()
                 self.clock.tick(FRAMERATE)
 
             pygame.quit()

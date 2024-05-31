@@ -53,7 +53,7 @@ def check_required_parameters(device: str, parameters, keys):
 # noinspection SpellCheckingInspection
 def parse_command_line():
     """Parses the command line arguments and returns a list of device groups.  Each device group is a dictionary"""
-    devices = [BaseDevice]
+    devices = []
     import argparse
 
     # Create an argument parser

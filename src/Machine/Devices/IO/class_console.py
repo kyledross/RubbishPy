@@ -119,8 +119,7 @@ class Console(BaseDevice):
                             # add to input queue
                             if event.unicode:
                                 self.input_queue.put(ord(event.unicode))
-                    time.sleep(0)
-
+                    time.sleep(0.05)
             # Start the event processing in a separate thread
             event_thread = threading.Thread(target=process_events,
                                             name=self.parent_console_device_id + "_Display::process_events")
@@ -322,7 +321,7 @@ class Console(BaseDevice):
 
     def process_buses(self):
         while self.is_running():
-            time.sleep(0)
+            self.control_bus().lock_bus()
             self.stop_running_if_halt_detected()
             if self.control_bus().is_power_on():
                 # if the display thread has ended, raise the halt interrupt
@@ -345,4 +344,5 @@ class Console(BaseDevice):
                         self.write_buffer_to_queue()
                         self.control_bus().set_write_request(False)
                         self.control_bus().set_response(True)
+            self.control_bus().unlock_bus()
         self._finished = True

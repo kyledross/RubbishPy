@@ -1,3 +1,6 @@
+from threading import Lock
+
+
 class ControlBus:
     """
     The ControlBus class represents the control bus of a computer system.
@@ -17,6 +20,19 @@ class ControlBus:
         self._ReadRequest = False
         self._WriteRequest = False
         self._Response = False
+        self._busLock = Lock()
+
+    def lock_bus(self):
+        """
+        This method locks the bus.
+        """
+        self._busLock.acquire()
+
+    def unlock_bus(self):
+        """
+        This method unlocks the bus.
+        """
+        self._busLock.release()
 
     def get_read_request(self) -> bool:
         """
@@ -82,4 +98,3 @@ class ControlBus:
     def power_off(self):
         """ This method starts the bus running. """
         self._PowerOn = True
-

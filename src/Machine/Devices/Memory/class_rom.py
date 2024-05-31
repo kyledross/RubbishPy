@@ -53,7 +53,7 @@ class ROM(BaseDevice):
 
     def process_buses(self):
         while self.is_running():
-            time.sleep(0)
+            self.control_bus().lock_bus()
             self.stop_running_if_halt_detected()
             if self.control_bus().is_power_on():
                 if self.address_is_valid(self.address_bus()):
@@ -62,4 +62,5 @@ class ROM(BaseDevice):
                             self._memory[self.address_bus().get_address() - super().starting_address])
                         self.control_bus().set_read_request(False)
                         self.control_bus().set_response(True)
+            self.control_bus().unlock_bus()
         self._finished = True

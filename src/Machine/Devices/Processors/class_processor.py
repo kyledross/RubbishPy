@@ -68,10 +68,11 @@ class Processor(BaseProcessor):
 
     def process_cycle(self):
         while self.is_running():
-            time.sleep(0)
+            self.control_bus().lock_bus()
             self.stop_running_if_halt_detected()
             if self.control_bus().is_power_on():
                 self.perform_instruction_processing()
+            self.control_bus().unlock_bus()
         self._finished = True
 
     def perform_instruction_processing(self):

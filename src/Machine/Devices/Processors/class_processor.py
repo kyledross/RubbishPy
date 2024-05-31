@@ -2,16 +2,14 @@ import collections
 import threading
 from collections import deque
 
-import time
-
+from Constants.class_compare_results import CompareResults
+from Constants.class_instruction_set import InstructionSet
+from Constants.class_interrupts import Interrupts
 from Machine.Buses.class_address_bus import AddressBus
 from Machine.Buses.class_control_bus import ControlBus
 from Machine.Buses.class_data_bus import DataBus
 from Machine.Buses.class_interrupt_bus import InterruptBus
 from Machine.Devices.Bases.class_base_processor import BaseProcessor
-from Constants.class_instruction_set import InstructionSet
-from Constants.class_compare_results import CompareResults
-from Constants.class_interrupts import Interrupts
 
 
 class Phases:

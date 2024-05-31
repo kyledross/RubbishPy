@@ -64,13 +64,13 @@ class Processor(BaseProcessor):
         # instruction caching
         self.instruction_and_operand_cache = {}
 
-        threading.Thread(target=self.process_cycle).start()
+        threading.Thread(target=self.process_cycle, name=self._deviceId + "::process_cycle").start()
 
     def process_cycle(self):
         while self.is_running():
             time.sleep(0)
             self.stop_running_if_halt_detected()
-            if self.control_bus().is_running():
+            if self.control_bus().is_power_on():
                 self.perform_instruction_processing()
         self._finished = True
 

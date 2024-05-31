@@ -7,7 +7,7 @@ class ControlBus:
     _ReadRequest: bool = False  # The read request on the bus
     _WriteRequest: bool = False  # The write request on the bus
     _Response: bool = False  # The response on the bus
-    _Running: bool = False  # The running state of the machine
+    _PowerOn: bool = False  # The running state of the machine
 
     def __init__(self):
         """
@@ -71,15 +71,15 @@ class ControlBus:
         """
         self._Response = value
 
-    def is_running(self) -> bool:
+    def is_power_on(self) -> bool:
         """ This method returns whether the bus is running or not. """
-        return self._Running
+        return self._PowerOn
 
-    def start_running(self):
+    def power_on(self):
         """ This method starts the bus running. """
-        self._Running = True
+        self._PowerOn = True
 
-    def stop_running(self):
+    def power_off(self):
         """ This method starts the bus running. """
-        self._Running = True
+        self._PowerOn = True
 

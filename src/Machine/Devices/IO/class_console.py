@@ -69,7 +69,8 @@ class DisplayElement(DisplayCommand):
 
 class Console(BaseDevice):
     class Display:
-        def __init__(self, output_q: queue.Queue, input_q: queue.Queue, display_width, display_height, character_width,
+        def __init__(self, console_device_id, output_q: queue.Queue, input_q: queue.Queue, display_width,
+                     display_height, character_width,
                      character_height, font_size):
             self.font = None
             self.clock = None
@@ -86,6 +87,7 @@ class Console(BaseDevice):
             self.cursor_x: int = 0
             self.cursor_y: int = 0
             self.running: bool = False
+            self.parent_console_device_id = console_device_id
 
         def run(self):
             pygame.init()
@@ -120,7 +122,8 @@ class Console(BaseDevice):
                     time.sleep(0)
 
             # Start the event processing in a separate thread
-            event_thread = threading.Thread(target=process_events)
+            event_thread = threading.Thread(target=process_events,
+                                            name=self.parent_console_device_id + "_Display::process_events")
             event_thread.start()
 
             while self.running:
@@ -181,7 +184,8 @@ class Console(BaseDevice):
         super().__init__(starting_address, 1, address_bus, data_bus, control_bus, interrupt_bus)
         self.output_queue = queue.Queue()
         self.input_queue = queue.Queue()
-        self.display = self.Display(self.output_queue, self.input_queue, display_width=width, display_height=height,
+        self.display = self.Display(console_device_id=self._deviceId, output_q=self.output_queue,
+                                    input_q=self.input_queue, display_width=width, display_height=height,
                                     character_width=12, character_height=22, font_size=20)
         self.cursor_x: int = 0
         self.cursor_y: int = 0
@@ -189,10 +193,10 @@ class Console(BaseDevice):
         self.height: int = height
         self.interrupt_number: int = interrupt_number
         self.display_buffer = [[DisplayElement(x, y, ' ') for x in range(80)] for y in range(25)]
-        self.output_form = threading.Thread(target=self.display.run)
+        self.output_form = threading.Thread(target=self.display.run, name=self._deviceId + "::display_run")
         self.output_form.start()
         self.write_buffer_to_queue()
-        threading.Thread(target=self.process_buses).start()
+        threading.Thread(target=self.process_buses, name=self._deviceId + "::process_buses").start()
 
     def send_cursor_location(self):
         self.output_queue.put(DisplayControl('cursor_x', str(self.cursor_x)))
@@ -320,7 +324,7 @@ class Console(BaseDevice):
         while self.is_running():
             time.sleep(0)
             self.stop_running_if_halt_detected()
-            if self.control_bus().is_running():
+            if self.control_bus().is_power_on():
                 # if the display thread has ended, raise the halt interrupt
                 if not self.output_form.is_alive():
                     self.interrupt_bus().set_interrupt(Interrupts.halt)

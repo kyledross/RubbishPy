@@ -42,7 +42,7 @@ class RAM(BaseDevice):
         """
         super().__init__(starting_address, size, address_bus, data_bus, control_bus, interrupt_bus)
         self._memory = [0] * size
-        threading.Thread(target=self.process_buses).start()
+        threading.Thread(target=self.process_buses, name=self._deviceId + "::process_buses").start()
 
     def load_data(self, data):
         """
@@ -65,7 +65,7 @@ class RAM(BaseDevice):
         while self.is_running():
             time.sleep(0)
             self.stop_running_if_halt_detected()
-            if self.control_bus().is_running():
+            if self.control_bus().is_power_on():
                 if self.address_is_valid(self.address_bus()):
                     if self.control_bus().get_read_request():
                         self.data_bus().set_data(

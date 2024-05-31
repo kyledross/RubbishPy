@@ -45,7 +45,6 @@ class RAM(BaseDevice):
         super().__init__(starting_address, size, address_bus, data_bus, control_bus, interrupt_bus)
         self._memory = [0] * size
 
-
     def load_data(self, data):
         """
         Loads data into the RAM device.

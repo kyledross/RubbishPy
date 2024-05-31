@@ -65,8 +65,6 @@ class Processor(BaseProcessor):
         # instruction caching
         self.instruction_and_operand_cache = {}
 
-
-
     def process_cycle(self):
         while self.is_running():
             self.control_bus().lock_bus()

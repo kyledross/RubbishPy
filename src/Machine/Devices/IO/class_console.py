@@ -120,6 +120,7 @@ class Console(BaseDevice):
                             if event.unicode:
                                 self.input_queue.put(ord(event.unicode))
                     time.sleep(0.05)
+
             # Start the event processing in a separate thread
             event_thread = threading.Thread(target=process_events,
                                             name=self.parent_console_device_id + "_Display::process_events")
@@ -199,7 +200,6 @@ class Console(BaseDevice):
         self.output_form.start()
         self.write_buffer_to_queue()
         threading.Thread(target=self.process_buses, name=self._deviceId + "::process_buses").start()
-
 
     def send_cursor_location(self):
         self.output_queue.put(DisplayControl('cursor_x', str(self.cursor_x)))

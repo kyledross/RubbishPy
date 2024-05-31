@@ -33,6 +33,9 @@ def execute_halt(interrupt_bus):
 # noinspection DuplicatedCode
 class Processor(BaseProcessor):
 
+    def start(self):
+        threading.Thread(target=self.process_cycle, name=self._deviceId + "::process_cycle").start()
+
     def __init__(self, starting_address: int, size: int, disable_instruction_caching: bool,
                  address_bus: AddressBus, data_bus: DataBus, control_bus: ControlBus, interrupt_bus: InterruptBus):
         # registers
@@ -62,7 +65,7 @@ class Processor(BaseProcessor):
         # instruction caching
         self.instruction_and_operand_cache = {}
 
-        threading.Thread(target=self.process_cycle, name=self._deviceId + "::process_cycle").start()
+
 
     def process_cycle(self):
         while self.is_running():

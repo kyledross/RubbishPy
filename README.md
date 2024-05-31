@@ -14,8 +14,10 @@ This project serves two purposes:
 This is by no means a perfect design or implementation.  But, it works.
 
 ## Requirements
-RubbishPy requires Python 3.11 or later.  
-RubbishPy requires tkinter for window support in console v4 (apt install python3-tk).  
+RubbishPy requires the following:
+Python 3.11 or later.  
+PyGame 2.5.2 or later required (pip install pygame).
+
 RubbishPy was developed with JetBrains PyCharm.  
 
 ## Running RubbishPy in terminal

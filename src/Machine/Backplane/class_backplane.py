@@ -90,7 +90,6 @@ class BackPlane:
             if self._interruptBus.test_interrupt(Interrupts.halt):
                 print("HALT interrupt detected.")
                 self.control_bus().power_off()
-                break
             self.control_bus().unlock_bus()
         self.wait_for_devices_to_finish()
 

@@ -6,7 +6,6 @@ class Interrupts(IntFlag):
     The Interrupts class represents the different types of interrupts that can be triggered in the system.
     Each interrupt is represented by a class variable with a unique integer value.
     """
-
     none: int = 0  # represents no active interrupts
     irq1: int = 1  # Represents the first interrupt request line
     irq2: int = 2  # Represents the second interrupt request line

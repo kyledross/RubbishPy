@@ -34,11 +34,6 @@ class BaseDevice(abc.ABC):
     cycle the device and check if an address is valid.
     """
 
-    _running: bool = False
-    _startingAddress: int = 0  # The starting address of the device
-    _size: int = 0  # The size of the device
-    _deviceId: str  # The unique device ID
-
     def __init__(self, starting_address: int, size: int, address_bus: AddressBus, data_bus: DataBus,
                  control_bus: ControlBus, interrupt_bus: InterruptBus):
         """
@@ -47,15 +42,15 @@ class BaseDevice(abc.ABC):
         :param starting_address: The starting address of the device.
         :param size: The size of the device.
         """
-        self._startingAddress = starting_address
-        self._size = size
-        self._addressBus = address_bus
-        self._dataBus = data_bus
-        self._controlBus = control_bus
-        self._interruptBus = interrupt_bus
-        self._running = True
-        self._finished = False
-        self._deviceId = self.generate_device_id()  # Generate a unique device ID
+        self.__startingAddress = starting_address
+        self.__size = size
+        self.__addressBus = address_bus
+        self.__dataBus = data_bus
+        self.__controlBus = control_bus
+        self.__interruptBus = interrupt_bus
+        self.__running = True
+        self.__finished = False
+        self.__deviceId = self.generate_device_id()  # Generate a unique device ID
 
     @classmethod
     def generate_device_id(cls):
@@ -66,8 +61,18 @@ class BaseDevice(abc.ABC):
         device_id = cls.__name__ + "_" + base36encode(random.randint(0, 36 ** 2))
         return device_id
 
-    def finished(self):
-        return self._finished
+    def get_device_id(self):
+        """
+        This method returns the device ID.
+        :return: The device ID.
+        """
+        return self.__deviceId
+
+    def set_finished(self):
+        self.__finished = True
+
+    def is_finished(self):
+        return self.__finished
 
     @abc.abstractmethod
     def start(self):
@@ -81,19 +86,19 @@ class BaseDevice(abc.ABC):
         This method returns whether the device is running or not.
         :return: True if the device is running, False otherwise.
         """
-        return self._running
+        return self.__running
 
     def address_bus(self):
-        return self._addressBus
+        return self.__addressBus
 
     def data_bus(self):
-        return self._dataBus
+        return self.__dataBus
 
     def control_bus(self):
-        return self._controlBus
+        return self.__controlBus
 
     def interrupt_bus(self):
-        return self._interruptBus
+        return self.__interruptBus
 
     @property
     def starting_address(self) -> int:
@@ -101,7 +106,7 @@ class BaseDevice(abc.ABC):
         This property returns the starting address of the device.
         :return: The starting address of the device.
         """
-        return self._startingAddress
+        return self.__startingAddress
 
     @property
     def size(self) -> int:
@@ -109,7 +114,7 @@ class BaseDevice(abc.ABC):
         This property returns the size of the device.
         :return: The size of the device.
         """
-        return self._size
+        return self.__size
 
     def address_is_valid(self, address_bus: AddressBus) -> bool:
         """
@@ -118,8 +123,8 @@ class BaseDevice(abc.ABC):
         :param address_bus: The address bus to check the address from.
         :return: True if the address is valid, False otherwise.
         """
-        if ((address_bus.get_address() >= self._startingAddress)
-                and (address_bus.get_address() < self._startingAddress + self._size)):
+        if ((address_bus.get_address() >= self.__startingAddress)
+                and (address_bus.get_address() < self.__startingAddress + self.__size)):
             return True
         else:
             return False
@@ -127,7 +132,7 @@ class BaseDevice(abc.ABC):
     def stop_running_if_halt_detected(self):
         # if halt interrupt has been raised, stop the thread
         if self.interrupt_bus().test_interrupt(Interrupts.halt):
-            self._running = False
+            self.__running = False
 
 
 def log_message(message):

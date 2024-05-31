@@ -8,32 +8,28 @@ class ControlBus:
     It provides methods to get and set the read request, write request, and response on the bus.
     """
 
-    _ReadRequest: bool = False  # The read request on the bus
-    _WriteRequest: bool = False  # The write request on the bus
-    _Response: bool = False  # The response on the bus
-    _PowerOn: bool = False  # The running state of the machine
-
     def __init__(self):
         """
         Constructor for the ControlBus class.
         Initializes the read request, write request, and response on the bus to False.
         """
-        self._ReadRequest = False
-        self._WriteRequest = False
-        self._Response = False
-        self._busLock = Lock()
+        self.__PowerOn = None
+        self.__ReadRequest = False
+        self.__WriteRequest = False
+        self.__Response = False
+        self.__busLock = Lock()
 
     def lock_bus(self):
         """
         This method locks the bus.
         """
-        self._busLock.acquire()
+        self.__busLock.acquire()
 
     def unlock_bus(self):
         """
         This method unlocks the bus.
         """
-        self._busLock.release()
+        self.__busLock.release()
         time.sleep(0)
 
     def get_read_request(self) -> bool:
@@ -41,36 +37,36 @@ class ControlBus:
         This method returns the read request on the bus.
         :return: The read request on the bus.
         """
-        return self._ReadRequest
+        return self.__ReadRequest
 
     def set_read_request(self, value: bool):
         """
         This method sets the read request on the bus.
         :param value: The read request to set on the bus.
         """
-        self._ReadRequest = value
+        self.__ReadRequest = value
 
     def get_write_request(self) -> bool:
         """
         This method returns the write request on the bus.
         :return: The write request on the bus.
         """
-        return self._WriteRequest
+        return self.__WriteRequest
 
     def set_write_request(self, value: bool):
         """
         This method sets the write request on the bus.
         :param value: The write request to set on the bus.
         """
-        self._WriteRequest = value
+        self.__WriteRequest = value
 
     def get_response(self) -> bool:
         """
         This method returns the response on the bus and then sets the response to False.
         :return: The response on the bus.
         """
-        if self._Response:
-            self._Response = False
+        if self.__Response:
+            self.__Response = False
             return True
         else:
             return False
@@ -80,23 +76,23 @@ class ControlBus:
         This method returns the response on the bus without setting the response to False.
         :return: The response on the bus.
         """
-        return self._Response
+        return self.__Response
 
     def set_response(self, value: bool):
         """
         This method sets the response on the bus.
         :param value: The response to set on the bus.
         """
-        self._Response = value
+        self.__Response = value
 
     def is_power_on(self) -> bool:
         """ This method returns whether the bus is running or not. """
-        return self._PowerOn
+        return self.__PowerOn
 
     def power_on(self):
         """ This method starts the bus running. """
-        self._PowerOn = True
+        self.__PowerOn = True
 
     def power_off(self):
         """ This method starts the bus running. """
-        self._PowerOn = False
+        self.__PowerOn = False

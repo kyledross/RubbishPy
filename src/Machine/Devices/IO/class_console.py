@@ -32,39 +32,48 @@ class DisplayControl(DisplayCommand):
     """
 
     def __init__(self, command: str, value: str):
-        self.value = value
-        self.command = command
+        self.__value = value
+        self.__command = command
 
     def get_command(self):
-        return self.command
+        return self.__command
 
     def set_command(self, command):
-        self.command = command
+        self.__command = command
 
     def get_value(self):
-        return self.value
+        return self.__value
 
     def set_value(self, value):
-        self.value = value
+        self.__value = value
 
 
 class DisplayElement(DisplayCommand):
     def __init__(self, x, y, character: str):
-        self.x = x
-        self.y = y
-        self.character = character
-        self.redraw = True
+        self.__x = x
+        self.__y = y
+        self.__character = character
+        self.__redraw = True
+
+    def get_x(self):
+        return self.__x
+
+    def get_y(self):
+        return self.__y
 
     def get_character(self):
-        return self.character
+        return self.__character
 
     def set_character(self, character):
-        if character != self.character:
-            self.redraw = True
-        self.character = character
+        if character != self.__character:
+            self.__redraw = True
+        self.__character = character
+
+    def get_redraw(self):
+        return self.__redraw
 
     def set_redraw(self, redraw):
-        self.redraw = redraw
+        self.__redraw = redraw
 
 
 class Console(BaseDevice):
@@ -147,11 +156,13 @@ class Console(BaseDevice):
                         text = self.font.render(text_to_display, True, (255, 255, 255))
                         # blank the area we are about to write to
                         text_size = self.font.size(text_to_display)
-                        position = (display_element.x * self.character_width, display_element.y * self.character_height)
+                        position = (display_element.get_x() * self.character_width,
+                                    display_element.get_y() * self.character_height)
                         pygame.draw.rect(self.screen, (0, 0, 0), (position[0], position[1], text_size[0], text_size[1]))
                         # draw the character
                         self.screen.blit(text, (
-                            display_element.x * self.character_width, display_element.y * self.character_height))
+                            display_element.get_x() * self.character_width,
+                            display_element.get_y() * self.character_height))
 
                 # draw the cursor
                 if pygame.time.get_ticks() - self.last_cursor_change > cursor_blink_milliseconds:
@@ -185,7 +196,7 @@ class Console(BaseDevice):
         self.output_form = None
         self.output_queue = queue.Queue()
         self.input_queue = queue.Queue()
-        self.display = self.Display(console_device_id=self._deviceId, output_q=self.output_queue,
+        self.display = self.Display(console_device_id=self.get_device_id(), output_q=self.output_queue,
                                     input_q=self.input_queue, display_width=width, display_height=height,
                                     character_width=12, character_height=22, font_size=20)
         self.cursor_x: int = 0
@@ -196,10 +207,10 @@ class Console(BaseDevice):
         self.display_buffer = [[DisplayElement(x, y, ' ') for x in range(80)] for y in range(25)]
 
     def start(self):
-        self.output_form = threading.Thread(target=self.display.run, name=self._deviceId + "::display_run")
+        self.output_form = threading.Thread(target=self.display.run, name=self.get_device_id() + "::display_run")
         self.output_form.start()
         self.write_buffer_to_queue()
-        threading.Thread(target=self.process_buses, name=self._deviceId + "::process_buses").start()
+        threading.Thread(target=self.process_buses, name=self.get_device_id() + "::process_buses").start()
 
     def send_cursor_location(self):
         self.output_queue.put(DisplayControl('cursor_x', str(self.cursor_x)))
@@ -211,11 +222,11 @@ class Console(BaseDevice):
         """
         for y in range(1, self.height):
             for x in range(self.width):
-                self.display_buffer[y - 1][x].character = self.display_buffer[y][x].character
-                self.display_buffer[y - 1][x].redraw = True
+                self.display_buffer[y - 1][x].set_character(self.display_buffer[y][x].get_character())
+                self.display_buffer[y - 1][x].set_redraw(True)
         for x in range(self.width):
-            self.display_buffer[self.height - 1][x].character = ' '
-            self.display_buffer[self.height - 1][x].redraw = True
+            self.display_buffer[self.height - 1][x].set_character(' ')
+            self.display_buffer[self.height - 1][x].set_redraw(True)
         # add a clear command to the output queue
         self.output_queue.put(DisplayControl('clear', ''))
 
@@ -319,8 +330,8 @@ class Console(BaseDevice):
         """
         for y in range(self.height):
             for x in range(self.width):
-                if self.display_buffer[y][x].redraw:
-                    self.display_buffer[y][x].redraw = False
+                if self.display_buffer[y][x].get_redraw():
+                    self.display_buffer[y][x].set_redraw(False)
                     self.output_queue.put(self.display_buffer[y][x])
 
     def process_buses(self):
@@ -349,4 +360,4 @@ class Console(BaseDevice):
                         self.control_bus().set_write_request(False)
                         self.control_bus().set_response(True)
             self.control_bus().unlock_bus()
-        self._finished = True
+        self.set_finished()

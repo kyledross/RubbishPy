@@ -1,4 +1,5 @@
 import time
+from typing import List
 
 from Constants.class_interrupts import Interrupts
 from Machine.Buses.class_address_bus import AddressBus
@@ -16,15 +17,15 @@ class BackPlane:
 
     Attributes
     ----------
-    _devices : list
+    __devices : list
         a list to store the devices connected to the backplane
-    _addressBus : AddressBus
+    __addressBus : AddressBus
         the address bus of the backplane
-    _dataBus : DataBus
+    __dataBus : DataBus
         the data bus of the backplane
-    _controlBus : ControlBus
+    __controlBus : ControlBus
         the control bus of the backplane
-    _interruptBus : InterruptBus
+    __interruptBus : InterruptBus
         the interrupt bus of the backplane
 
     Methods
@@ -37,34 +38,27 @@ class BackPlane:
         Runs the backplane.
     """
 
-    _devices = []
-    _addressBus: AddressBus = None
-    _dataBus: DataBus = None
-    _controlBus: ControlBus = None
-    _interruptBus: InterruptBus = None
-
-    _cataloged_devices = {}
-
     def address_bus(self):
-        return self._addressBus
+        return self.__addressBus
 
     def data_bus(self):
-        return self._dataBus
+        return self.__dataBus
 
     def control_bus(self):
-        return self._controlBus
+        return self.__controlBus
 
     def interrupt_bus(self):
-        return self._interruptBus
+        return self.__interruptBus
 
     def __init__(self):
         """
         Constructs all the necessary attributes for the backplane.
         """
-        self._addressBus = AddressBus()
-        self._controlBus = ControlBus()
-        self._dataBus = DataBus(self._controlBus)
-        self._interruptBus = InterruptBus()
+        self.__addressBus = AddressBus()
+        self.__controlBus = ControlBus()
+        self.__dataBus = DataBus(self.__controlBus)
+        self.__interruptBus = InterruptBus()
+        self.__devices: List[BaseDevice] = []
 
     def add_device(self, device: BaseDevice):
         """
@@ -73,7 +67,7 @@ class BackPlane:
         Parameters:
             device (BaseDevice): The device to be added to the backplane.
         """
-        self._devices.append(device)
+        self.__devices.append(device)
 
     def run(self):
         """
@@ -85,11 +79,11 @@ class BackPlane:
             None
         """
         self.control_bus().power_on()
-        for device in self._devices:
+        for device in self.__devices:
             device.start()
         while self.control_bus().is_power_on():
             self.control_bus().lock_bus()
-            if self._interruptBus.test_interrupt(Interrupts.halt):
+            if self.__interruptBus.test_interrupt(Interrupts.halt):
                 print("HALT interrupt detected.")
                 self.control_bus().power_off()
             self.control_bus().unlock_bus()
@@ -100,8 +94,8 @@ class BackPlane:
         devices_busy = True
         while devices_busy:
             devices_busy = False
-            for device in self._devices:
-                if device.finished() is False:
+            for device in self.__devices:
+                if device.is_finished() is False:
                     devices_busy = True
                     break
             time.sleep(.1)

@@ -2,8 +2,6 @@
 
 import sys
 
-from Machine.Devices.Bases.class_base_device import BaseDevice
-
 
 def intro():
     print("RubbishPy")

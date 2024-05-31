@@ -1,4 +1,5 @@
 import threading
+from typing import List
 
 from Constants.class_instruction_set import InstructionSet
 from Machine.Buses.class_address_bus import AddressBus
@@ -30,7 +31,7 @@ class ROM(BaseDevice):
     def start(self):
         threading.Thread(target=self.process_buses, name=self.get_device_id() + "::process_buses").start()
 
-    def __init__(self, starting_address, address_bus: AddressBus, data_bus: DataBus,
+    def __init__(self, starting_address: int, address_bus: AddressBus, data_bus: DataBus,
                  control_bus: ControlBus, interrupt_bus: InterruptBus):
         """
         Constructs all the necessary attributes for the ROM device.
@@ -38,7 +39,7 @@ class ROM(BaseDevice):
         Parameters:
             starting_address (int): The starting address of the ROM device.
         """
-        self.__memory = []
+        self.__memory: List[int] = []
         self.__memory.append(InstructionSet.LR)
         self.__memory.append(1)
         self.__memory.append(1)

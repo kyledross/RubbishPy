@@ -1,3 +1,6 @@
+from typing import List
+
+
 class RubbishCompiler:
     """
     The RubbishCompiler class represents a compiler for the Rubbish language.
@@ -13,7 +16,7 @@ class RubbishCompiler:
         self.labels = {}
         self.address: int = address
 
-    def compile(self, source_pathname):
+    def compile(self, source_pathname: str):
         """
         This method compiles the source code into machine code.
         It goes through two phases:
@@ -80,7 +83,7 @@ class RubbishCompiler:
         finally:
             pass
 
-    def read_file(self, source_pathname, lines):
+    def read_file(self, source_pathname: str, lines: List[str]):
         with open(source_pathname, 'r') as file:
             for line in file:
                 strip = line.strip()
@@ -91,7 +94,7 @@ class RubbishCompiler:
 
     # Function to cross-reference register
     @staticmethod
-    def cross_reference_register(parameters, parameter_number):
+    def cross_reference_register(parameters: List[str], parameter_number: int):
         """
         This function checks if the parameter starts with '@' and if so, it multiplies the parameter by -1.
         This is used to indicate that the parameter is a register.
@@ -101,7 +104,7 @@ class RubbishCompiler:
         if str(parameters[parameter_number]).startswith("@"):
             parameters[parameter_number] = str(int(parameters[parameter_number][1:]) * -1)
 
-    def cross_reference_label(self, parameters, parameter_number, cross_reference_labels: bool = False):
+    def cross_reference_label(self, parameters: List[str], parameter_number: int, cross_reference_labels: bool = False):
         """
         This method cross-references a label.
         If the parameter starts with ':' or is not numeric, it replaces the parameter with the address of the label.
@@ -118,9 +121,9 @@ class RubbishCompiler:
             if cross_reference_labels:
                 parameters[parameter_number] = str(self.get_address_from_label(parameter))
             else:
-                parameters[parameter_number] = 0  # dummy placeholder
+                parameters[parameter_number] = "0"  # dummy placeholder
 
-    def get_address(self, address_parameter):
+    def get_address(self, address_parameter: str):
         """
         This method returns the address for the given parameter.
         If the parameter is a digit, it returns the integer value of the parameter.
@@ -132,7 +135,7 @@ class RubbishCompiler:
             return int(address_parameter)
         return self.labels[address_parameter]
 
-    def add_instruction(self, instruction, parameters, code, cross_reference_labels: bool):
+    def add_instruction(self, instruction: int, parameters: List[str], code: List[int], cross_reference_labels: bool):
         """
         This method adds an instruction to the code.
         Cross-references labels and registers and then adds the instruction and its parameters to the code.
@@ -148,7 +151,7 @@ class RubbishCompiler:
             self.cross_reference_register(parameters, parameter_index)
             code.append(int(parameters[parameter_index]))
 
-    def get_address_from_label(self, label):
+    def get_address_from_label(self, label: str):
         """
         This method returns the address for the given label.
         :param label: The label to get the address for.
@@ -158,7 +161,7 @@ class RubbishCompiler:
 
     # Function to get instruction code
     @staticmethod
-    def get_instruction_code(instruction):
+    def get_instruction_code(instruction: str):
         """
         This function returns the op code for the given instruction.
         :param instruction: The instruction to get the op code for.
@@ -175,7 +178,7 @@ class RubbishCompiler:
         return op_codes[instruction]
 
     @staticmethod
-    def is_numeric(s):
+    def is_numeric(s: str):
         """
         This function checks if the input string can be converted to a float.
         It returns True if the string can be converted to a float, otherwise it returns False.

@@ -171,7 +171,7 @@ class MachineBuilder:
                 print(f"Device {device_to_add} not found.")
 
     @staticmethod
-    def read_file(filename):
+    def read_file(filename: str):
         """
         Function to read a file and return its contents.
 

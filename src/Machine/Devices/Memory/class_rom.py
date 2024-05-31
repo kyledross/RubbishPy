@@ -49,13 +49,13 @@ class ROM(BaseDevice):
         self._memory.append(InstructionSet.JMP)
         self._memory.append(0)
         super().__init__(starting_address, len(self._memory), address_bus, data_bus, control_bus, interrupt_bus)
-        threading.Thread(target=self.process_buses).start()
+        threading.Thread(target=self.process_buses, name=self._deviceId + "::process_buses").start()
 
     def process_buses(self):
         while self.is_running():
             time.sleep(0)
             self.stop_running_if_halt_detected()
-            if self.control_bus().is_running():
+            if self.control_bus().is_power_on():
                 if self.address_is_valid(self.address_bus()):
                     if self.control_bus().get_read_request():
                         self.data_bus().set_data(

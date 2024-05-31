@@ -1,3 +1,4 @@
+import random
 import sys
 
 from Constants.class_interrupts import Interrupts
@@ -5,6 +6,24 @@ from Machine.Buses.class_interrupt_bus import InterruptBus
 from Machine.Buses.class_address_bus import AddressBus
 from Machine.Buses.class_data_bus import DataBus
 from Machine.Buses.class_control_bus import ControlBus
+
+
+def base36encode(number):
+    """
+    Converts an integer to a base36 string.
+    """
+    if not isinstance(number, int):
+        raise TypeError('number must be an integer')
+
+    # noinspection SpellCheckingInspection
+    alphabet = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+
+    base36 = ''
+    while number:
+        number, i = divmod(number, 36)
+        base36 = alphabet[i] + base36
+
+    return base36 or alphabet[0]
 
 
 class BaseDevice:
@@ -17,6 +36,7 @@ class BaseDevice:
     _running: bool = False
     _startingAddress: int = 0  # The starting address of the device
     _size: int = 0  # The size of the device
+    _deviceId: str  # The unique device ID
 
     def __init__(self, starting_address: int, size: int, address_bus: AddressBus, data_bus: DataBus,
                  control_bus: ControlBus, interrupt_bus: InterruptBus):
@@ -34,6 +54,16 @@ class BaseDevice:
         self._interruptBus = interrupt_bus
         self._running = True
         self._finished = False
+        self._deviceId = self.generate_device_id()  # Generate a unique device ID
+
+    @classmethod
+    def generate_device_id(cls):
+        """
+        This method generates a unique device ID.
+        :return: A unique device ID.
+        """
+        device_id = cls.__name__ + "_" + base36encode(random.randint(0, 36 ** 2))
+        return device_id
 
     def finished(self):
         return self._finished

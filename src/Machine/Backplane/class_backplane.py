@@ -84,11 +84,11 @@ class BackPlane:
         Raises:
             None
         """
-        self.control_bus().start_running()
-        while self.control_bus().is_running():
+        self.control_bus().power_on()
+        while self.control_bus().is_power_on():
             if self._interruptBus.test_interrupt(Interrupts.halt):
                 print("HALT interrupt detected.")
-                self.control_bus().stop_running()
+                self.control_bus().power_off()
                 break
             time.sleep(.5)  # allow other threads (such as console 3.1) to run
         self.wait_for_devices_to_finish()

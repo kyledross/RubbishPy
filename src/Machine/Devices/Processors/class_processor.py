@@ -1,7 +1,9 @@
 import collections
+import threading
 from collections import deque
 
-import Constants.class_interrupts
+import time
+
 from Machine.Buses.class_address_bus import AddressBus
 from Machine.Buses.class_control_bus import ControlBus
 from Machine.Buses.class_data_bus import DataBus
@@ -9,6 +11,7 @@ from Machine.Buses.class_interrupt_bus import InterruptBus
 from Machine.Devices.Bases.class_base_processor import BaseProcessor
 from Constants.class_instruction_set import InstructionSet
 from Constants.class_compare_results import CompareResults
+from Constants.class_interrupts import Interrupts
 
 
 class Phases:
@@ -26,15 +29,16 @@ class Phases:
 
 
 def execute_halt(interrupt_bus):
-    interrupt_bus.set_interrupt(Constants.class_interrupts.Interrupts.halt)
+    interrupt_bus.set_interrupt(Interrupts.halt)
 
 
 # noinspection DuplicatedCode
 class Processor(BaseProcessor):
 
-    def __init__(self, starting_address: int, size: int, disable_instruction_caching: bool):
+    def __init__(self, starting_address: int, size: int, disable_instruction_caching: bool,
+                 address_bus: AddressBus, data_bus: DataBus, control_bus: ControlBus, interrupt_bus: InterruptBus):
         # registers
-        super().__init__(starting_address, size)
+        super().__init__(starting_address, size, address_bus, data_bus, control_bus, interrupt_bus)
         self.disable_instruction_caching = disable_instruction_caching
         self.current_instruction: int = -1
         self.data_pointer: int = 0
@@ -60,9 +64,21 @@ class Processor(BaseProcessor):
         # instruction caching
         self.instruction_and_operand_cache = {}
 
-    def cycle(self, address_bus: AddressBus, data_bus: DataBus, control_bus: ControlBus, interrupt_bus: InterruptBus):
-        self.cache_instruction(address_bus, control_bus, data_bus)
+        threading.Thread(target=self.process_cycle).start()
 
+    def process_cycle(self):
+        while self.is_running():
+            time.sleep(0)
+            self.stop_running_if_halt_detected()
+            if self.control_bus().is_running():
+                self.perform_instruction_processing()
+
+    def perform_instruction_processing(self):
+        address_bus = self.address_bus()
+        control_bus = self.control_bus()
+        data_bus = self.data_bus()
+        interrupt_bus = self.interrupt_bus()
+        self.cache_instruction(address_bus, control_bus, data_bus)
         while True:  # loop until a cached instruction request is not fulfilled
             # Interrupt processing
             if self.phase == Phases.NothingPending:

@@ -1,3 +1,6 @@
+import threading
+import time
+
 from Machine.Buses.class_address_bus import AddressBus
 from Machine.Buses.class_control_bus import ControlBus
 from Machine.Buses.class_data_bus import DataBus
@@ -27,7 +30,8 @@ class ROM(BaseDevice):
 
     _memory = []
 
-    def __init__(self, starting_address):
+    def __init__(self, starting_address, address_bus: AddressBus, data_bus: DataBus,
+                 control_bus: ControlBus, interrupt_bus: InterruptBus):
         """
         Constructs all the necessary attributes for the ROM device.
 
@@ -44,20 +48,17 @@ class ROM(BaseDevice):
         self._memory.append(InstructionSet.DEBUG)
         self._memory.append(InstructionSet.JMP)
         self._memory.append(0)
-        super().__init__(starting_address, len(self._memory))
+        super().__init__(starting_address, len(self._memory), address_bus, data_bus, control_bus, interrupt_bus)
+        threading.Thread(target=self.process_buses).start()
 
-    def cycle(self, address_bus: AddressBus, data_bus: DataBus, control_bus: ControlBus, interrupt_bus: InterruptBus):
-        """
-        Executes a cycle of the ROM device.
-
-        Parameters:
-            address_bus (AddressBus): The address bus.
-            data_bus (DataBus): The data bus.
-            control_bus (ControlBus): The control bus.
-            interrupt_bus (InterruptBus): The interrupt bus.
-        """
-        if self.address_is_valid(address_bus):
-            if control_bus.get_read_request():
-                data_bus.set_data(self._memory[address_bus.get_address() - super().starting_address])
-                control_bus.set_read_request(False)
-                control_bus.set_response(True)
+    def process_buses(self):
+        while self.is_running():
+            time.sleep(0)
+            self.stop_running_if_halt_detected()
+            if self.control_bus().is_running():
+                if self.address_is_valid(self.address_bus()):
+                    if self.control_bus().get_read_request():
+                        self.data_bus().set_data(
+                            self._memory[self.address_bus().get_address() - super().starting_address])
+                        self.control_bus().set_read_request(False)
+                        self.control_bus().set_response(True)

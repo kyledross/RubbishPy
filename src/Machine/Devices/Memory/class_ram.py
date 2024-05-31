@@ -77,3 +77,4 @@ class RAM(BaseDevice):
                             self.data_bus().get_data())
                         self.control_bus().set_write_request(False)
                         self.control_bus().set_response(True)
+        self._finished = True

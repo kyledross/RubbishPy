@@ -62,3 +62,4 @@ class ROM(BaseDevice):
                             self._memory[self.address_bus().get_address() - super().starting_address])
                         self.control_bus().set_read_request(False)
                         self.control_bus().set_response(True)
+        self._finished = True

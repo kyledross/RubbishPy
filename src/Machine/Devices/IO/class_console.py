@@ -341,3 +341,4 @@ class Console(BaseDevice):
                         self.write_buffer_to_queue()
                         self.control_bus().set_write_request(False)
                         self.control_bus().set_response(True)
+        self._finished = True

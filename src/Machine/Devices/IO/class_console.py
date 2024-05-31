@@ -98,6 +98,7 @@ class Console(BaseDevice):
             if os.name == 'nt':  # Windows
                 # noinspection SpellCheckingInspection
                 windir = os.getenv('WINDIR')
+                # noinspection SpellCheckingInspection
                 font_path = os.path.join(windir, 'Fonts', 'consola.ttf')
             else:  # Unix/Linux/MacOS/BSD/etc
                 font_path = '/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf'

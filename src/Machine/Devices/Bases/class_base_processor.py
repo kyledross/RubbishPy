@@ -9,4 +9,3 @@ class BaseProcessor(BaseDevice, ABC):
     It inherits from the BaseDevice class and provides a common interface
     for all processors, including a method to cycle the processor.
     """
-

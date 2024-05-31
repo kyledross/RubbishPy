@@ -1,5 +1,6 @@
 import sys
-from abc import abstractmethod
+
+from Constants.class_interrupts import Interrupts
 from Machine.Buses.class_interrupt_bus import InterruptBus
 from Machine.Buses.class_address_bus import AddressBus
 from Machine.Buses.class_data_bus import DataBus
@@ -13,10 +14,12 @@ class BaseDevice:
     cycle the device and check if an address is valid.
     """
 
+    _running: bool = False
     _startingAddress: int = 0  # The starting address of the device
     _size: int = 0  # The size of the device
 
-    def __init__(self, starting_address: int, size: int):
+    def __init__(self, starting_address: int, size: int, address_bus: AddressBus, data_bus: DataBus,
+                 control_bus: ControlBus, interrupt_bus: InterruptBus):
         """
         Constructor for the BaseDevice class.
         Initializes the starting address and size of the device.
@@ -25,6 +28,30 @@ class BaseDevice:
         """
         self._startingAddress = starting_address
         self._size = size
+        self._addressBus = address_bus
+        self._dataBus = data_bus
+        self._controlBus = control_bus
+        self._interruptBus = interrupt_bus
+        self._running = True
+
+    def is_running(self) -> bool:
+        """
+        This method returns whether the device is running or not.
+        :return: True if the device is running, False otherwise.
+        """
+        return self._running
+
+    def address_bus(self):
+        return self._addressBus
+
+    def data_bus(self):
+        return self._dataBus
+
+    def control_bus(self):
+        return self._controlBus
+
+    def interrupt_bus(self):
+        return self._interruptBus
 
     @property
     def starting_address(self) -> int:
@@ -42,21 +69,6 @@ class BaseDevice:
         """
         return self._size
 
-    @abstractmethod
-    def cycle(self, address_bus: AddressBus, data_bus: DataBus,
-              control_bus: ControlBus, interrupt_bus: InterruptBus):
-        """
-        This method is an abstract method that must be implemented by all subclasses.
-        It represents a cycle of the device, which involves interaction with the buses.
-        :param address_bus: The address bus to interact with.
-        :param data_bus: The data bus to interact with.
-        :param control_bus: The control bus to interact with.
-        :param interrupt_bus: The interrupt bus to interact with.
-        :raise NotImplementedError: If this method is called directly from the base class.
-        """
-        raise NotImplementedError("BaseDevice.Cycle: You may not call this method directly. It must be implemented by "
-                                  "a subclass.")
-
     def address_is_valid(self, address_bus: AddressBus) -> bool:
         """
         This method checks if an address on the address bus is valid for this device.
@@ -69,6 +81,11 @@ class BaseDevice:
             return True
         else:
             return False
+
+    def stop_running_if_halt_detected(self):
+        # if halt interrupt has been raised, stop the thread
+        if self.interrupt_bus().test_interrupt(Interrupts.halt):
+            self._running = False
 
 
 def log_message(message):

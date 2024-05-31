@@ -34,7 +34,7 @@ def execute_halt(interrupt_bus):
 class Processor(BaseProcessor):
 
     def start(self):
-        threading.Thread(target=self.process_cycle, name=self._deviceId + "::process_cycle").start()
+        threading.Thread(target=self.process_cycle, name=self.get_device_id() + "::process_cycle").start()
 
     def __init__(self, starting_address: int, size: int, disable_instruction_caching: bool,
                  address_bus: AddressBus, data_bus: DataBus, control_bus: ControlBus, interrupt_bus: InterruptBus):
@@ -72,7 +72,7 @@ class Processor(BaseProcessor):
             if self.control_bus().is_power_on():
                 self.perform_instruction_processing()
             self.control_bus().unlock_bus()
-        self._finished = True
+        self.set_finished()
 
     def perform_instruction_processing(self):
         address_bus = self.address_bus()

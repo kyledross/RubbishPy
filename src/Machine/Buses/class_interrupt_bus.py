@@ -8,14 +8,12 @@ class InterruptBus:
     It provides methods to set, test, and clear interrupts on the bus.
     """
 
-    _interruptBus: Constants.class_interrupts.IntFlag = Interrupts.none
-
     def __init__(self):
         """
         Constructor for the InterruptBus class.
         Initializes the interrupts on the bus to 0.
         """
-        self._interruptBus = Interrupts.none
+        self.__interruptBus = Interrupts.none
 
     def set_interrupt(self, value: Constants.class_interrupts):
         """
@@ -23,7 +21,7 @@ class InterruptBus:
         It uses bitwise OR to set the interrupt.
         :param value: The interrupt to set on the bus.
         """
-        self._interruptBus = self._interruptBus | value
+        self.__interruptBus = self.__interruptBus | value
 
     def test_interrupt(self, interrupt_number: Constants.class_interrupts) -> bool:
         """
@@ -32,7 +30,7 @@ class InterruptBus:
         :param interrupt_number: The interrupt to test on the bus.
         :return: True if the interrupt is set, False otherwise.
         """
-        return self._interruptBus & interrupt_number != Interrupts.none
+        return self.__interruptBus & interrupt_number != Interrupts.none
 
     def clear_interrupt(self, interrupt_number: Constants.class_interrupts):
         """
@@ -40,4 +38,4 @@ class InterruptBus:
         It uses bitwise AND with bitwise NOT to clear the interrupt.
         :param interrupt_number: The interrupt to clear on the bus.
         """
-        self._interruptBus = self._interruptBus & ~interrupt_number
+        self.__interruptBus = self.__interruptBus & ~interrupt_number

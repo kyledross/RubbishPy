@@ -29,7 +29,7 @@ class RAM(BaseDevice):
     """
 
     def start(self):
-        threading.Thread(target=self.process_buses, name=self._deviceId + "::process_buses").start()
+        threading.Thread(target=self.process_buses, name=self.get_device_id() + "::process_buses").start()
 
     _memory = []
 
@@ -79,4 +79,4 @@ class RAM(BaseDevice):
                         self.control_bus().set_write_request(False)
                         self.control_bus().set_response(True)
             self.control_bus().unlock_bus()
-        self._finished = True
+        self.set_finished()

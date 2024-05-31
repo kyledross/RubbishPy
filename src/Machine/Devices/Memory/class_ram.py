@@ -63,7 +63,7 @@ class RAM(BaseDevice):
 
     def process_buses(self):
         while self.is_running():
-            time.sleep(0)
+            self.control_bus().lock_bus()
             self.stop_running_if_halt_detected()
             if self.control_bus().is_power_on():
                 if self.address_is_valid(self.address_bus()):
@@ -77,4 +77,5 @@ class RAM(BaseDevice):
                             self.data_bus().get_data())
                         self.control_bus().set_write_request(False)
                         self.control_bus().set_response(True)
+            self.control_bus().unlock_bus()
         self._finished = True

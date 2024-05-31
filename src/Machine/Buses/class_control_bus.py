@@ -97,4 +97,4 @@ class ControlBus:
 
     def power_off(self):
         """ This method starts the bus running. """
-        self._PowerOn = True
+        self._PowerOn = False

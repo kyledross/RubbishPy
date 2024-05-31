@@ -15,7 +15,7 @@ class RAM(BaseDevice):
 
     Attributes
     ----------
-    _memory : list
+    __memory : list
         a list to store the memory of the RAM device
 
     Methods
@@ -31,8 +31,6 @@ class RAM(BaseDevice):
     def start(self):
         threading.Thread(target=self.process_buses, name=self.get_device_id() + "::process_buses").start()
 
-    _memory = []
-
     def __init__(self, starting_address, size, address_bus: AddressBus, data_bus: DataBus,
                  control_bus: ControlBus, interrupt_bus: InterruptBus):
         """
@@ -43,7 +41,7 @@ class RAM(BaseDevice):
             size (int): The size of the RAM device.
         """
         super().__init__(starting_address, size, address_bus, data_bus, control_bus, interrupt_bus)
-        self._memory = [0] * size
+        self.__memory = [0] * size
 
     def load_data(self, data):
         """
@@ -55,12 +53,12 @@ class RAM(BaseDevice):
         Raises:
             ValueError: If the length of the data is greater than the memory size.
         """
-        if len(data) > len(self._memory):
+        if len(data) > len(self.__memory):
             raise ValueError("Data must be the same length or less as the memory size.")
-        memory_size = len(self._memory)
-        self._memory = []
-        self._memory += data
-        self._memory += [0] * (memory_size - len(self._memory))
+        memory_size = len(self.__memory)
+        self.__memory = []
+        self.__memory += data
+        self.__memory += [0] * (memory_size - len(self.__memory))
 
     def process_buses(self):
         while self.is_running():
@@ -70,11 +68,11 @@ class RAM(BaseDevice):
                 if self.address_is_valid(self.address_bus()):
                     if self.control_bus().get_read_request():
                         self.data_bus().set_data(
-                            self._memory[self.address_bus().get_address() - self.starting_address])
+                            self.__memory[self.address_bus().get_address() - self.starting_address])
                         self.control_bus().set_read_request(False)
                         self.control_bus().set_response(True)
                     if self.control_bus().get_write_request():
-                        self._memory[self.address_bus().get_address() - self.starting_address] = (
+                        self.__memory[self.address_bus().get_address() - self.starting_address] = (
                             self.data_bus().get_data())
                         self.control_bus().set_write_request(False)
                         self.control_bus().set_response(True)

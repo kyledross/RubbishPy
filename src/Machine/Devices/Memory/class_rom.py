@@ -16,7 +16,7 @@ class ROM(BaseDevice):
 
     Attributes
     ----------
-    _memory : list
+    __memory : list
         a list to store the memory of the ROM device
 
     Methods
@@ -30,7 +30,7 @@ class ROM(BaseDevice):
     def start(self):
         threading.Thread(target=self.process_buses, name=self.get_device_id() + "::process_buses").start()
 
-    _memory = []
+
 
     def __init__(self, starting_address, address_bus: AddressBus, data_bus: DataBus,
                  control_bus: ControlBus, interrupt_bus: InterruptBus):
@@ -40,17 +40,18 @@ class ROM(BaseDevice):
         Parameters:
             starting_address (int): The starting address of the ROM device.
         """
-        self._memory.append(InstructionSet.LR)
-        self._memory.append(1)
-        self._memory.append(1)
-        self._memory.append(InstructionSet.LR)
-        self._memory.append(2)
-        self._memory.append(2)
-        self._memory.append(InstructionSet.ADD)
-        self._memory.append(InstructionSet.DEBUG)
-        self._memory.append(InstructionSet.JMP)
-        self._memory.append(0)
-        super().__init__(starting_address, len(self._memory), address_bus, data_bus, control_bus, interrupt_bus)
+        self.__memory = []
+        self.__memory.append(InstructionSet.LR)
+        self.__memory.append(1)
+        self.__memory.append(1)
+        self.__memory.append(InstructionSet.LR)
+        self.__memory.append(2)
+        self.__memory.append(2)
+        self.__memory.append(InstructionSet.ADD)
+        self.__memory.append(InstructionSet.DEBUG)
+        self.__memory.append(InstructionSet.JMP)
+        self.__memory.append(0)
+        super().__init__(starting_address, len(self.__memory), address_bus, data_bus, control_bus, interrupt_bus)
 
     def process_buses(self):
         while self.is_running():
@@ -60,7 +61,7 @@ class ROM(BaseDevice):
                 if self.address_is_valid(self.address_bus()):
                     if self.control_bus().get_read_request():
                         self.data_bus().set_data(
-                            self._memory[self.address_bus().get_address() - super().starting_address])
+                            self.__memory[self.address_bus().get_address() - super().starting_address])
                         self.control_bus().set_read_request(False)
                         self.control_bus().set_response(True)
             self.control_bus().unlock_bus()

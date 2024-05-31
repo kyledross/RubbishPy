@@ -181,6 +181,7 @@ class Console(BaseDevice):
     def __init__(self, starting_address: int, width: int, height: int, interrupt_number: int, address_bus: AddressBus,
                  data_bus: DataBus, control_bus: ControlBus, interrupt_bus: InterruptBus):
         super().__init__(starting_address, 1, address_bus, data_bus, control_bus, interrupt_bus)
+        self.output_form = None
         self.output_queue = queue.Queue()
         self.input_queue = queue.Queue()
         self.display = self.Display(console_device_id=self._deviceId, output_q=self.output_queue,
@@ -192,10 +193,13 @@ class Console(BaseDevice):
         self.height: int = height
         self.interrupt_number: int = interrupt_number
         self.display_buffer = [[DisplayElement(x, y, ' ') for x in range(80)] for y in range(25)]
+
+    def start(self):
         self.output_form = threading.Thread(target=self.display.run, name=self._deviceId + "::display_run")
         self.output_form.start()
         self.write_buffer_to_queue()
         threading.Thread(target=self.process_buses, name=self._deviceId + "::process_buses").start()
+
 
     def send_cursor_location(self):
         self.output_queue.put(DisplayControl('cursor_x', str(self.cursor_x)))

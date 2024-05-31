@@ -1,3 +1,4 @@
+import abc
 import random
 import sys
 
@@ -26,7 +27,7 @@ def base36encode(number):
     return base36 or alphabet[0]
 
 
-class BaseDevice:
+class BaseDevice(abc.ABC):
     """
     The BaseDevice class is an abstract base class for all devices in the system.
     It provides a common interface for all devices, including a method to
@@ -67,6 +68,13 @@ class BaseDevice:
 
     def finished(self):
         return self._finished
+
+    @abc.abstractmethod
+    def start(self):
+        """
+        This method starts the device.
+        """
+        pass
 
     def is_running(self) -> bool:
         """

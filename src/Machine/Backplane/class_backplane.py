@@ -85,6 +85,8 @@ class BackPlane:
             None
         """
         self.control_bus().power_on()
+        for device in self._devices:
+            device.start()
         while self.control_bus().is_power_on():
             self.control_bus().lock_bus()
             if self._interruptBus.test_interrupt(Interrupts.halt):

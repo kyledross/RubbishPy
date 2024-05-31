@@ -2,6 +2,8 @@
 
 import sys
 
+from Machine.Devices.Bases.class_base_device import BaseDevice
+
 
 def intro():
     print("RubbishPy")
@@ -51,7 +53,7 @@ def check_required_parameters(device: str, parameters, keys):
 # noinspection SpellCheckingInspection
 def parse_command_line():
     """Parses the command line arguments and returns a list of device groups.  Each device group is a dictionary"""
-    devices = []
+    devices = [BaseDevice]
     import argparse
 
     # Create an argument parser

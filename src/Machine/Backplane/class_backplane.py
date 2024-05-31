@@ -78,8 +78,8 @@ class BackPlane:
     def run(self):
         """
         Runs the backplane.
-        The backplane runs in an infinite loop, cycling through all the devices
-        connected to it.  When a HALT interrupt is detected, cycling stops.
+        The backplane runs creates instances of the buses and allows the devices to run on them.
+        When a HALT interrupt is detected, cycling stops.
 
         Raises:
             None

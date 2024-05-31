@@ -72,6 +72,7 @@ class Processor(BaseProcessor):
             self.stop_running_if_halt_detected()
             if self.control_bus().is_running():
                 self.perform_instruction_processing()
+        self._finished = True
 
     def perform_instruction_processing(self):
         address_bus = self.address_bus()

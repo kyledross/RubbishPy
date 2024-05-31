@@ -33,6 +33,10 @@ class BaseDevice:
         self._controlBus = control_bus
         self._interruptBus = interrupt_bus
         self._running = True
+        self._finished = False
+
+    def finished(self):
+        return self._finished
 
     def is_running(self) -> bool:
         """

@@ -90,5 +90,17 @@ class BackPlane:
                 print("HALT interrupt detected.")
                 self.control_bus().stop_running()
                 break
-            time.sleep(0)  # allow other threads (such as console 3.1) to run
+            time.sleep(.5)  # allow other threads (such as console 3.1) to run
+        self.wait_for_devices_to_finish()
+
+    def wait_for_devices_to_finish(self):
+        print("Waiting for devices to finish.")
+        devices_busy = True
+        while devices_busy:
+            devices_busy = False
+            for device in self._devices:
+                if device.finished() is False:
+                    devices_busy = True
+                    break
+            time.sleep(.1)
 

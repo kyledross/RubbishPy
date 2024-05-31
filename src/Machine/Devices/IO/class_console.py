@@ -89,7 +89,7 @@ class Console(BaseDevice):
 
         def run(self):
             pygame.init()
-            pygame.display.set_caption("RubbishPy Console v5")
+            pygame.display.set_caption("RubbishPy Console")
             icon = pygame.image.load('../Resources/graphics/console_icon.png')
             pygame.display.set_icon(icon)
             self.screen = pygame.display.set_mode((self.display_width * self.character_width,
@@ -97,7 +97,8 @@ class Console(BaseDevice):
             self.clock = pygame.time.Clock()
             if os.name == 'nt':  # Windows
                 # noinspection SpellCheckingInspection
-                font_path = 'C:\\Windows\\Fonts\\consola.ttf'  # Consolas is a monospace font in Windows
+                windir = os.getenv('WINDIR')
+                font_path = os.path.join(windir, 'Fonts', 'consola.ttf')
             else:  # Unix/Linux/MacOS/BSD/etc
                 font_path = '/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf'
             self.font = pygame.font.Font(font_path, self.font_size)

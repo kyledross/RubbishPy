@@ -34,6 +34,7 @@ class ControlBus:
         This method unlocks the bus.
         """
         self._busLock.release()
+        time.sleep(0)
 
     def get_read_request(self) -> bool:
         """

@@ -105,4 +105,3 @@ class BackPlane:
                     devices_busy = True
                     break
             time.sleep(.1)
-

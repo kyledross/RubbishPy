@@ -38,16 +38,16 @@ class BackPlane:
         Runs the backplane.
     """
 
-    def address_bus(self):
+    def address_bus(self) -> AddressBus:
         return self.__addressBus
 
-    def data_bus(self):
+    def data_bus(self) -> DataBus:
         return self.__dataBus
 
-    def control_bus(self):
+    def control_bus(self) -> ControlBus:
         return self.__controlBus
 
-    def interrupt_bus(self):
+    def interrupt_bus(self) -> InterruptBus:
         return self.__interruptBus
 
     def __init__(self):

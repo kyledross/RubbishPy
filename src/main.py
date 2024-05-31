@@ -1,6 +1,7 @@
 # lylt <3
 
 import sys
+from typing import List
 
 
 def intro():
@@ -33,7 +34,7 @@ def start_machine():
     print("Session ended.")
 
 
-def check_required_parameters(device: str, parameters, keys):
+def check_required_parameters(device: str, parameters: {str}, keys: List[str]):
     """
     Checks if any of the specified keys are None in the "parameters" dictionary.
 

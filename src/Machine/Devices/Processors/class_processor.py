@@ -1,6 +1,7 @@
 import collections
 import threading
 from collections import deque
+from enum import IntFlag
 
 from Constants.class_compare_results import CompareResults
 from Constants.class_instruction_set import InstructionSet
@@ -12,7 +13,7 @@ from Machine.Buses.class_interrupt_bus import InterruptBus
 from Machine.Devices.Bases.class_base_processor import BaseProcessor
 
 
-class Phases:
+class Phases(IntFlag):
     """
     The Phases class represents the different phases a processor can be in during its operation.
     It is a static class, meaning it does not need to be instantiated and its members can be accessed directly.
@@ -26,7 +27,7 @@ class Phases:
     # the Processor class's cycle method in regard to data caching.
 
 
-def execute_halt(interrupt_bus):
+def execute_halt(interrupt_bus: InterruptBus):
     interrupt_bus.set_interrupt(Interrupts.halt)
 
 
@@ -203,7 +204,7 @@ class Processor(BaseProcessor):
             if not self.cached_instruction_will_be_used(address_bus, control_bus, data_bus):
                 break
 
-    def cached_instruction_will_be_used(self, address_bus, control_bus, data_bus):
+    def cached_instruction_will_be_used(self, address_bus: AddressBus, control_bus: ControlBus, data_bus: DataBus):
         """
         Check if the cached instruction will be used in the current cycle.
         If instruction will be used, it is placed on the data bus and the control bus is updated, as if it were
@@ -228,7 +229,7 @@ class Processor(BaseProcessor):
             return True
         return False
 
-    def cache_instruction(self, address_bus, control_bus, data_bus):
+    def cache_instruction(self, address_bus: AddressBus, control_bus: ControlBus, data_bus: DataBus):
         """
         Cache incoming data from the data bus if the processor is awaiting an instruction or operand.
         Args:
@@ -279,7 +280,7 @@ class Processor(BaseProcessor):
         self.__sleep_mode = True
         self.finish_instruction(True)
 
-    def load_instruction(self, address_bus, control_bus, data_bus):
+    def load_instruction(self, address_bus: AddressBus, control_bus: ControlBus, data_bus: DataBus):
         if self.__phase == Phases.NothingPending:
             address_bus.set_address(self.__data_pointer)
             control_bus.set_read_request(True)
@@ -309,14 +310,14 @@ class Processor(BaseProcessor):
             self.__registers[3] = self.__registers[1] * self.__registers[2]
             self.finish_instruction(True)
 
-    def execute_lrr(self, address_bus, control_bus, data_bus):
+    def execute_lrr(self, address_bus: AddressBus, control_bus: ControlBus, data_bus: DataBus):
         value = self.request_two_operands(address_bus, control_bus, data_bus)
         if value is not None:
             destination_register = self.__internal_stack.pop()
             self.__registers[destination_register] = self.__registers[value]
             self.finish_instruction(True)
 
-    def execute_lrm(self, address_bus, control_bus, data_bus):
+    def execute_lrm(self, address_bus: AddressBus, control_bus: ControlBus, data_bus: DataBus):
         value = self.request_two_operands(address_bus, control_bus, data_bus)
         if value is not None:
             #  the data bus contains the memory address where the value destined for the register resides.
@@ -335,7 +336,7 @@ class Processor(BaseProcessor):
                 self.__registers[self.__internal_stack.pop()] = data_bus.get_data()
                 self.finish_instruction(True)
 
-    def execute_mrm(self, address_bus, control_bus, data_bus):
+    def execute_mrm(self, address_bus: AddressBus, control_bus: ControlBus, data_bus: DataBus):
         value = self.request_two_operands(address_bus, control_bus, data_bus)
         if value is not None:
             #  the data bus contains the memory address where the register's value is destined.
@@ -355,7 +356,7 @@ class Processor(BaseProcessor):
             if control_bus.get_response():
                 self.finish_instruction(True)
 
-    def execute_lr(self, address_bus, control_bus, data_bus):
+    def execute_lr(self, address_bus: AddressBus, control_bus: ControlBus, data_bus: DataBus):
         value = self.request_two_operands(address_bus, control_bus, data_bus)
         if value is not None:
             value: int = value
@@ -363,13 +364,13 @@ class Processor(BaseProcessor):
             self.__registers[destination_register] = value
             self.finish_instruction(True)
 
-    def execute_jmp(self, address_bus, control_bus, data_bus):
+    def execute_jmp(self, address_bus: AddressBus, control_bus: ControlBus, data_bus: DataBus):
         value = self.request_single_operand(address_bus, control_bus, data_bus)
         if value is not None:
             self.__data_pointer = value
             self.finish_instruction(False)
 
-    def execute_je(self, address_bus, control_bus, data_bus):
+    def execute_je(self, address_bus: AddressBus, control_bus: ControlBus, data_bus: DataBus):
         value = self.request_single_operand(address_bus, control_bus, data_bus)
         if value is not None:
             if self.__compare_result == CompareResults.Equal:
@@ -378,7 +379,7 @@ class Processor(BaseProcessor):
             else:
                 self.finish_instruction(True)
 
-    def execute_jne(self, address_bus, control_bus, data_bus):
+    def execute_jne(self, address_bus: AddressBus, control_bus: ControlBus, data_bus: DataBus):
         value = self.request_single_operand(address_bus, control_bus, data_bus)
         if value is not None:
             if (self.__compare_result == CompareResults.GreaterThan
@@ -388,7 +389,7 @@ class Processor(BaseProcessor):
             else:
                 self.finish_instruction(True)
 
-    def execute_jl(self, address_bus, control_bus, data_bus):
+    def execute_jl(self, address_bus: AddressBus, control_bus: ControlBus, data_bus: DataBus):
         value = self.request_single_operand(address_bus, control_bus, data_bus)
         if value is not None:
             if self.__compare_result == CompareResults.LessThan:
@@ -397,7 +398,7 @@ class Processor(BaseProcessor):
             else:
                 self.finish_instruction(True)
 
-    def execute_jg(self, address_bus, control_bus, data_bus):
+    def execute_jg(self, address_bus: AddressBus, control_bus: ControlBus, data_bus: DataBus):
         value = self.request_single_operand(address_bus, control_bus, data_bus)
         if value is not None:
             if self.__compare_result == CompareResults.GreaterThan:
@@ -416,26 +417,26 @@ class Processor(BaseProcessor):
                 self.__compare_result = CompareResults.LessThan
             self.finish_instruction(True)
 
-    def execute_push(self, address_bus, control_bus, data_bus):
+    def execute_push(self, address_bus: AddressBus, control_bus: ControlBus, data_bus: DataBus):
         value = self.request_single_operand(address_bus, control_bus, data_bus)
         if value is not None:
             self.__general_purpose_stack.append(self.__registers[value])
             self.__phase = Phases.NothingPending
             self.finish_instruction(True)
 
-    def execute_pop(self, address_bus, control_bus, data_bus):
+    def execute_pop(self, address_bus: AddressBus, control_bus: ControlBus, data_bus: DataBus):
         value = self.request_single_operand(address_bus, control_bus, data_bus)
         if value is not None:
             self.__registers[value] = self.__general_purpose_stack.pop()
             self.finish_instruction(True)
 
-    def execute_peek(self, address_bus, control_bus, data_bus):
+    def execute_peek(self, address_bus: AddressBus, control_bus: ControlBus, data_bus: DataBus):
         value = self.request_single_operand(address_bus, control_bus, data_bus)
         if value is not None:
             self.__registers[value] = self.__general_purpose_stack[-1]()
             self.finish_instruction(True)
 
-    def execute_call(self, address_bus, control_bus, data_bus):
+    def execute_call(self, address_bus: AddressBus, control_bus: ControlBus, data_bus: DataBus):
         value = self.request_single_operand(address_bus, control_bus, data_bus)
         if value is not None:
             self.__call_stack.append(self.__data_pointer)
@@ -452,7 +453,7 @@ class Processor(BaseProcessor):
                 self.__sleeping = True
             self.finish_instruction(True)
 
-    def execute_siv(self, address_bus, control_bus, data_bus):
+    def execute_siv(self, address_bus: AddressBus, control_bus: ControlBus, data_bus: DataBus):
         value = self.request_two_operands(address_bus, control_bus, data_bus)
         if value is not None:
             call_address: int = value
@@ -461,7 +462,7 @@ class Processor(BaseProcessor):
             self.finish_instruction(True)
 
     # instruction helpers
-    def request_operand(self, address_bus, control_bus):
+    def request_operand(self, address_bus: AddressBus, control_bus: ControlBus):
         self.__data_pointer += 1
         address_bus.set_address(self.__data_pointer)
         control_bus.set_read_request(True)
@@ -501,13 +502,13 @@ class Processor(BaseProcessor):
             self.__registers[3] = ~self.__registers[1]
             self.finish_instruction(True)
 
-    def execute_inc(self, address_bus, control_bus, data_bus):
+    def execute_inc(self, address_bus: AddressBus, control_bus: ControlBus, data_bus: DataBus):
         value = self.request_single_operand(address_bus, control_bus, data_bus)
         if value is not None:
             self.__registers[value] += 1
             self.finish_instruction(True)
 
-    def request_single_operand(self, address_bus, control_bus, data_bus):
+    def request_single_operand(self, address_bus: AddressBus, control_bus: ControlBus, data_bus: DataBus):
         if self.__phase == Phases.NothingPending:
             self.request_operand(address_bus, control_bus)
             self.__phase = Phases.AwaitingFirstOperand
@@ -516,7 +517,7 @@ class Processor(BaseProcessor):
                 return data_bus.get_data()
         return None
 
-    def request_two_operands(self, address_bus, control_bus, data_bus):
+    def request_two_operands(self, address_bus: AddressBus, control_bus: ControlBus, data_bus: DataBus):
         """
         Request two operands from the address bus and data bus.
         Args:

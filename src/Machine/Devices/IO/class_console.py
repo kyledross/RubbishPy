@@ -78,9 +78,8 @@ class DisplayElement(DisplayCommand):
 
 class Console(BaseDevice):
     class Display:
-        def __init__(self, console_device_id, output_q: queue.Queue, input_q: queue.Queue, display_width,
-                     display_height, character_width,
-                     character_height, font_size):
+        def __init__(self, console_device_id: str, output_q: queue.Queue, input_q: queue.Queue, display_width: int,
+                     display_height: int, character_width: int, character_height: int, font_size: int):
             self.__font = None
             self.__clock = None
             self.__screen = None
@@ -98,28 +97,28 @@ class Console(BaseDevice):
             self.__running: bool = False
             self.__parent_console_device_id = console_device_id
 
-        def set_cursor_x(self, x):
+        def set_cursor_x(self, x: int):
             self.__cursor_x = x
 
-        def get_cursor_x(self):
+        def get_cursor_x(self) -> int:
             return self.__cursor_x
 
-        def set_cursor_y(self, y):
+        def set_cursor_y(self, y: int):
             self.__cursor_y = y
 
-        def get_cursor_y(self):
+        def get_cursor_y(self) -> int:
             return self.__cursor_y
 
-        def set_cursor_state(self, state):
+        def set_cursor_state(self, state: bool):
             self.__cursor_state = state
 
-        def get_cursor_state(self):
+        def get_cursor_state(self) -> bool:
             return self.__cursor_state
 
-        def get_last_cursor_change(self):
+        def get_last_cursor_change(self) -> int:
             return self.__last_cursor_change
 
-        def set_last_cursor_change(self, change_time):
+        def set_last_cursor_change(self, change_time: int):
             self.__last_cursor_change = change_time
 
         def run(self):
@@ -231,28 +230,28 @@ class Console(BaseDevice):
         self.__interrupt_number: int = interrupt_number
         self.__display_buffer = [[DisplayElement(x, y, ' ') for x in range(80)] for y in range(25)]
 
-    def get_cursor_x(self):
+    def get_cursor_x(self) -> int:
         return self.__cursor_x
 
-    def set_cursor_x(self, cursor_x):
+    def set_cursor_x(self, cursor_x: int):
         self.__cursor_x = cursor_x
 
-    def get_cursor_y(self):
+    def get_cursor_y(self) -> int:
         return self.__cursor_y
 
-    def set_cursor_y(self, cursor_y):
+    def set_cursor_y(self, cursor_y: int):
         self.__cursor_y = cursor_y
 
-    def get_output_form(self):
+    def get_output_form(self) -> threading.Thread:
         return self.__output_form
 
-    def set_output_form(self, output_form):
+    def set_output_form(self, output_form: threading.Thread):
         self.__output_form = output_form
 
-    def get_display_buffer(self):
+    def get_display_buffer(self) -> list:
         return self.__display_buffer
 
-    def set_display_buffer(self, display_buffer):
+    def set_display_buffer(self, display_buffer: list):
         self.__display_buffer = display_buffer
 
     def start(self):
@@ -290,7 +289,7 @@ class Console(BaseDevice):
                 return x + 1
         return 0
 
-    def write_to_display_buffer(self, address, value: str):
+    def write_to_display_buffer(self, address: int, value: str):
         """
         This method writes a character to the display buffer at a given address.
         :param address: The address to write to.
@@ -300,7 +299,7 @@ class Console(BaseDevice):
         x = address % self.__width
         self.get_display_buffer()[y][x].set_character(character=value)
 
-    def handle_control_character(self, data):
+    def handle_control_character(self, data: int):
         """
         Handles control characters.
         Args:

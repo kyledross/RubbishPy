@@ -1,4 +1,5 @@
 import threading
+from typing import List
 
 from Machine.Buses.class_address_bus import AddressBus
 from Machine.Buses.class_control_bus import ControlBus
@@ -31,7 +32,7 @@ class RAM(BaseDevice):
     def start(self):
         threading.Thread(target=self.process_buses, name=self.get_device_id() + "::process_buses").start()
 
-    def __init__(self, starting_address, size, address_bus: AddressBus, data_bus: DataBus,
+    def __init__(self, starting_address: int, size: int, address_bus: AddressBus, data_bus: DataBus,
                  control_bus: ControlBus, interrupt_bus: InterruptBus):
         """
         Constructs all the necessary attributes for the RAM device.
@@ -41,9 +42,9 @@ class RAM(BaseDevice):
             size (int): The size of the RAM device.
         """
         super().__init__(starting_address, size, address_bus, data_bus, control_bus, interrupt_bus)
-        self.__memory = [0] * size
+        self.__memory: List[int] = [0] * size
 
-    def load_data(self, data):
+    def load_data(self, data: List[int]):
         """
         Loads data into the RAM device.
 
@@ -56,7 +57,7 @@ class RAM(BaseDevice):
         if len(data) > len(self.__memory):
             raise ValueError("Data must be the same length or less as the memory size.")
         memory_size = len(self.__memory)
-        self.__memory = []
+        self.__memory.clear()
         self.__memory += data
         self.__memory += [0] * (memory_size - len(self.__memory))
 

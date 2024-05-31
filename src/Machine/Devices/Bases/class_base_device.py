@@ -9,7 +9,7 @@ from Machine.Buses.class_data_bus import DataBus
 from Machine.Buses.class_control_bus import ControlBus
 
 
-def base36encode(number):
+def base36encode(number) -> str:
     """
     Converts an integer to a base36 string.
     """
@@ -42,18 +42,18 @@ class BaseDevice(abc.ABC):
         :param starting_address: The starting address of the device.
         :param size: The size of the device.
         """
-        self.__startingAddress = starting_address
-        self.__size = size
-        self.__addressBus = address_bus
-        self.__dataBus = data_bus
-        self.__controlBus = control_bus
-        self.__interruptBus = interrupt_bus
-        self.__running = True
-        self.__finished = False
-        self.__deviceId = self.generate_device_id()  # Generate a unique device ID
+        self.__startingAddress: int = starting_address
+        self.__size: int = size
+        self.__addressBus: AddressBus = address_bus
+        self.__dataBus: DataBus = data_bus
+        self.__controlBus: ControlBus = control_bus
+        self.__interruptBus: InterruptBus = interrupt_bus
+        self.__running: bool = True
+        self.__finished: bool = False
+        self.__deviceId: str = self.generate_device_id()
 
     @classmethod
-    def generate_device_id(cls):
+    def generate_device_id(cls) -> str:
         """
         This method generates a unique device ID.
         :return: A unique device ID.
@@ -61,7 +61,7 @@ class BaseDevice(abc.ABC):
         device_id = cls.__name__ + "_" + base36encode(random.randint(0, 36 ** 2))
         return device_id
 
-    def get_device_id(self):
+    def get_device_id(self) -> str:
         """
         This method returns the device ID.
         :return: The device ID.
@@ -71,7 +71,7 @@ class BaseDevice(abc.ABC):
     def set_finished(self):
         self.__finished = True
 
-    def is_finished(self):
+    def is_finished(self) -> bool:
         return self.__finished
 
     @abc.abstractmethod
@@ -88,16 +88,16 @@ class BaseDevice(abc.ABC):
         """
         return self.__running
 
-    def address_bus(self):
+    def address_bus(self) -> AddressBus:
         return self.__addressBus
 
-    def data_bus(self):
+    def data_bus(self) -> DataBus:
         return self.__dataBus
 
-    def control_bus(self):
+    def control_bus(self) -> ControlBus:
         return self.__controlBus
 
-    def interrupt_bus(self):
+    def interrupt_bus(self) -> InterruptBus:
         return self.__interruptBus
 
     @property
@@ -135,7 +135,7 @@ class BaseDevice(abc.ABC):
             self.__running = False
 
 
-def log_message(message):
+def log_message(message: str):
     """
     A function to log a message if a debugger is attached.
     Args:

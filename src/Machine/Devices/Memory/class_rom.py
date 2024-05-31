@@ -52,7 +52,6 @@ class ROM(BaseDevice):
         self._memory.append(0)
         super().__init__(starting_address, len(self._memory), address_bus, data_bus, control_bus, interrupt_bus)
 
-
     def process_buses(self):
         while self.is_running():
             self.control_bus().lock_bus()

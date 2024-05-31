@@ -30,8 +30,6 @@ class ROM(BaseDevice):
     def start(self):
         threading.Thread(target=self.process_buses, name=self.get_device_id() + "::process_buses").start()
 
-
-
     def __init__(self, starting_address, address_bus: AddressBus, data_bus: DataBus,
                  control_bus: ControlBus, interrupt_bus: InterruptBus):
         """

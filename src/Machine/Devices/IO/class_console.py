@@ -71,24 +71,37 @@ class Console(BaseDevice):
     class Display:
         def __init__(self, output_q: queue.Queue, input_q: queue.Queue, display_width, display_height, character_width,
                      character_height, font_size):
+            self.font = None
+            self.clock = None
+            self.screen = None
             self.display_queue = output_q  # a queue of DisplayElement objects to process
             self.input_queue = input_q
             self.character_width = character_width
             self.character_height = character_height
-            self.screen = pygame.display.set_mode((display_width * character_width, display_height * character_height))
-            self.clock = pygame.time.Clock()
-            if os.name == 'nt':  # Windows
-                font_path = 'C:\\Windows\\Fonts\\consola.ttf'  # Consolas is a monospace font in Windows
-            else:  # Unix/Linux/MacOS/BSD/etc
-                font_path = '/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf'
-            self.font = pygame.font.Font(font_path, font_size)
+            self.display_width = display_width
+            self.display_height = display_height
+            self.font_size = font_size
             self.cursor_state = False
-            self.last_cursor_change = pygame.time.get_ticks()
+            self.last_cursor_change = 0
             self.cursor_x: int = 0
             self.cursor_y: int = 0
             self.running: bool = False
 
         def run(self):
+            pygame.init()
+            pygame.display.set_caption("RubbishPy Console v5")
+            icon = pygame.image.load('../Resources/graphics/console_icon.png')
+            pygame.display.set_icon(icon)
+            self.screen = pygame.display.set_mode((self.display_width * self.character_width,
+                                                   self.display_height * self.character_height))
+            self.clock = pygame.time.Clock()
+            if os.name == 'nt':  # Windows
+                font_path = 'C:\\Windows\\Fonts\\consola.ttf'  # Consolas is a monospace font in Windows
+            else:  # Unix/Linux/MacOS/BSD/etc
+                font_path = '/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf'
+            self.font = pygame.font.Font(font_path, self.font_size)
+            self.last_cursor_change = pygame.time.get_ticks()
+
             self.running = True
             pygame.key.set_repeat(500, 50)
 
@@ -109,8 +122,6 @@ class Console(BaseDevice):
             event_thread.start()
 
             while self.running:
-                pygame.event.pump()
-                time.sleep(0)
                 while not self.display_queue.empty():
                     command = self.display_queue.get_nowait()
                     # if command is a DisplayControl object, process it
@@ -165,10 +176,6 @@ class Console(BaseDevice):
     def __init__(self, starting_address: int, width: int, height: int, interrupt_number: int, address_bus: AddressBus,
                  data_bus: DataBus, control_bus: ControlBus, interrupt_bus: InterruptBus):
         super().__init__(starting_address, 1, address_bus, data_bus, control_bus, interrupt_bus)
-        pygame.init()
-        pygame.display.set_caption("RubbishPy Console v5")
-        icon = pygame.image.load('../Resources/graphics/console_icon.png')
-        pygame.display.set_icon(icon)
         self.output_queue = queue.Queue()
         self.input_queue = queue.Queue()
         self.display = self.Display(self.output_queue, self.input_queue, display_width=width, display_height=height,

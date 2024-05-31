@@ -96,6 +96,7 @@ class Console(BaseDevice):
                                                    self.display_height * self.character_height))
             self.clock = pygame.time.Clock()
             if os.name == 'nt':  # Windows
+                # noinspection SpellCheckingInspection
                 font_path = 'C:\\Windows\\Fonts\\consola.ttf'  # Consolas is a monospace font in Windows
             else:  # Unix/Linux/MacOS/BSD/etc
                 font_path = '/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf'

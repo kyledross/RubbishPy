@@ -49,7 +49,7 @@ rtn
 ' Next Line routine
 ' =======================================
 ' Send a 13 (CR) then a 10 (LF) to the console (address 1024), then return from the interrupt handler
-CR: call play_startup_sound
+CR: call play_click
 lr 3 13
 mrm 3 1024
 lr 3 10
@@ -93,6 +93,7 @@ play_click:
 lr 1 50
 mrm 1 1025
 
+' frequency of 1000 Hz'
 lr 1 10000
 mrm 1 1025
 

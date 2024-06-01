@@ -26,23 +26,41 @@ def play_sounds(sounds: List[Sound]):
         channel = pygame.mixer.Channel(i)
         channel.play(sound)
         channels.append(channel)
+        time.sleep(0)
 
     while any(channel.get_busy() for channel in channels):
         time.sleep(0.05)
 
 
+def build_sound(duration_ms: int, frequency: float, volume: float):
+    sample_rate: int = 44100
+    n_samples: int = int(round(duration_ms / 1000 * sample_rate))
+    buf = numpy.zeros((n_samples, 2), dtype=numpy.int16)
+    max_sample = 2 ** 15 - 1
+    for s in range(n_samples):
+        t = float(s) / sample_rate
+        buf[s][0] = int(round(volume * max_sample * numpy.sin(2 * numpy.pi * frequency * t)))
+        buf[s][1] = int(round(volume * max_sample * numpy.sin(2 * numpy.pi * frequency * t)))
+    sound = pygame.sndarray.make_sound(buf)
+    return sound
+
+
 class SoundCard(BaseDevice):
     """
     A class used to represent a Sound Card device.
-    Sounds are played by sending frames to the sound card.
+    Sounds are played by sending frames to the sound card within a transaction.
+    All frames are built and queued up until the transaction is complete.
+    After the transaction is complete, the sounds in the queue are played.
+    A transaction is ended by sending -1 to the sound card.
     A frame consists of:
-    - Integer representing the length of the sound in milliseconds.
-    - One or more frames consisting of two integers:
-        - The first integer represents the frequency of the sound with two decimal places, packed * 100
-          For example, middle C of 261.63Hz would be 26163.
-        - The second integer represents the volume of the sound from 0 to 1, packed * 10
-    - A final integer of ASCII NULL (0) to signify the end of the sound.
-    When the frame is complete, the sound card will play the sound and the frame will be removed from the queue.
+        - Integer representing the length of the sound in milliseconds.
+        - One or more frames consisting of two integers:
+            - The first integer represents the frequency of the sound with two decimal places, packed * 100
+              For example, middle C of 261.63Hz would be 26163.
+            - The second integer represents the volume of the sound from 0 to 1, packed * 10
+        - A final integer of ASCII NULL (0) to signify the end of the sound frame
+        - A final integer of -1 to signify the end of the transaction
+    When the transaction is complete, the sound card will play the sound frames.
     """
 
     def start(self):
@@ -78,9 +96,18 @@ class SoundCard(BaseDevice):
 
     def process_queue(self):
         self.__processing_queue = True
+        transaction = []
+        while not self.complete_transaction_is_ready():
+            time.sleep(0.05)
         while self.complete_frame_is_ready():
-            sounds = self.build_sounds_from_queue()
-            play_sounds(sounds)
+            frame_sounds = self.build_sounds_from_queue()
+            transaction.append(frame_sounds)
+
+        for frame_sounds in transaction:
+            play_sounds(frame_sounds)
+        # there should be an end-transaction left on the queue here
+        # remove it
+        self.__command_queue.get()
         self.__processing_queue = False
 
     def wait_until_queue_is_empty(self):
@@ -99,15 +126,7 @@ class SoundCard(BaseDevice):
         while queue_byte != 0:
             frequency: float = queue_byte / 100
             volume: float = self.__command_queue.get() / 10
-            sample_rate: int = 44100
-            n_samples: int = int(round(duration_ms / 1000 * sample_rate))
-            buf = numpy.zeros((n_samples, 2), dtype=numpy.int16)
-            max_sample = 2 ** 15 - 1
-            for s in range(n_samples):
-                t = float(s) / sample_rate
-                buf[s][0] = int(round(volume * max_sample * numpy.sin(2 * numpy.pi * frequency * t)))
-                buf[s][1] = int(round(volume * max_sample * numpy.sin(2 * numpy.pi * frequency * t)))
-            sound = pygame.sndarray.make_sound(buf)
+            sound = build_sound(duration_ms, frequency, volume)
             sounds.append(sound)
             queue_byte = self.__command_queue.get()
         return sounds
@@ -115,7 +134,6 @@ class SoundCard(BaseDevice):
     def complete_frame_is_ready(self) -> bool:
         """
         This method checks the command queue for a complete command to play.
-        If a complete command is found, it is played.
         """
 
         # build a list of integers from the queue, without removing them from the queue, just yet.
@@ -127,5 +145,22 @@ class SoundCard(BaseDevice):
         queue_end_index = len(self.__command_queue.queue)
         for i in range(queue_end_index):
             if self.__command_queue.queue[i] == 0:
+                return True
+        return False
+
+    def complete_transaction_is_ready(self) -> bool:
+        """
+        This method checks the command queue for a complete transaction to play.
+        """
+
+        # build a list of integers from the queue, without removing them from the queue, just yet.
+        # we want to see if a complete frame is in the queue.
+
+        # search the queue from index 0 to the end of the queue, looking for an ASCII NULL.
+        # if an ASCII NULL is found, we have a complete frame.
+        # if an ASCII NULL is not found, we do not have a complete frame.
+        queue_end_index = len(self.__command_queue.queue)
+        for i in range(queue_end_index):
+            if self.__command_queue.queue[i] == -1:
                 return True
         return False

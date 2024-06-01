@@ -27,11 +27,13 @@ call send_e
 call send_volume
 call end_frame
 
+call end_transaction
+
 halt
 
 send_duration:
 ' first byte of frame is the duration in milliseconds'
-lr 1 1000
+lr 1 250
 mrm 1 1025
 rtn
 
@@ -54,6 +56,10 @@ lr 1 0
 mrm 1 1025
 rtn
 
+end_transaction:
+lr 1 -1
+mrm 1 1025
+rtn
 
 send_d:
 lr 1 29366

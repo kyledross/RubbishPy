@@ -8,6 +8,7 @@ call send_duration
 call send_c
 call send_volume
 call end_frame
+call end_transaction
 
 call send_duration
 call send_d
@@ -28,7 +29,6 @@ call send_volume
 call end_frame
 
 call end_transaction
-
 halt
 
 send_duration:

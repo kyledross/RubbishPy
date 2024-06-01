@@ -52,12 +52,12 @@ rtn
 
 end_frame:
 ' end frame with zero
-lr 1 0
+lr 1 -1
 mrm 1 1025
 rtn
 
 end_transaction:
-lr 1 -1
+lr 1 -2
 mrm 1 1025
 rtn
 

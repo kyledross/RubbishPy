@@ -1,18 +1,19 @@
 import queue
 import threading
 import time
-
 import numpy
-from typing import List
-
 import pygame
 from pygame.mixer import Sound
+from typing import List
 
 from Machine.Buses.class_address_bus import AddressBus
 from Machine.Buses.class_control_bus import ControlBus
 from Machine.Buses.class_data_bus import DataBus
 from Machine.Buses.class_interrupt_bus import InterruptBus
 from Machine.Devices.Bases.class_base_device import BaseDevice
+
+END_OF_FRAME = -1
+END_OF_TRANSACTION = -2
 
 
 def play_sounds(sounds: List[Sound]):
@@ -51,15 +52,14 @@ class SoundCard(BaseDevice):
     Sounds are played by sending frames to the sound card within a transaction.
     All frames are built and queued up until the transaction is complete.
     After the transaction is complete, the sounds in the queue are played.
-    A transaction is ended by sending -1 to the sound card.
     A frame consists of:
         - Integer representing the length of the sound in milliseconds.
         - One or more frames consisting of two integers:
             - The first integer represents the frequency of the sound with two decimal places, packed * 100
               For example, middle C of 261.63Hz would be 26163.
             - The second integer represents the volume of the sound from 0 to 1, packed * 10
-        - A final integer of ASCII NULL (0) to signify the end of the sound frame
-        - A final integer of -1 to signify the end of the transaction
+        - A final integer of -1 to signify the end of the sound frame
+        - A final integer of -2 to signify the end of the transaction
     When the transaction is complete, the sound card will play the sound frames.
     """
 
@@ -95,6 +95,11 @@ class SoundCard(BaseDevice):
         self.set_finished()
 
     def process_queue(self):
+        """
+        This method processes the command queue.
+        Returns:
+
+        """
         self.__processing_queue = True
         transaction = []
         while not self.complete_transaction_is_ready():
@@ -111,6 +116,11 @@ class SoundCard(BaseDevice):
         self.__processing_queue = False
 
     def wait_until_queue_is_empty(self):
+        """
+        This method waits until the command queue is empty.
+        Returns:
+
+        """
         while self.__processing_queue:
             time.sleep(0.05)
 
@@ -123,7 +133,7 @@ class SoundCard(BaseDevice):
         duration_ms = self.__command_queue.get()
         queue_byte: int
         queue_byte = self.__command_queue.get()
-        while queue_byte != 0:
+        while queue_byte != END_OF_FRAME:
             frequency: float = queue_byte / 100
             volume: float = self.__command_queue.get() / 10
             sound = build_sound(duration_ms, frequency, volume)
@@ -133,34 +143,22 @@ class SoundCard(BaseDevice):
 
     def complete_frame_is_ready(self) -> bool:
         """
-        This method checks the command queue for a complete command to play.
+        This method checks the command queue for a complete frame to play.
+        A frame is complete when a -1 is found in the queue.
         """
-
-        # build a list of integers from the queue, without removing them from the queue, just yet.
-        # we want to see if a complete frame is in the queue.
-
-        # search the queue from index 0 to the end of the queue, looking for an ASCII NULL.
-        # if an ASCII NULL is found, we have a complete frame.
-        # if an ASCII NULL is not found, we do not have a complete frame.
         queue_end_index = len(self.__command_queue.queue)
         for i in range(queue_end_index):
-            if self.__command_queue.queue[i] == 0:
+            if self.__command_queue.queue[i] == END_OF_FRAME:
                 return True
         return False
 
     def complete_transaction_is_ready(self) -> bool:
         """
         This method checks the command queue for a complete transaction to play.
+        A transaction is complete when -2 is found in the queue.
         """
-
-        # build a list of integers from the queue, without removing them from the queue, just yet.
-        # we want to see if a complete frame is in the queue.
-
-        # search the queue from index 0 to the end of the queue, looking for an ASCII NULL.
-        # if an ASCII NULL is found, we have a complete frame.
-        # if an ASCII NULL is not found, we do not have a complete frame.
         queue_end_index = len(self.__command_queue.queue)
         for i in range(queue_end_index):
-            if self.__command_queue.queue[i] == -1:
+            if self.__command_queue.queue[i] == END_OF_TRANSACTION:
                 return True
         return False

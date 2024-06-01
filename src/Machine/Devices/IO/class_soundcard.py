@@ -46,6 +46,36 @@ def build_sound(duration_ms: int, frequency: float, volume: float):
     return sound
 
 
+def build_sounds_from_queue(command_queue: queue.Queue) -> List[Sound]:
+    """
+    This method builds sounds from the command queue.
+    """
+    sounds = []
+    # build a list of sounds from the queue
+    duration_ms = command_queue.get()
+    queue_byte: int
+    queue_byte = command_queue.get()
+    while queue_byte != END_OF_FRAME:
+        frequency: float = queue_byte / 100
+        volume: float = command_queue.get() / 10
+        sound = build_sound(duration_ms, frequency, volume)
+        sounds.append(sound)
+        queue_byte = command_queue.get()
+    return sounds
+
+
+def complete_frame_is_ready(command_queue: queue.Queue) -> bool:
+    """
+    This method checks the command queue for a complete frame to play.
+    A frame is complete when a -1 is found in the queue.
+    """
+    queue_end_index = len(command_queue.queue)
+    for i in range(queue_end_index):
+        if command_queue.queue[i] == END_OF_FRAME:
+            return True
+    return False
+
+
 class SoundCard(BaseDevice):
     """
     A class used to represent a Sound Card device.
@@ -101,18 +131,24 @@ class SoundCard(BaseDevice):
 
         """
         self.__processing_queue = True
-        transaction = []
-        while not self.complete_transaction_is_ready():
-            time.sleep(0.05)
-        while self.complete_frame_is_ready():
-            frame_sounds = self.build_sounds_from_queue()
-            transaction.append(frame_sounds)
 
-        for frame_sounds in transaction:
-            play_sounds(frame_sounds)
-        # there should be an end-transaction left on the queue here
-        # remove it
-        self.__command_queue.get()
+        while not self.__command_queue.empty():
+            while not self.complete_transaction_is_ready():
+                time.sleep(0.05)
+            transaction = []
+            # copy transaction to new queue
+            transaction_queue = queue.Queue()
+            queue_byte = self.__command_queue.get()
+            while queue_byte != END_OF_TRANSACTION:
+                transaction_queue.put(queue_byte)
+                queue_byte = self.__command_queue.get()
+            while complete_frame_is_ready(transaction_queue):
+                frame_sounds = build_sounds_from_queue(transaction_queue)
+                transaction.append(frame_sounds)
+
+            for frame_sounds in transaction:
+                play_sounds(frame_sounds)
+            time.sleep(0)
         self.__processing_queue = False
 
     def wait_until_queue_is_empty(self):
@@ -123,34 +159,6 @@ class SoundCard(BaseDevice):
         """
         while self.__processing_queue:
             time.sleep(0.05)
-
-    def build_sounds_from_queue(self) -> List[Sound]:
-        """
-        This method builds sounds from the command queue.
-        """
-        sounds = []
-        # build a list of sounds from the queue
-        duration_ms = self.__command_queue.get()
-        queue_byte: int
-        queue_byte = self.__command_queue.get()
-        while queue_byte != END_OF_FRAME:
-            frequency: float = queue_byte / 100
-            volume: float = self.__command_queue.get() / 10
-            sound = build_sound(duration_ms, frequency, volume)
-            sounds.append(sound)
-            queue_byte = self.__command_queue.get()
-        return sounds
-
-    def complete_frame_is_ready(self) -> bool:
-        """
-        This method checks the command queue for a complete frame to play.
-        A frame is complete when a -1 is found in the queue.
-        """
-        queue_end_index = len(self.__command_queue.queue)
-        for i in range(queue_end_index):
-            if self.__command_queue.queue[i] == END_OF_FRAME:
-                return True
-        return False
 
     def complete_transaction_is_ready(self) -> bool:
         """

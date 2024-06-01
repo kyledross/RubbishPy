@@ -4,7 +4,7 @@ from Machine.Devices.Memory.class_ram import RAM
 from Machine.Devices.Memory.class_rom import ROM
 from Machine.Devices.Processors.class_processor import Processor
 from Machine.Backplane.class_backplane import BackPlane
-from Machine.Devices.IO.class_sound_card import SoundCard
+from Machine.Devices.IO.class_soundcard import SoundCard
 
 device_group = []
 

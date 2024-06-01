@@ -50,6 +50,17 @@ def check_required_parameters(device: str, parameters: {str}, keys: List[str]):
 
 
 # noinspection SpellCheckingInspection
+def add_sound_card(args, devices):
+    if args.soundcard:
+        soundcard_args = dict(args.soundcard)
+        address = soundcard_args.get("address")
+        # noinspection SpellCheckingInspection
+        check_required_parameters("Soundcard", soundcard_args, ["address"])
+        # noinspection SpellCheckingInspection
+        devices.append(
+            {'device_name': 'soundcard', 'address': address})
+
+
 def parse_command_line():
     """Parses the command line arguments and returns a list of device groups.  Each device group is a dictionary"""
     devices = []
@@ -61,11 +72,9 @@ def parse_command_line():
     parser.add_argument('--help', action='store_const', const=True)
     parser.add_argument('--ram', type=lambda x: x.split('='), nargs='+')
     parser.add_argument('--processor', action='store_const', const=True)
-    parser.add_argument('--processor_with_cache', action='store_const', const=True)
-    parser.add_argument('--debugger', action='store_const', const=True)
     parser.add_argument('--console', type=lambda x: x.split('='), nargs='+')
     parser.add_argument("--compiler", type=lambda x: x.split('='), nargs='+')
-    parser.add_argument("--display", type=lambda x: x.split('='), nargs='+')
+    parser.add_argument('--soundcard', type=lambda x: x.split('='), nargs='+')
 
     args = parser.parse_args()
     if args.help:
@@ -79,6 +88,7 @@ def parse_command_line():
     add_ram(args, devices)
     add_console(args, devices)
     add_compiler(args, devices)
+    add_sound_card(args, devices)
     return devices
 
 
@@ -177,6 +187,15 @@ def show_help():
     print()
     print("   Example:")
     print("         --compiler address=0 size=2048 program=./my_program.txt")
+    print()
+    print("--soundcard")
+    print("   Adds a sound card device to the backplane.")
+    print()
+    print("   Syntax:")
+    print("         --soundcard address={address}")
+    print()
+    print("   Example:")
+    print("         --soundcard address=1025")
     print()
 
 

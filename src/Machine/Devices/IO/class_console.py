@@ -1,4 +1,6 @@
+import hashlib
 import os
+import pickle
 import queue
 import threading
 import time
@@ -73,6 +75,13 @@ class DisplayElement(DisplayCommand):
 
     def set_redraw(self, redraw):
         self.__redraw = redraw
+
+
+def get_queue_hash(q: queue.Queue) -> str:
+    q_hash = hashlib.sha256()
+    q_list = list(q.queue)
+    q_hash.update(pickle.dumps(q_list))
+    return q_hash.hexdigest()
 
 
 class Console(BaseDevice):
@@ -219,6 +228,7 @@ class Console(BaseDevice):
         self.__output_form = None
         self.__output_queue = queue.Queue()
         self.__input_queue = queue.Queue()
+        self.__last_input_queue_hash = get_queue_hash(self.__input_queue)
         self.__display = self.Display(console_device_id=self.get_device_id(), output_q=self.__output_queue,
                                       input_q=self.__input_queue, display_width=width, display_height=height,
                                       character_width=12, character_height=22, font_size=20)
@@ -391,7 +401,8 @@ class Console(BaseDevice):
                     self.interrupt_bus().set_interrupt(Interrupts.halt)
                 # if there is data in the input queue,
                 # raise the interrupt to signal that there is data available
-                if not self.__input_queue.empty():
+                if get_queue_hash(self.__input_queue) != self.__last_input_queue_hash:
+                    self.__last_input_queue_hash = get_queue_hash(self.__input_queue)
                     self.interrupt_bus().set_interrupt(self.__interrupt_number)
                 if self.address_is_valid(self.address_bus()):
                     if self.control_bus().get_read_request():

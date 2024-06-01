@@ -83,8 +83,6 @@ def parse_command_line():
 
     # build the devices list to pass to the machine builder
     add_processor(args, devices)
-    add_processor_with_cache(args, devices)
-    add_debugger(args, devices)
     add_ram(args, devices)
     add_console(args, devices)
     add_compiler(args, devices)
@@ -123,16 +121,6 @@ def add_ram(args, devices):
         size = ram_args.get("size")
         check_required_parameters("RAM", ram_args, ["address", "size"])
         devices.append({'device_name': 'ram', 'address': address, 'size': size})
-
-
-def add_debugger(args, devices):
-    if args.debugger:
-        devices.append({'device_name': 'debugger'})
-
-
-def add_processor_with_cache(args, devices):
-    if args.processor_with_cache:
-        devices.append({'device_name': 'processor_with_cache', 'options': ''})
 
 
 def add_processor(args, devices):

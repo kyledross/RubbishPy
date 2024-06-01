@@ -13,8 +13,7 @@ from Machine.Buses.class_interrupt_bus import InterruptBus
 from Machine.Devices.Bases.class_base_device import BaseDevice
 
 FRAMERATE = 90
-
-cursor_blink_milliseconds = 250
+CURSOR_BLINK_MILLISECONDS = 250
 
 
 class DisplayCommand:
@@ -189,7 +188,7 @@ class Console(BaseDevice):
                             display_element.get_y() * self.__character_height))
 
                 # draw the cursor
-                if pygame.time.get_ticks() - self.get_last_cursor_change() > cursor_blink_milliseconds:
+                if pygame.time.get_ticks() - self.get_last_cursor_change() > CURSOR_BLINK_MILLISECONDS:
                     self.update_cursor()
                     self.set_cursor_state(not self.get_cursor_state())
                     self.set_last_cursor_change(pygame.time.get_ticks())

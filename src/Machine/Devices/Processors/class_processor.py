@@ -1,6 +1,7 @@
 import collections
 import threading
 from collections import deque
+from datetime import datetime
 from enum import IntFlag
 
 from Constants.class_compare_results import CompareResults
@@ -41,6 +42,8 @@ class Processor(BaseProcessor):
                  address_bus: AddressBus, data_bus: DataBus, control_bus: ControlBus, interrupt_bus: InterruptBus):
         # registers
         super().__init__(starting_address, size, address_bus, data_bus, control_bus, interrupt_bus)
+        self.__interrupt_state = deque()
+        self.__sleep_state_stack = deque()
         self.__disable_instruction_caching = disable_instruction_caching
         self.__current_instruction: int = -1
         self.__data_pointer: int = 0
@@ -58,7 +61,6 @@ class Processor(BaseProcessor):
 
         # flags
         self.__compare_result = CompareResults.Equal
-        self.__interrupt_in_progress = False
         self.__sleeping: bool = False
         self.__sleep_mode: bool = False
 
@@ -83,17 +85,13 @@ class Processor(BaseProcessor):
         while True:  # loop until a cached instruction request is not fulfilled
             # Interrupt processing
             if self.__phase == Phases.NothingPending:
-                if not self.__interrupt_in_progress:
+                if len(self.__interrupt_state) == 0:
                     for interruptBit in range(0, 32):
                         interrupt_number = 2 ** interruptBit
                         if interrupt_bus.test_interrupt(interrupt_number):
                             if interrupt_number in self.__interrupt_vectors:
-                                self.__sleeping = False
-                                self.__call_stack.append(self.__data_pointer)
-                                self.__data_pointer = self.__interrupt_vectors[interrupt_number]
-                                self.push_registers()
+                                self.make_call(self.__data_pointer, self.__interrupt_vectors[interrupt_number], True)
                                 interrupt_bus.clear_interrupt(interrupt_number)
-                                self.__interrupt_in_progress = True
                                 break
 
             # Instruction routing
@@ -106,10 +104,7 @@ class Processor(BaseProcessor):
                         self.finish_instruction(True)
 
                     case InstructionSet.DEBUG:
-                        print("Processor: Debug instruction encountered.")
-                        print("Current registers:")
-                        print(self.__registers)
-                        self.finish_instruction(True)
+                        self.execute_debug()
 
                     case InstructionSet.JMP:
                         self.execute_jmp(address_bus, control_bus, data_bus)
@@ -204,6 +199,12 @@ class Processor(BaseProcessor):
             if not self.cached_instruction_will_be_used(address_bus, control_bus, data_bus):
                 break
 
+    def execute_debug(self):
+        print(f"Processor: Debug instruction encountered at {datetime.now().strftime('%H:%M:%S')}")
+        print("Current registers:")
+        print(self.__registers)
+        self.finish_instruction(True)
+
     def cached_instruction_will_be_used(self, address_bus: AddressBus, control_bus: ControlBus, data_bus: DataBus):
         """
         Check if the cached instruction will be used in the current cycle.
@@ -265,7 +266,6 @@ class Processor(BaseProcessor):
         self.__call_stack = deque()
         self.__registers = [0] * 8
         self.__compare_result = CompareResults.Equal
-        self.__interrupt_in_progress = False
         self.__interrupt_vectors: collections.OrderedDict[int, int] = collections.OrderedDict()
         self.__sleeping: bool = False
         self.__sleep_mode: bool = False
@@ -439,18 +439,25 @@ class Processor(BaseProcessor):
     def execute_call(self, address_bus: AddressBus, control_bus: ControlBus, data_bus: DataBus):
         value = self.request_single_operand(address_bus, control_bus, data_bus)
         if value is not None:
-            self.__call_stack.append(self.__data_pointer)
-            self.__data_pointer = value
-            self.push_registers()
-            self.finish_instruction(False)
+            pointer: int = self.__data_pointer
+            self.make_call(pointer, value, False)
+
+    def make_call(self, current_pointer, new_pointer, is_interrupt: bool):
+        self.__sleep_state_stack.append(self.__sleeping)
+        self.__sleeping = False
+        self.__call_stack.append(current_pointer)
+        self.__data_pointer = new_pointer
+        self.push_registers()
+        self.__interrupt_state.append(is_interrupt)
+        self.finish_instruction(False)
 
     def execute_rtn(self):
         if self.__phase == Phases.NothingPending:
-            self.__interrupt_in_progress = False
             self.__data_pointer = self.__call_stack.pop()
             self.pop_registers()
             if self.__sleep_mode:
-                self.__sleeping = True
+                self.__sleeping = self.__sleep_state_stack.pop()
+            self.__interrupt_state.pop()
             self.finish_instruction(True)
 
     def execute_siv(self, address_bus: AddressBus, control_bus: ControlBus, data_bus: DataBus):

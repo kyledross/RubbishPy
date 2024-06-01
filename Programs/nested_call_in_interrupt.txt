@@ -1,0 +1,16 @@
+siv 2 keypress
+sleep
+lr 0 3
+debug
+
+keypress:
+lr 0 1
+debug
+call nested
+debug
+rtn
+
+nested:
+lr 0 2
+debug
+rtn

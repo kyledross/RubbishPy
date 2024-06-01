@@ -3,6 +3,11 @@
 ' then a harmony of C and E
 ' requires soundcard at address 1025'
 
+call play_sound
+halt
+
+
+play_sound:
 start_frame:
 call send_duration
 call send_c
@@ -29,7 +34,7 @@ call send_volume
 call end_frame
 
 call end_transaction
-halt
+rtn
 
 send_duration:
 ' first byte of frame is the duration in milliseconds'

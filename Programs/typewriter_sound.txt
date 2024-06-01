@@ -33,7 +33,9 @@ jmp main
 ' =======================================
 ' Handle IRQ
 ' Load value at 1024 (the console) into register 1
-keypress: lrm 1 1024
+keypress:
+call play_click
+lrm 1 1024
 ' Load CR into register 2
 lr 2 13
 ' Compare registers 1 and 2
@@ -49,7 +51,7 @@ rtn
 ' Next Line routine
 ' =======================================
 ' Send a 13 (CR) then a 10 (LF) to the console (address 1024), then return from the interrupt handler
-CR: call play_click
+CR:
 lr 3 13
 mrm 3 1024
 lr 3 10
@@ -89,12 +91,11 @@ print_return: rtn
 ' Sound
 
 play_click:
-' short duration'
-lr 1 50
+lr 1 10
 mrm 1 1025
 
 ' frequency of 1000 Hz'
-lr 1 10000
+lr 1 100000
 mrm 1 1025
 
 call send_volume

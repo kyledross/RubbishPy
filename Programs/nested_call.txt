@@ -1,0 +1,18 @@
+start:
+lr 0 1
+debug
+call first_level
+debug
+halt
+
+first_level:
+lr 0 2
+debug
+call second_level
+debug
+rtn
+
+second_level:
+lr 0 3
+debug
+rtn

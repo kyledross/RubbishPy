@@ -232,7 +232,6 @@ class Console(BaseDevice):
     def __init__(self, starting_address: int, width: int, height: int, interrupt_number: int, address_bus: AddressBus,
                  data_bus: DataBus, control_bus: ControlBus, interrupt_bus: InterruptBus):
         super().__init__(starting_address, 1, address_bus, data_bus, control_bus, interrupt_bus)
-        self.__interrupt_raised: bool = False
         self.__output_form = None
         self.__output_queue = queue.Queue()
         self.__input_queue = queue.Queue()
@@ -429,23 +428,23 @@ class Console(BaseDevice):
             if self.control_bus.power_on:
                 # if the display thread has ended, raise the halt interrupt
                 if not self.output_form.is_alive():
-                    while not self.interrupt_bus.set_interrupt(Interrupts.halt):
-                        time.sleep(0.1)
+                    self.interrupt_bus.set_interrupt(Interrupts.halt)
+
                 # if there is data in the input queue,
                 # raise the interrupt to signal that there is data available
                 if not self.__input_queue.empty():
-                    if not self.__interrupt_raised:
-                        self.__interrupt_raised = True
-                        while not self.interrupt_bus.set_interrupt(self.__interrupt_number):
-                            time.sleep(0.1)
+                    self.interrupt_bus.set_interrupt(self.__interrupt_number)
+
                 if self.address_is_valid(self.address_bus):
                     if self.control_bus.read_request:
                         if not self.__input_queue.empty():
                             buffer_data = self.__input_queue.get()
-                            self.__interrupt_raised = False
                             self.data_bus.data = buffer_data
                             self.control_bus.read_request = False
                             self.control_bus.response = True
+                        if self.__input_queue.empty():
+                            self.interrupt_bus.clear_interrupt(self.__interrupt_number)
+
                     if self.control_bus.write_request:
                         data = self.data_bus.data
                         self.process_output(data)

@@ -3,7 +3,6 @@ import threading
 from collections import deque
 from datetime import datetime
 from enum import IntFlag
-from time import sleep
 
 from Constants.class_compare_results import CompareResults
 from Constants.class_instruction_set import InstructionSet
@@ -30,8 +29,7 @@ class Phases(IntFlag):
 
 
 def execute_halt(interrupt_bus: InterruptBus):
-    while not interrupt_bus.set_interrupt(Interrupts.halt):
-        sleep(0.1)
+    interrupt_bus.set_interrupt(Interrupts.halt)
 
 
 # noinspection DuplicatedCode
@@ -44,7 +42,8 @@ class Processor(BaseProcessor):
                  address_bus: AddressBus, data_bus: DataBus, control_bus: ControlBus, interrupt_bus: InterruptBus):
         # registers
         super().__init__(starting_address, size, address_bus, data_bus, control_bus, interrupt_bus)
-        self.__sleep_state_stack = deque()
+        self.__handling_interrupt: bool = False
+        self.__call_source_stack = deque()
         self.__disable_instruction_caching = disable_instruction_caching
         self.__current_instruction: int = -1
         self.__data_pointer: int = 0
@@ -68,6 +67,10 @@ class Processor(BaseProcessor):
         # instruction caching
         self.__instruction_and_operand_cache = {}
 
+        # interrupt handling
+        self.__interrupt_to_handle: bool = False
+        self.__interrupt_number_to_handle: int = 0
+
     def process_cycle(self):
         while self.running:
             self.control_bus.lock_bus()
@@ -84,21 +87,23 @@ class Processor(BaseProcessor):
         interrupt_bus = self.interrupt_bus
         self.cache_instruction(address_bus, control_bus, data_bus)
         while True:  # loop until a cached instruction request is not fulfilled
-            # Interrupt processing
-            if self.__phase == Phases.NothingPending:
-                if len(self.__call_stack) == 0:
+            # handle interrupts
+            if self.__sleeping and not self.__handling_interrupt:
+                if self.interrupt_bus.interrupt_awaiting():
                     for interruptBit in range(0, 32):
                         interrupt_number = 2 ** interruptBit
                         if interrupt_bus.test_interrupt(interrupt_number):
                             if interrupt_number in self.__interrupt_vectors:
-                                self.make_call(self.__data_pointer, self.__interrupt_vectors[interrupt_number])
-                                interrupt_bus.clear_interrupt(interrupt_number)
+                                self.__interrupt_to_handle = True
+                                self.__interrupt_number_to_handle = interrupt_number
+                                self.__sleeping = False
+                                self.__handling_interrupt = True
                                 break
 
-            # Instruction routing
             if self.__sleeping:
                 break
             else:
+                # Instruction routing
                 match self.__current_instruction:
 
                     case InstructionSet.NOP:
@@ -195,7 +200,16 @@ class Processor(BaseProcessor):
                         self.execute_siv(address_bus, control_bus, data_bus)
 
                     case _:
-                        self.load_instruction(address_bus, control_bus, data_bus)
+                        # is there an interrupt waiting?
+                        # if so, fake a call to the interrupt vector
+                        if self.__interrupt_to_handle:
+                            # fake the call
+                            self.__interrupt_to_handle = False
+                            self.make_call(self.__data_pointer,
+                                           self.__interrupt_vectors[self.__interrupt_number_to_handle],
+                                           True)
+                        else:
+                            self.load_instruction(address_bus, control_bus, data_bus)
 
             if not self.cached_instruction_will_be_used(address_bus, control_bus, data_bus):
                 break
@@ -444,10 +458,10 @@ class Processor(BaseProcessor):
         value = self.request_single_operand(address_bus, control_bus, data_bus)
         if value is not None:
             pointer: int = self.__data_pointer
-            self.make_call(pointer, value)
+            self.make_call(pointer, value, False)
 
-    def make_call(self, current_pointer, new_pointer):
-        self.__sleep_state_stack.append(self.__sleeping)
+    def make_call(self, current_pointer, new_pointer, is_interrupt_sourced_call):
+        self.__call_source_stack.append(is_interrupt_sourced_call)
         self.__sleeping = False
         self.__call_stack.append(current_pointer)
         self.__data_pointer = new_pointer
@@ -458,16 +472,19 @@ class Processor(BaseProcessor):
         if self.__phase == Phases.NothingPending:
             self.__data_pointer = self.__call_stack.pop()
             self.pop_registers()
-            if self.__sleep_mode:
-                self.__sleeping = self.__sleep_state_stack.pop()
+            is_interrupt_sourced_call = self.__call_source_stack.pop()
+            if is_interrupt_sourced_call:
+                if self.__sleep_mode:
+                    self.__sleeping = True
+                self.__handling_interrupt = False
+
             self.finish_instruction(True)
 
     def execute_siv(self, address_bus: AddressBus, control_bus: ControlBus, data_bus: DataBus):
         value = self.request_two_operands(address_bus, control_bus, data_bus)
         if value is not None:
-            call_address: int = value
             interrupt_number = self.__internal_stack.pop()
-            self.__interrupt_vectors[interrupt_number] = call_address
+            self.__interrupt_vectors[interrupt_number] = value
             self.finish_instruction(True)
 
     # instruction helpers

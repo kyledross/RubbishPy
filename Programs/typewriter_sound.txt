@@ -5,7 +5,7 @@
 ' I/O Console at address 1024, interrupt 2
 
 ' Usage:
-' python3 main.py --compiler address=0 size=1024 program=../Programs/typewriter.txt --processor --console width=80 height=25 address=1024 interrupt=2 --soundcard address=1025ewfe
+' python3 main.py --compiler address=0 size=1024 program=../Programs/typewriter.txt --processor --console width=80 height=25 address=1024 interrupt=2 --soundcard address=1025
 
 ' =======================================
 ' Play startup sound

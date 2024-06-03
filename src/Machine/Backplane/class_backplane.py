@@ -38,15 +38,19 @@ class BackPlane:
         Runs the backplane.
     """
 
+    @property
     def address_bus(self) -> AddressBus:
         return self.__addressBus
 
+    @property
     def data_bus(self) -> DataBus:
         return self.__dataBus
 
+    @property
     def control_bus(self) -> ControlBus:
         return self.__controlBus
 
+    @property
     def interrupt_bus(self) -> InterruptBus:
         return self.__interruptBus
 
@@ -78,15 +82,15 @@ class BackPlane:
         Raises:
             None
         """
-        self.control_bus().power_on = True
+        self.control_bus.power_on = True
         for device in self.__devices:
             device.start()
-        while self.control_bus().power_on:
-            self.control_bus().lock_bus()
-            if self.__interruptBus.test_interrupt(Interrupts.halt):
+        while self.control_bus.power_on:
+            self.control_bus.lock_bus()
+            if self.interrupt_bus.test_interrupt(Interrupts.halt):
                 print("HALT interrupt detected.")
-                self.control_bus().power_on = False
-            self.control_bus().unlock_bus()
+                self.control_bus.power_on = False
+            self.control_bus.unlock_bus()
         self.wait_for_devices_to_finish()
 
     def wait_for_devices_to_finish(self):
@@ -95,7 +99,7 @@ class BackPlane:
         while devices_busy:
             devices_busy = False
             for device in self.__devices:
-                if device.is_finished() is False:
+                if device.finished is False:
                     devices_busy = True
                     break
             time.sleep(.1)

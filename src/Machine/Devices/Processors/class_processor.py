@@ -24,15 +24,12 @@ class Phases(IntFlag):
     AwaitingFirstOperand = 2  # The processor is awaiting the first operand.
     AwaitingSecondOperand = 3  # The processor is awaiting the second operand.
     AwaitingResponse = 4  # The processor is awaiting a response.
-    # Developer: if a new phase is added, remember to update
-    # the Processor class's cycle method in regard to data caching.
 
 
 def execute_halt(interrupt_bus: InterruptBus):
     interrupt_bus.set_interrupt(Interrupts.halt)
 
 
-# noinspection DuplicatedCode
 class Processor(BaseProcessor):
 
     def start(self):
@@ -356,8 +353,6 @@ class Processor(BaseProcessor):
     def execute_mrm(self, address_bus: AddressBus, control_bus: ControlBus, data_bus: DataBus):
         value = self.request_two_operands(address_bus, control_bus, data_bus)
         if value is not None:
-            #  the data bus contains the memory address where the register's value is destined.
-            #  send the value to memory
             data_bus_data: int = value
             match data_bus_data < 0:
                 case True:

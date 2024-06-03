@@ -88,7 +88,7 @@ class Processor(BaseProcessor):
         self.cache_instruction(address_bus, control_bus, data_bus)
         while True:  # loop until a cached instruction request is not fulfilled
             # handle interrupts
-            if not self.__handling_interrupt:
+            if self.__sleeping and not self.__handling_interrupt:
                 if self.interrupt_bus.interrupt_awaiting():
                     for interruptBit in range(0, 32):
                         interrupt_number = 2 ** interruptBit

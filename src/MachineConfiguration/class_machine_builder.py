@@ -134,7 +134,7 @@ class MachineBuilder:
             case 'processor':
                 self.__backplane.add_device(Processor(size=size,
                                                       starting_address=address,
-                                                      disable_instruction_caching=True,
+                                                      disable_instruction_caching=False,
                                                       address_bus=self.__backplane.address_bus,
                                                       data_bus=self.__backplane.data_bus,
                                                       control_bus=self.__backplane.control_bus,

@@ -214,8 +214,6 @@ class Console(BaseDevice):
                 self.__clock.tick(FRAMERATE)
                 pygame.event.pump()
 
-            pygame.quit()
-
         def turn_cursor_off(self):
             # turn the cursor off before drawing the screen
             self.cursor_state = False

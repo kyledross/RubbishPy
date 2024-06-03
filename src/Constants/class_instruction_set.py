@@ -6,6 +6,7 @@ class InstructionSet(IntFlag):
     The InstructionSet class represents the set of instructions that the Rubbish language supports.
     Each instruction is represented by a class variable with a unique integer value.
     """
+    DoNotUse = -1
     NOP = 0  # No operation instruction
     LR = 1  # Load register instruction
     LRM = 2  # Load register from memory instruction

@@ -113,11 +113,11 @@ class SoundCard(BaseDevice):
 
     @property
     def processing_queue(self) -> bool:
-        return self.processing_queue
+        return self.__processing_queue
 
     @processing_queue.setter
     def processing_queue(self, value: bool):
-        self.processing_queue = value
+        self.__processing_queue = value
 
     def process_buses(self):
         pygame.mixer.init()

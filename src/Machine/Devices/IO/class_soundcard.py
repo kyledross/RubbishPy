@@ -95,7 +95,7 @@ class SoundCard(BaseDevice):
 
     def start(self):
         # start process_buses thread
-        threading.Thread(target=self.process_buses, name=self.get_device_id() + "::process_buses").start()
+        threading.Thread(target=self.process_buses, name=self.device_id + "::process_buses").start()
 
     def __init__(self, starting_address: int, address_bus: AddressBus, data_bus: DataBus, control_bus: ControlBus,
                  interrupt_bus: InterruptBus):
@@ -103,26 +103,43 @@ class SoundCard(BaseDevice):
         self.__command_queue = queue.Queue()
         self.__processing_queue: bool = False
 
+    @property
+    def command_queue(self) -> queue.Queue:
+        return self.__command_queue
+
+    @command_queue.setter
+    def command_queue(self, value: queue.Queue):
+        self.__command_queue = value
+
+    @property
+    def processing_queue(self) -> bool:
+        return self.processing_queue
+
+    @processing_queue.setter
+    def processing_queue(self, value: bool):
+        self.processing_queue = value
+
     def process_buses(self):
         pygame.mixer.init()
-        while self.is_running():
+        while self.running:
             queue_changed: bool = False
-            self.control_bus().lock_bus()
+            self.control_bus.lock_bus()
             self.stop_running_if_halt_detected()
-            if self.control_bus().power_on:
-                if self.address_is_valid(self.address_bus()):
-                    if self.control_bus().write_request:
-                        self.__command_queue.put(self.data_bus().data)
+            if self.control_bus.power_on:
+                if self.address_is_valid(self.address_bus):
+                    if self.control_bus.write_request:
+                        self.command_queue.put(self.data_bus.data)
                         queue_changed = True
-                        self.control_bus().write_request = False
-                        self.control_bus().response = True
-            self.control_bus().unlock_bus()
+                        self.control_bus.write_request = False
+                        self.control_bus.response = True
+            self.control_bus.unlock_bus()
             if queue_changed:
                 # run process_queue on new thread if not already running
-                if not self.__processing_queue:
-                    threading.Thread(target=self.process_queue, name=self.get_device_id() + "::process_queue").start()
+                if not self.processing_queue:
+                    threading.Thread(target=self.process_queue, name=self.device_id + "::process_queue").start()
+
         self.wait_until_queue_is_empty()
-        self.set_finished()
+        self.finished = True
 
     def process_queue(self):
         """
@@ -130,18 +147,18 @@ class SoundCard(BaseDevice):
         Returns:
 
         """
-        self.__processing_queue = True
+        self.processing_queue = True
 
-        while not self.__command_queue.empty():
+        while not self.command_queue.empty():
             while not self.complete_transaction_is_ready():
                 time.sleep(0.05)
             transaction = []
             # copy transaction to new queue
             transaction_queue = queue.Queue()
-            queue_byte = self.__command_queue.get()
+            queue_byte = self.command_queue.get()
             while queue_byte != END_OF_TRANSACTION:
                 transaction_queue.put(queue_byte)
-                queue_byte = self.__command_queue.get()
+                queue_byte = self.command_queue.get()
             while complete_frame_is_ready(transaction_queue):
                 frame_sounds = build_sounds_from_queue(transaction_queue)
                 transaction.append(frame_sounds)
@@ -149,7 +166,7 @@ class SoundCard(BaseDevice):
             for frame_sounds in transaction:
                 play_sounds(frame_sounds)
             time.sleep(0)
-        self.__processing_queue = False
+        self.processing_queue = False
 
     def wait_until_queue_is_empty(self):
         """
@@ -157,7 +174,7 @@ class SoundCard(BaseDevice):
         Returns:
 
         """
-        while self.__processing_queue:
+        while self.processing_queue:
             time.sleep(0.05)
 
     def complete_transaction_is_ready(self) -> bool:
@@ -165,8 +182,8 @@ class SoundCard(BaseDevice):
         This method checks the command queue for a complete transaction to play.
         A transaction is complete when -2 is found in the queue.
         """
-        queue_end_index = len(self.__command_queue.queue)
+        queue_end_index = len(self.command_queue.queue)
         for i in range(queue_end_index):
-            if self.__command_queue.queue[i] == END_OF_TRANSACTION:
+            if self.command_queue.queue[i] == END_OF_TRANSACTION:
                 return True
         return False

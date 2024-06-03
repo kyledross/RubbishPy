@@ -32,4 +32,3 @@ class DataBus:
         :param value: The data to set on the bus.
         """
         self.__DataBus = value
-

@@ -36,7 +36,7 @@ def execute_halt(interrupt_bus: InterruptBus):
 class Processor(BaseProcessor):
 
     def start(self):
-        threading.Thread(target=self.process_cycle, name=self.get_device_id() + "::process_cycle").start()
+        threading.Thread(target=self.process_cycle, name=self.device_id + "::process_cycle").start()
 
     def __init__(self, starting_address: int, size: int, disable_instruction_caching: bool,
                  address_bus: AddressBus, data_bus: DataBus, control_bus: ControlBus, interrupt_bus: InterruptBus):
@@ -68,19 +68,19 @@ class Processor(BaseProcessor):
         self.__instruction_and_operand_cache = {}
 
     def process_cycle(self):
-        while self.is_running():
-            self.control_bus().lock_bus()
+        while self.running:
+            self.control_bus.lock_bus()
             self.stop_running_if_halt_detected()
-            if self.control_bus().power_on:
+            if self.control_bus.power_on:
                 self.perform_instruction_processing()
-            self.control_bus().unlock_bus()
-        self.set_finished()
+            self.control_bus.unlock_bus()
+        self.finished = True
 
     def perform_instruction_processing(self):
-        address_bus = self.address_bus()
-        control_bus = self.control_bus()
-        data_bus = self.data_bus()
-        interrupt_bus = self.interrupt_bus()
+        address_bus = self.address_bus
+        control_bus = self.control_bus
+        data_bus = self.data_bus
+        interrupt_bus = self.interrupt_bus
         self.cache_instruction(address_bus, control_bus, data_bus)
         while True:  # loop until a cached instruction request is not fulfilled
             # Interrupt processing

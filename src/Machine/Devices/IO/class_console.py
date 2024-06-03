@@ -36,16 +36,20 @@ class DisplayControl(DisplayCommand):
         self.__value = value
         self.__command = command
 
-    def get_command(self):
+    @property
+    def command(self) -> str:
         return self.__command
 
-    def set_command(self, command):
+    @command.setter
+    def command(self, command: str):
         self.__command = command
 
-    def get_value(self):
+    @property
+    def value(self) -> str:
         return self.__value
 
-    def set_value(self, value):
+    @value.setter
+    def value(self, value: str):
         self.__value = value
 
 
@@ -56,24 +60,30 @@ class DisplayElement(DisplayCommand):
         self.__character = character
         self.__redraw = True
 
-    def get_x(self):
+    @property
+    def x(self) -> int:
         return self.__x
 
-    def get_y(self):
+    @property
+    def y(self) -> int:
         return self.__y
 
-    def get_character(self):
+    @property
+    def character(self) -> str:
         return self.__character
 
-    def set_character(self, character):
+    @character.setter
+    def character(self, character: str):
         if character != self.__character:
             self.__redraw = True
         self.__character = character
 
-    def get_redraw(self):
+    @property
+    def redraw(self) -> bool:
         return self.__redraw
 
-    def set_redraw(self, redraw):
+    @redraw.setter
+    def redraw(self, redraw: bool):
         self.__redraw = redraw
 
 
@@ -105,29 +115,37 @@ class Console(BaseDevice):
             self.__running: bool = False
             self.__parent_console_device_id = console_device_id
 
-        def set_cursor_x(self, x: int):
-            self.__cursor_x = x
-
-        def get_cursor_x(self) -> int:
+        @property
+        def cursor_x(self) -> int:
             return self.__cursor_x
 
-        def set_cursor_y(self, y: int):
-            self.__cursor_y = y
+        @cursor_x.setter
+        def cursor_x(self, cursor_x: int) -> None:
+            self.__cursor_x = cursor_x
 
-        def get_cursor_y(self) -> int:
+        @property
+        def cursor_y(self) -> int:
             return self.__cursor_y
 
-        def set_cursor_state(self, state: bool):
-            self.__cursor_state = state
+        @cursor_y.setter
+        def cursor_y(self, cursor_y: int) -> None:
+            self.__cursor_y = cursor_y
 
-        def get_cursor_state(self) -> bool:
+        @property
+        def cursor_state(self) -> bool:
             return self.__cursor_state
 
-        def get_last_cursor_change(self) -> int:
+        @cursor_state.setter
+        def cursor_state(self, cursor_state: bool):
+            self.__cursor_state = cursor_state
+
+        @property
+        def last_cursor_change(self) -> int:
             return self.__last_cursor_change
 
-        def set_last_cursor_change(self, change_time: int):
-            self.__last_cursor_change = change_time
+        @last_cursor_change.setter
+        def last_cursor_change(self, last_cursor_change: int):
+            self.__last_cursor_change = last_cursor_change
 
         def run(self):
             pygame.init()
@@ -145,7 +163,7 @@ class Console(BaseDevice):
             else:  # Unix/Linux/MacOS/BSD/etc
                 font_path = '/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf'
             self.__font = pygame.font.Font(font_path, self.__font_size)
-            self.set_last_cursor_change(pygame.time.get_ticks())
+            self.last_cursor_change = pygame.time.get_ticks()
 
             self.__running = True
             pygame.key.set_repeat(500, 50)
@@ -171,36 +189,36 @@ class Console(BaseDevice):
                     command = self.__display_queue.get_nowait()
                     # if command is a DisplayControl object, process it
                     if isinstance(command, DisplayControl):
-                        if command.get_command() == 'clear':
+                        if command.command == 'clear':
                             self.__screen.fill((0, 0, 0))
                     if isinstance(command, DisplayControl):
-                        if command.get_command() == 'cursor_x':
+                        if command.command == 'cursor_x':
                             self.turn_cursor_off()
-                            self.set_cursor_x(int(command.get_value()))
-                        if command.get_command() == 'cursor_y':
+                            self.cursor_x = int(command.value)
+                        if command.command == 'cursor_y':
                             self.turn_cursor_off()
-                            self.set_cursor_y(int(command.get_value()))
+                            self.cursor_y = int(command.value)
                     if isinstance(command, DisplayElement):
                         display_element: DisplayElement = command
-                        text_to_display = display_element.get_character()
+                        text_to_display = display_element.character
                         self.turn_cursor_off()
                         text = self.__font.render(text_to_display, True, (255, 255, 255))
                         # blank the area we are about to write to
                         text_size = self.__font.size(text_to_display)
-                        position = (display_element.get_x() * self.__character_width,
-                                    display_element.get_y() * self.__character_height)
+                        position = (display_element.x * self.__character_width,
+                                    display_element.y * self.__character_height)
                         pygame.draw.rect(self.__screen, (0, 0, 0),
                                          (position[0], position[1], text_size[0], text_size[1]))
                         # draw the character
                         self.__screen.blit(text, (
-                            display_element.get_x() * self.__character_width,
-                            display_element.get_y() * self.__character_height))
+                            display_element.x * self.__character_width,
+                            display_element.y * self.__character_height))
 
                 # draw the cursor
-                if pygame.time.get_ticks() - self.get_last_cursor_change() > CURSOR_BLINK_MILLISECONDS:
+                if pygame.time.get_ticks() - self.last_cursor_change > CURSOR_BLINK_MILLISECONDS:
                     self.update_cursor()
-                    self.set_cursor_state(not self.get_cursor_state())
-                    self.set_last_cursor_change(pygame.time.get_ticks())
+                    self.cursor_state = not self.cursor_state
+                    self.last_cursor_change = pygame.time.get_ticks()
                 pygame.display.flip()
                 self.__clock.tick(FRAMERATE)
                 pygame.event.pump()
@@ -209,18 +227,18 @@ class Console(BaseDevice):
 
         def turn_cursor_off(self):
             # turn the cursor off before drawing the screen
-            self.set_cursor_state(False)
+            self.cursor_state = False
             self.update_cursor()
 
         def update_cursor(self):
-            if self.get_cursor_state():
+            if self.cursor_state:
                 cursor = self.__font.render('_', False, (255, 255, 255))
-                self.__screen.blit(cursor, (self.get_cursor_x() * self.__character_width,
-                                            self.get_cursor_y() * self.__character_height))
+                self.__screen.blit(cursor, (self.cursor_x * self.__character_width,
+                                            self.cursor_y * self.__character_height))
             else:
                 cursor = self.__font.render('_', False, (0, 0, 0))
-                self.__screen.blit(cursor, (self.get_cursor_x() * self.__character_width,
-                                            self.get_cursor_y() * self.__character_height))
+                self.__screen.blit(cursor, (self.cursor_x * self.__character_width,
+                                            self.cursor_y * self.__character_height))
 
     def __init__(self, starting_address: int, width: int, height: int, interrupt_number: int, address_bus: AddressBus,
                  data_bus: DataBus, control_bus: ControlBus, interrupt_bus: InterruptBus):
@@ -229,7 +247,7 @@ class Console(BaseDevice):
         self.__output_queue = queue.Queue()
         self.__input_queue = queue.Queue()
         self.__last_input_queue_hash = get_queue_hash(self.__input_queue)
-        self.__display = self.Display(console_device_id=self.get_device_id(), output_q=self.__output_queue,
+        self.__display = self.Display(console_device_id=self.device_id, output_q=self.__output_queue,
                                       input_q=self.__input_queue, display_width=width, display_height=height,
                                       character_width=12, character_height=22, font_size=20)
         self.__cursor_x: int = 0
@@ -239,51 +257,75 @@ class Console(BaseDevice):
         self.__interrupt_number: int = interrupt_number
         self.__display_buffer = [[DisplayElement(x, y, ' ') for x in range(80)] for y in range(25)]
 
-    def get_cursor_x(self) -> int:
+    @property
+    def width(self) -> int:
+        return self.__width
+
+    @width.setter
+    def width(self, width: int):
+        self.__width = width
+
+    @property
+    def height(self) -> int:
+        return self.__height
+
+    @height.setter
+    def height(self, height: int):
+        self.__height = height
+
+    @property
+    def cursor_x(self) -> int:
         return self.__cursor_x
 
-    def set_cursor_x(self, cursor_x: int):
+    @cursor_x.setter
+    def cursor_x(self, cursor_x: int):
         self.__cursor_x = cursor_x
 
-    def get_cursor_y(self) -> int:
+    @property
+    def cursor_y(self) -> int:
         return self.__cursor_y
 
-    def set_cursor_y(self, cursor_y: int):
+    @cursor_y.setter
+    def cursor_y(self, cursor_y: int):
         self.__cursor_y = cursor_y
 
-    def get_output_form(self) -> threading.Thread:
+    @property
+    def output_form(self) -> threading.Thread:
         return self.__output_form
 
-    def set_output_form(self, output_form: threading.Thread):
+    @output_form.setter
+    def output_form(self, output_form: threading.Thread):
         self.__output_form = output_form
 
-    def get_display_buffer(self) -> list:
+    @property
+    def display_buffer(self) -> list:
         return self.__display_buffer
 
-    def set_display_buffer(self, display_buffer: list):
+    @display_buffer.setter
+    def display_buffer(self, display_buffer: list):
         self.__display_buffer = display_buffer
 
     def start(self):
-        self.set_output_form(threading.Thread(target=self.__display.run, name=self.get_device_id() + "::display_run"))
-        self.get_output_form().start()
+        self.output_form = threading.Thread(target=self.__display.run, name=self.device_id + "::display_run")
+        self.output_form.start()
         self.write_buffer_to_queue()
-        threading.Thread(target=self.process_buses, name=self.get_device_id() + "::process_buses").start()
+        threading.Thread(target=self.process_buses, name=self.device_id + "::process_buses").start()
 
     def send_cursor_location(self):
-        self.__output_queue.put(DisplayControl('cursor_x', str(self.get_cursor_x())))
-        self.__output_queue.put(DisplayControl('cursor_y', str(self.get_cursor_y())))
+        self.__output_queue.put(DisplayControl('cursor_x', str(self.cursor_x)))
+        self.__output_queue.put(DisplayControl('cursor_y', str(self.cursor_y)))
 
     def scroll_up(self):
         """
         Scrolls the display buffer up by one line.
         """
-        for y in range(1, self.__height):
-            for x in range(self.__width):
-                self.get_display_buffer()[y - 1][x].set_character(self.get_display_buffer()[y][x].get_character())
-                self.get_display_buffer()[y - 1][x].set_redraw(True)
-        for x in range(self.__width):
-            self.get_display_buffer()[self.__height - 1][x].set_character(' ')
-            self.get_display_buffer()[self.__height - 1][x].set_redraw(True)
+        for y in range(1, self.height):
+            for x in range(self.width):
+                self.display_buffer[y - 1][x].character = self.display_buffer[y][x].character
+                self.display_buffer[y - 1][x].redraw = True
+        for x in range(self.width):
+            self.display_buffer[self.height - 1][x].character = ' '
+            self.display_buffer[self.height - 1][x].redraw = True
         # add a clear command to the output queue
         self.__output_queue.put(DisplayControl('clear', ''))
 
@@ -293,8 +335,8 @@ class Console(BaseDevice):
         Returns:
             int: The last non-space character on the current row.
         """
-        for x in range(self.__width - 1, -1, -1):
-            if self.get_display_buffer()[self.get_cursor_y()][x].get_character() != ' ':
+        for x in range(self.width - 1, -1, -1):
+            if self.display_buffer[self.cursor_y][x].character != ' ':
                 return x + 1
         return 0
 
@@ -304,9 +346,9 @@ class Console(BaseDevice):
         :param address: The address to write to.
         :param value: The character to write.
         """
-        y = address // self.__width
-        x = address % self.__width
-        self.get_display_buffer()[y][x].set_character(character=value)
+        y = address // self.width
+        x = address % self.width
+        self.display_buffer[y][x].character = value
 
     def handle_control_character(self, data: int):
         """
@@ -318,38 +360,38 @@ class Console(BaseDevice):
             True if the data was handled, False otherwise.
         """
         if data == 13:  # CR
-            self.set_cursor_x(0)
+            self.cursor_x = 0
             self.send_cursor_location()
             return True
         elif data == 10:  # LF
-            self.set_cursor_y(self.get_cursor_y() + 1)
-            if self.get_cursor_y() >= self.__height:
+            self.cursor_y = self.cursor_y + 1
+            if self.cursor_y >= self.height:
                 self.scroll_up()
-                self.set_cursor_y(self.get_cursor_y() - 1)
+                self.cursor_y = self.cursor_y - 1
             self.send_cursor_location()
             return True
         elif data == 9:  # TAB
-            self.set_cursor_x(self.get_cursor_x() + 4)
-            if self.get_cursor_x() >= self.__width:
-                self.set_cursor_x(self.__width - 1)
+            self.cursor_x = self.cursor_x + 4
+            if self.cursor_x >= self.width:
+                self.cursor_x = self.width - 1
             self.send_cursor_location()
             return True
         elif data == 12:  # FF
-            self.set_display_buffer([[DisplayElement(x, y, ' ') for x in range(80)] for y in range(25)])
+            self.display_buffer = [[DisplayElement(x, y, ' ') for x in range(80)] for y in range(25)]
             self.__output_queue.put(DisplayControl('clear', ''))
-            self.set_cursor_x(0)
-            self.set_cursor_y(0)
+            self.cursor_x = 0
+            self.cursor_y = 0
             self.send_cursor_location()
             return True
         elif data == 8:  # BS
-            self.set_cursor_x(self.get_cursor_x() - 1)
-            if self.get_cursor_x() < 0:
-                self.set_cursor_y(self.get_cursor_y() - 1)
-                if self.get_cursor_y() < 0:
-                    self.set_cursor_y(0)
-                    self.set_cursor_x(0)
-                self.set_cursor_x(self.find_last_non_space_character_on_current_row())
-            self.write_to_display_buffer(self.get_cursor_y() * self.__width + self.get_cursor_x(), " ")
+            self.cursor_x = self.cursor_x - 1
+            if self.cursor_x < 0:
+                self.cursor_y = self.cursor_y - 1
+                if self.cursor_y < 0:
+                    self.cursor_y = 0
+                    self.cursor_x = 0
+                self.cursor_x = self.find_last_non_space_character_on_current_row()
+            self.write_to_display_buffer(self.cursor_y * self.width + self.cursor_x, " ")
             self.send_cursor_location()
             return True
         else:
@@ -368,54 +410,54 @@ class Console(BaseDevice):
         if self.handle_control_character(data):
             return
 
-        self.write_to_display_buffer(self.get_cursor_y() * self.__width + self.get_cursor_x(), chr(data))
+        self.write_to_display_buffer(self.cursor_y * self.width + self.cursor_x, chr(data))
 
         # add the DisplayElement object to the output queue
-        self.__output_queue.put(self.get_display_buffer()[self.get_cursor_y()][self.get_cursor_x()])
-        self.set_cursor_x(self.get_cursor_x() + 1)
-        if self.get_cursor_x() >= self.__width:
-            self.set_cursor_x(0)
-            self.set_cursor_y(self.get_cursor_y() + 1)
-            if self.get_cursor_y() >= self.__height:
+        self.__output_queue.put(self.display_buffer[self.cursor_y][self.cursor_x])
+        self.cursor_x = self.cursor_x + 1
+        if self.cursor_x >= self.width:
+            self.cursor_x = 0
+            self.cursor_y = self.cursor_y + 1
+            if self.cursor_y >= self.height:
                 self.scroll_up()
-                self.set_cursor_y(self.get_cursor_y() - 1)
+                self.cursor_y = self.cursor_y - 1
         self.send_cursor_location()
 
     def write_buffer_to_queue(self):
         """
         Writes the display buffer to the output queue.
         """
-        for y in range(self.__height):
-            for x in range(self.__width):
-                if self.get_display_buffer()[y][x].get_redraw():
-                    self.get_display_buffer()[y][x].set_redraw(False)
-                    self.__output_queue.put(self.get_display_buffer()[y][x])
+        for y in range(self.height):
+            for x in range(self.width):
+                if self.display_buffer[y][x].redraw:
+                    self.display_buffer[y][x].redraw = False
+                    self.__output_queue.put(self.display_buffer[y][x])
 
     def process_buses(self):
-        while self.is_running():
-            self.control_bus().lock_bus()
+        while self.running:
+            self.control_bus.lock_bus()
             self.stop_running_if_halt_detected()
-            if self.control_bus().power_on:
+            if self.control_bus.power_on:
                 # if the display thread has ended, raise the halt interrupt
-                if not self.get_output_form().is_alive():
-                    self.interrupt_bus().set_interrupt(Interrupts.halt)
+                if not self.output_form.is_alive():
+                    self.interrupt_bus.set_interrupt(Interrupts.halt)
                 # if there is data in the input queue,
                 # raise the interrupt to signal that there is data available
                 if get_queue_hash(self.__input_queue) != self.__last_input_queue_hash:
                     self.__last_input_queue_hash = get_queue_hash(self.__input_queue)
-                    self.interrupt_bus().set_interrupt(self.__interrupt_number)
-                if self.address_is_valid(self.address_bus()):
-                    if self.control_bus().read_request:
+                    self.interrupt_bus.set_interrupt(self.__interrupt_number)
+                if self.address_is_valid(self.address_bus):
+                    if self.control_bus.read_request:
                         if not self.__input_queue.empty():
                             buffer_data = self.__input_queue.get()
-                            self.data_bus().data = buffer_data
-                            self.control_bus().read_request = False
-                            self.control_bus().response = True
-                    if self.control_bus().write_request:
-                        data = self.data_bus().data
+                            self.data_bus.data = buffer_data
+                            self.control_bus.read_request = False
+                            self.control_bus.response = True
+                    if self.control_bus.write_request:
+                        data = self.data_bus.data
                         self.process_output(data)
                         self.write_buffer_to_queue()
-                        self.control_bus().write_request = False
-                        self.control_bus().response = True
-            self.control_bus().unlock_bus()
-        self.set_finished()
+                        self.control_bus.write_request = False
+                        self.control_bus.response = True
+            self.control_bus.unlock_bus()
+        self.finished = True

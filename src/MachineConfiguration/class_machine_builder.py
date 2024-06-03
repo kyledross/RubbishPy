@@ -127,39 +127,39 @@ class MachineBuilder:
             case 'ram':
                 self.__backplane.add_device(RAM(starting_address=address,
                                                 size=size,
-                                                address_bus=self.__backplane.address_bus(),
-                                                data_bus=self.__backplane.data_bus(),
-                                                control_bus=self.__backplane.control_bus(),
-                                                interrupt_bus=self.__backplane.interrupt_bus()))
+                                                address_bus=self.__backplane.address_bus,
+                                                data_bus=self.__backplane.data_bus,
+                                                control_bus=self.__backplane.control_bus,
+                                                interrupt_bus=self.__backplane.interrupt_bus))
             case 'processor':
                 self.__backplane.add_device(Processor(size=size,
                                                       starting_address=address,
                                                       disable_instruction_caching=False,
-                                                      address_bus=self.__backplane.address_bus(),
-                                                      data_bus=self.__backplane.data_bus(),
-                                                      control_bus=self.__backplane.control_bus(),
-                                                      interrupt_bus=self.__backplane.interrupt_bus()))
+                                                      address_bus=self.__backplane.address_bus,
+                                                      data_bus=self.__backplane.data_bus,
+                                                      control_bus=self.__backplane.control_bus,
+                                                      interrupt_bus=self.__backplane.interrupt_bus))
             case 'console':
                 self.__backplane.add_device(Console(starting_address=address,
                                                     width=width,
                                                     height=height,
                                                     interrupt_number=interrupt,
-                                                    address_bus=self.__backplane.address_bus(),
-                                                    data_bus=self.__backplane.data_bus(),
-                                                    control_bus=self.__backplane.control_bus(),
-                                                    interrupt_bus=self.__backplane.interrupt_bus()))
+                                                    address_bus=self.__backplane.address_bus,
+                                                    data_bus=self.__backplane.data_bus,
+                                                    control_bus=self.__backplane.control_bus,
+                                                    interrupt_bus=self.__backplane.interrupt_bus))
             case 'soundcard':
                 self.__backplane.add_device(SoundCard(starting_address=address,
-                                                      address_bus=self.__backplane.address_bus(),
-                                                      data_bus=self.__backplane.data_bus(),
-                                                      control_bus=self.__backplane.control_bus(),
-                                                      interrupt_bus=self.__backplane.interrupt_bus()))
+                                                      address_bus=self.__backplane.address_bus,
+                                                      data_bus=self.__backplane.data_bus,
+                                                      control_bus=self.__backplane.control_bus,
+                                                      interrupt_bus=self.__backplane.interrupt_bus))
             case 'rom':
                 self.__backplane.add_device(ROM(starting_address=address,
-                                                address_bus=self.__backplane.address_bus(),
-                                                data_bus=self.__backplane.data_bus(),
-                                                control_bus=self.__backplane.control_bus(),
-                                                interrupt_bus=self.__backplane.interrupt_bus()))
+                                                address_bus=self.__backplane.address_bus,
+                                                data_bus=self.__backplane.data_bus,
+                                                control_bus=self.__backplane.control_bus,
+                                                interrupt_bus=self.__backplane.interrupt_bus))
             case 'compiler':
                 compiler = RubbishCompiler(address=address)
                 code = compiler.compile(program_pathname)
@@ -167,10 +167,10 @@ class MachineBuilder:
                     print("Warning: The compiled program size exceeds the specified size.")
                 ram = RAM(starting_address=address,
                           size=size,
-                          address_bus=self.__backplane.address_bus(),
-                          data_bus=self.__backplane.data_bus(),
-                          control_bus=self.__backplane.control_bus(),
-                          interrupt_bus=self.__backplane.interrupt_bus())
+                          address_bus=self.__backplane.address_bus,
+                          data_bus=self.__backplane.data_bus,
+                          control_bus=self.__backplane.control_bus,
+                          interrupt_bus=self.__backplane.interrupt_bus)
                 ram.load_data(data=code)
                 self.__backplane.add_device(ram)
 

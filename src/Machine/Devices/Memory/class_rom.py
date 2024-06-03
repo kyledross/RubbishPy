@@ -29,7 +29,7 @@ class ROM(BaseDevice):
     """
 
     def start(self):
-        threading.Thread(target=self.process_buses, name=self.get_device_id() + "::process_buses").start()
+        threading.Thread(target=self.process_buses, name=self.device_id + "::process_buses").start()
 
     def __init__(self, starting_address: int, address_bus: AddressBus, data_bus: DataBus,
                  control_bus: ControlBus, interrupt_bus: InterruptBus):
@@ -52,15 +52,31 @@ class ROM(BaseDevice):
         self.__memory.append(0)
         super().__init__(starting_address, len(self.__memory), address_bus, data_bus, control_bus, interrupt_bus)
 
+    @property
+    def memory(self) -> List[int]:
+        """
+        This method returns the memory of the ROM device.
+        :return: The memory of the ROM device.
+        """
+        return self.__memory
+
+    @memory.setter
+    def memory(self, value: List[int]):
+        """
+        This method sets the memory of the ROM device.
+        :param value: The memory to set for the ROM device.
+        """
+        self.__memory = value
+
     def process_buses(self):
-        while self.is_running():
-            self.control_bus().lock_bus()
+        while self.running:
+            self.control_bus.lock_bus()
             self.stop_running_if_halt_detected()
-            if self.control_bus().power_on:
-                if self.address_is_valid(self.address_bus()):
-                    if self.control_bus().read_request:
-                        self.data_bus().data = self.__memory[self.address_bus().address - super().starting_address]
-                        self.control_bus().read_request = False
-                        self.control_bus().response = True
-            self.control_bus().unlock_bus()
-        self.set_finished()
+            if self.control_bus.power_on:
+                if self.address_is_valid(self.address_bus):
+                    if self.control_bus.read_request:
+                        self.data_bus.data = self.memory[self.address_bus.address - super().starting_address]
+                        self.control_bus.read_request = False
+                        self.control_bus.response = True
+            self.control_bus.unlock_bus()
+        self.finished = True

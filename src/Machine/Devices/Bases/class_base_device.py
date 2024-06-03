@@ -61,18 +61,29 @@ class BaseDevice(abc.ABC):
         device_id = cls.__name__ + "_" + base36encode(random.randint(0, 36 ** 2))
         return device_id
 
-    def get_device_id(self) -> str:
+    @property
+    def device_id(self) -> str:
         """
-        This method returns the device ID.
+        This property returns the device ID.
         :return: The device ID.
         """
         return self.__deviceId
 
-    def set_finished(self):
-        self.__finished = True
-
-    def is_finished(self) -> bool:
+    @property
+    def finished(self) -> bool:
+        """
+        This property returns whether the device has finished or not.
+        :return: True if the device has finished, False otherwise.
+        """
         return self.__finished
+
+    @finished.setter
+    def finished(self, value: bool):
+        """
+        This property sets whether the device has finished or not.
+        :param value: True if the device has finished, False otherwise.
+        """
+        self.__finished = value
 
     @abc.abstractmethod
     def start(self):
@@ -81,24 +92,53 @@ class BaseDevice(abc.ABC):
         """
         pass
 
-    def is_running(self) -> bool:
+    @property
+    def running(self) -> bool:
         """
-        This method returns whether the device is running or not.
+        This property returns whether the device is running or not.
         :return: True if the device is running, False otherwise.
         """
         return self.__running
 
+    @running.setter
+    def running(self, value: bool):
+        """
+        This property sets whether the device is running or not.
+        :param value: True if the device is running, False otherwise.
+        """
+        self.__running = value
+
+    @property
     def address_bus(self) -> AddressBus:
         return self.__addressBus
 
+    @address_bus.setter
+    def address_bus(self, value: AddressBus):
+        self.__addressBus = value
+
+    @property
     def data_bus(self) -> DataBus:
         return self.__dataBus
 
+    @data_bus.setter
+    def data_bus(self, value: DataBus):
+        self.__dataBus = value
+
+    @property
     def control_bus(self) -> ControlBus:
         return self.__controlBus
 
+    @control_bus.setter
+    def control_bus(self, value: ControlBus):
+        self.__controlBus = value
+
+    @property
     def interrupt_bus(self) -> InterruptBus:
         return self.__interruptBus
+
+    @interrupt_bus.setter
+    def interrupt_bus(self, value: InterruptBus):
+        self.__interruptBus = value
 
     @property
     def starting_address(self) -> int:
@@ -131,7 +171,7 @@ class BaseDevice(abc.ABC):
 
     def stop_running_if_halt_detected(self):
         # if halt interrupt has been raised, stop the thread
-        if self.interrupt_bus().test_interrupt(Interrupts.halt):
+        if self.interrupt_bus.test_interrupt(Interrupts.halt):
             self.__running = False
 
 

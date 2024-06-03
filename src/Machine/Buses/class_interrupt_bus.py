@@ -15,16 +15,20 @@ class InterruptBus:
         """
         self.__interruptBus = Interrupts.none
 
-    def set_interrupt(self, value: Constants.class_interrupts) -> bool:
+    def interrupt_awaiting(self) -> bool:
+        """
+        This method checks if any interrupts are set on the bus.
+        :return: True if any interrupts are set, False otherwise.
+        """
+        return self.__interruptBus != Interrupts.none
+
+    def set_interrupt(self, value: Constants.class_interrupts):
         """
         This method sets an interrupt on the bus.
         It uses bitwise OR to set the interrupt.
         :param value: The interrupt to set on the bus.
         """
-        if self.__interruptBus == Interrupts.none:
-            self.__interruptBus = self.__interruptBus | value
-            return True
-        return False
+        self.__interruptBus = self.__interruptBus | value
 
     def test_interrupt(self, interrupt_number: Constants.class_interrupts) -> bool:
         """

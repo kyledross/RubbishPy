@@ -431,13 +431,15 @@ class Console(BaseDevice):
             if self.control_bus.power_on:
                 # if the display thread has ended, raise the halt interrupt
                 if not self.output_form.is_alive():
-                    self.interrupt_bus.set_interrupt(Interrupts.halt)
+                    while not self.interrupt_bus.set_interrupt(Interrupts.halt):
+                        time.sleep(0.1)
                 # if there is data in the input queue,
                 # raise the interrupt to signal that there is data available
                 if not self.__input_queue.empty():
                     if not self.__interrupt_raised:
                         self.__interrupt_raised = True
-                        self.interrupt_bus.set_interrupt(self.__interrupt_number)
+                        while not self.interrupt_bus.set_interrupt(self.__interrupt_number):
+                            time.sleep(0.1)
                 if self.address_is_valid(self.address_bus):
                     if self.control_bus.read_request:
                         if not self.__input_queue.empty():

@@ -3,6 +3,7 @@ import threading
 from collections import deque
 from datetime import datetime
 from enum import IntFlag
+from time import sleep
 
 from Constants.class_compare_results import CompareResults
 from Constants.class_instruction_set import InstructionSet
@@ -29,7 +30,8 @@ class Phases(IntFlag):
 
 
 def execute_halt(interrupt_bus: InterruptBus):
-    interrupt_bus.set_interrupt(Interrupts.halt)
+    while not interrupt_bus.set_interrupt(Interrupts.halt):
+        sleep(0.1)
 
 
 # noinspection DuplicatedCode
@@ -42,7 +44,6 @@ class Processor(BaseProcessor):
                  address_bus: AddressBus, data_bus: DataBus, control_bus: ControlBus, interrupt_bus: InterruptBus):
         # registers
         super().__init__(starting_address, size, address_bus, data_bus, control_bus, interrupt_bus)
-        self.__interrupt_state = deque()
         self.__sleep_state_stack = deque()
         self.__disable_instruction_caching = disable_instruction_caching
         self.__current_instruction: int = -1
@@ -85,7 +86,7 @@ class Processor(BaseProcessor):
         while True:  # loop until a cached instruction request is not fulfilled
             # Interrupt processing
             if self.__phase == Phases.NothingPending:
-                if len(self.__interrupt_state) == 0:
+                if len(self.__call_stack) == 0:
                     for interruptBit in range(0, 32):
                         interrupt_number = 2 ** interruptBit
                         if interrupt_bus.test_interrupt(interrupt_number):
@@ -451,7 +452,6 @@ class Processor(BaseProcessor):
         self.__call_stack.append(current_pointer)
         self.__data_pointer = new_pointer
         self.push_registers()
-        self.__interrupt_state.append(is_interrupt)
         self.finish_instruction(False)
 
     def execute_rtn(self):
@@ -460,7 +460,6 @@ class Processor(BaseProcessor):
             self.pop_registers()
             if self.__sleep_mode:
                 self.__sleeping = self.__sleep_state_stack.pop()
-            self.__interrupt_state.pop()
             self.finish_instruction(True)
 
     def execute_siv(self, address_bus: AddressBus, control_bus: ControlBus, data_bus: DataBus):

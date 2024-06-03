@@ -32,67 +32,66 @@ class ControlBus:
         self.__busLock.release()
         time.sleep(0)
 
-    def get_read_request(self) -> bool:
+    @property
+    def read_request(self) -> bool:
         """
         This method returns the read request on the bus.
         :return: The read request on the bus.
         """
         return self.__ReadRequest
 
-    def set_read_request(self, value: bool):
+    @read_request.setter
+    def read_request(self, value: bool):
         """
         This method sets the read request on the bus.
         :param value: The read request to set on the bus.
         """
         self.__ReadRequest = value
 
-    def get_write_request(self) -> bool:
+    @property
+    def write_request(self) -> bool:
         """
         This method returns the write request on the bus.
         :return: The write request on the bus.
         """
         return self.__WriteRequest
 
-    def set_write_request(self, value: bool):
+    @write_request.setter
+    def write_request(self, value: bool):
         """
         This method sets the write request on the bus.
         :param value: The write request to set on the bus.
         """
         self.__WriteRequest = value
 
-    def get_response(self) -> bool:
+    @property
+    def response(self) -> bool:
         """
-        This method returns the response on the bus and then sets the response to False.
-        :return: The response on the bus.
-        """
-        if self.__Response:
-            self.__Response = False
-            return True
-        else:
-            return False
-
-    def peek_response(self) -> bool:
-        """
-        This method returns the response on the bus without setting the response to False.
+        This method returns the response on the bus.
         :return: The response on the bus.
         """
         return self.__Response
 
-    def set_response(self, value: bool):
+    @response.setter
+    def response(self, value: bool):
         """
         This method sets the response on the bus.
         :param value: The response to set on the bus.
         """
         self.__Response = value
 
-    def is_power_on(self) -> bool:
-        """ This method returns whether the bus is running or not. """
+    @property
+    def power_on(self) -> bool:
+        """
+        This method returns the power on status of the bus.
+        :return: The power on status of the bus.
+        """
         return self.__PowerOn
 
-    def power_on(self):
-        """ This method starts the bus running. """
-        self.__PowerOn = True
-
-    def power_off(self):
-        """ This method starts the bus running. """
-        self.__PowerOn = False
+    @power_on.setter
+    def power_on(self, value: bool):
+        """
+        This method sets the power on status of the bus.
+        :param value: The power on status to set on the bus.
+        """
+        self.__PowerOn = value

@@ -78,14 +78,14 @@ class BackPlane:
         Raises:
             None
         """
-        self.control_bus().power_on()
+        self.control_bus().power_on = True
         for device in self.__devices:
             device.start()
-        while self.control_bus().is_power_on():
+        while self.control_bus().power_on:
             self.control_bus().lock_bus()
             if self.__interruptBus.test_interrupt(Interrupts.halt):
                 print("HALT interrupt detected.")
-                self.control_bus().power_off()
+                self.control_bus().power_on = False
             self.control_bus().unlock_bus()
         self.wait_for_devices_to_finish()
 

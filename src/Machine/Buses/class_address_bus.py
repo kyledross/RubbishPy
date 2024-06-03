@@ -11,14 +11,16 @@ class AddressBus:
         """
         self.__AddressBus = 0
 
-    def get_address(self) -> int:
+    @property
+    def address(self) -> int:
         """
         This method returns the address on the bus.
         :return: The address on the bus.
         """
         return self.__AddressBus
 
-    def set_address(self, value: int):
+    @address.setter
+    def address(self, value: int):
         """
         This method sets the address on the bus.
         :param value: The address to set on the bus.

@@ -17,16 +17,19 @@ class DataBus:
         self.__DataBus = 0
         self.__ControlBus = control_bus
 
-    def get_data(self) -> int:
+    @property
+    def data(self) -> int:
         """
         This method returns the data on the bus.
         :return: The data on the bus.
         """
         return self.__DataBus
 
-    def set_data(self, value: int):
+    @data.setter
+    def data(self, value: int):
         """
         This method sets the data on the bus.
         :param value: The data to set on the bus.
         """
         self.__DataBus = value
+

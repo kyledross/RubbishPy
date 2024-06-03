@@ -91,7 +91,7 @@ class Processor(BaseProcessor):
                         interrupt_number = 2 ** interruptBit
                         if interrupt_bus.test_interrupt(interrupt_number):
                             if interrupt_number in self.__interrupt_vectors:
-                                self.make_call(self.__data_pointer, self.__interrupt_vectors[interrupt_number], True)
+                                self.make_call(self.__data_pointer, self.__interrupt_vectors[interrupt_number])
                                 interrupt_bus.clear_interrupt(interrupt_number)
                                 break
 
@@ -444,9 +444,9 @@ class Processor(BaseProcessor):
         value = self.request_single_operand(address_bus, control_bus, data_bus)
         if value is not None:
             pointer: int = self.__data_pointer
-            self.make_call(pointer, value, False)
+            self.make_call(pointer, value)
 
-    def make_call(self, current_pointer, new_pointer, is_interrupt: bool):
+    def make_call(self, current_pointer, new_pointer):
         self.__sleep_state_stack.append(self.__sleeping)
         self.__sleeping = False
         self.__call_stack.append(current_pointer)

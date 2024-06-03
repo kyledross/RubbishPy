@@ -42,34 +42,34 @@ class Processor(BaseProcessor):
                  address_bus: AddressBus, data_bus: DataBus, control_bus: ControlBus, interrupt_bus: InterruptBus):
         # registers
         super().__init__(starting_address, size, address_bus, data_bus, control_bus, interrupt_bus)
-        self.__handling_interrupt: bool = False
-        self.__call_source_stack = deque()
-        self.__disable_instruction_caching = disable_instruction_caching
-        self.__current_instruction: int = -1
-        self.__data_pointer: int = 0
-        self.__phase: int = 0
-        self.__registers = [0] * 8
+        self._handling_interrupt: bool = False
+        self._call_source_stack = deque()
+        self._disable_instruction_caching: bool = disable_instruction_caching
+        self._current_instruction: int = -1
+        self._data_pointer: int = 0
+        self._phase: int = 0
+        self._registers = [0] * 8
 
         # stacks
-        self.__internal_stack = deque()
-        self.__general_purpose_stack = deque()
-        self.__register_stack = deque()
-        self.__call_stack = deque()
+        self._internal_stack = deque()
+        self._general_purpose_stack = deque()
+        self._register_stack = deque()
+        self._call_stack = deque()
 
         # vectors
-        self.__interrupt_vectors: collections.OrderedDict[int, int] = collections.OrderedDict()
+        self._interrupt_vectors: collections.OrderedDict[int, int] = collections.OrderedDict()
 
         # flags
-        self.__compare_result = CompareResults.Equal
-        self.__sleeping: bool = False
-        self.__sleep_mode: bool = False
+        self._compare_result: CompareResults = CompareResults.Equal
+        self._sleeping: bool = False
+        self._sleep_mode: bool = False
 
         # instruction caching
-        self.__instruction_and_operand_cache = {}
+        self._instruction_and_operand_cache = {}
 
         # interrupt handling
-        self.__interrupt_to_handle: bool = False
-        self.__interrupt_number_to_handle: int = 0
+        self._interrupt_to_handle: bool = False
+        self._interrupt_number_to_handle: int = 0
 
     def process_cycle(self):
         while self.running:
@@ -88,23 +88,23 @@ class Processor(BaseProcessor):
         self.cache_instruction(address_bus, control_bus, data_bus)
         while True:  # loop until a cached instruction request is not fulfilled
             # handle interrupts
-            if self.__sleeping and not self.__handling_interrupt:
+            if self._sleeping and not self._handling_interrupt:
                 if self.interrupt_bus.interrupt_awaiting():
                     for interruptBit in range(0, 32):
                         interrupt_number = 2 ** interruptBit
                         if interrupt_bus.test_interrupt(interrupt_number):
-                            if interrupt_number in self.__interrupt_vectors:
-                                self.__interrupt_to_handle = True
-                                self.__interrupt_number_to_handle = interrupt_number
-                                self.__sleeping = False
-                                self.__handling_interrupt = True
+                            if interrupt_number in self._interrupt_vectors:
+                                self._interrupt_to_handle = True
+                                self._interrupt_number_to_handle = interrupt_number
+                                self._sleeping = False
+                                self._handling_interrupt = True
                                 break
 
-            if self.__sleeping:
+            if self._sleeping:
                 break
             else:
                 # Instruction routing
-                match self.__current_instruction:
+                match self._current_instruction:
 
                     case InstructionSet.NOP:
                         self.finish_instruction(True)
@@ -202,11 +202,11 @@ class Processor(BaseProcessor):
                     case _:
                         # is there an interrupt waiting?
                         # if so, fake a call to the interrupt vector
-                        if self.__interrupt_to_handle:
+                        if self._interrupt_to_handle:
                             # fake the call
-                            self.__interrupt_to_handle = False
-                            self.make_call(self.__data_pointer,
-                                           self.__interrupt_vectors[self.__interrupt_number_to_handle],
+                            self._interrupt_to_handle = False
+                            self.make_call(self._data_pointer,
+                                           self._interrupt_vectors[self._interrupt_number_to_handle],
                                            True)
                         else:
                             self.load_instruction(address_bus, control_bus, data_bus)
@@ -217,7 +217,7 @@ class Processor(BaseProcessor):
     def execute_debug(self):
         print(f"Processor: Debug instruction encountered at {datetime.now().strftime('%H:%M:%S')}")
         print("Current registers:")
-        print(self.__registers)
+        print(self._registers)
         self.finish_instruction(True)
 
     def cached_instruction_will_be_used(self, address_bus: AddressBus, control_bus: ControlBus, data_bus: DataBus):
@@ -234,12 +234,12 @@ class Processor(BaseProcessor):
             True if the cached instruction will be used, False otherwise.
 
         """
-        if self.__disable_instruction_caching:
+        if self._disable_instruction_caching:
             return False
-        if (self.__phase in [Phases.AwaitingInstruction, Phases.AwaitingFirstOperand, Phases.AwaitingSecondOperand]
+        if (self._phase in [Phases.AwaitingInstruction, Phases.AwaitingFirstOperand, Phases.AwaitingSecondOperand]
                 and control_bus.read_request
-                and address_bus.address in self.__instruction_and_operand_cache):
-            data_bus.data = self.__instruction_and_operand_cache[address_bus.address]
+                and address_bus.address in self._instruction_and_operand_cache):
+            data_bus.data = self._instruction_and_operand_cache[address_bus.address]
             control_bus.read_request = False
             control_bus.response = True
             return True
@@ -256,14 +256,14 @@ class Processor(BaseProcessor):
         Returns:
 
         """
-        if self.__disable_instruction_caching:
+        if self._disable_instruction_caching:
             return
         # if the processor is awaiting an instruction, and a response has been received, cache it
-        if (self.__phase == Phases.AwaitingInstruction or
-                self.__phase == Phases.AwaitingFirstOperand or
-                self.__phase == Phases.AwaitingSecondOperand):
+        if (self._phase == Phases.AwaitingInstruction or
+                self._phase == Phases.AwaitingFirstOperand or
+                self._phase == Phases.AwaitingSecondOperand):
             if control_bus.response:
-                self.__instruction_and_operand_cache[address_bus.address] = data_bus.data
+                self._instruction_and_operand_cache[address_bus.address] = data_bus.data
 
     # instruction fetching and execution
     def execute_reset(self):
@@ -272,65 +272,65 @@ class Processor(BaseProcessor):
         Returns:
 
         """
-        self.__current_instruction: int = -1
-        self.__data_pointer: int = 0
-        self.__phase: int = 0
-        self.__internal_stack = deque()
-        self.__general_purpose_stack = deque()
-        self.__register_stack = deque()
-        self.__call_stack = deque()
-        self.__registers = [0] * 8
-        self.__compare_result = CompareResults.Equal
-        self.__interrupt_vectors: collections.OrderedDict[int, int] = collections.OrderedDict()
-        self.__sleeping: bool = False
-        self.__sleep_mode: bool = False
+        self._current_instruction = -1
+        self._data_pointer = 0
+        self._phase = 0
+        self._internal_stack = deque()
+        self._general_purpose_stack = deque()
+        self._register_stack = deque()
+        self._call_stack = deque()
+        self._registers = [0] * 8
+        self._compare_result = CompareResults.Equal
+        self._interrupt_vectors = collections.OrderedDict()
+        self._sleeping = False
+        self._sleep_mode = False
 
     def execute_wake(self):
-        self.__sleeping = False
-        self.__sleep_mode = False
+        self._sleeping = False
+        self._sleep_mode = False
         self.finish_instruction(True)
 
     def execute_sleep(self):
-        self.__sleeping = True
-        self.__sleep_mode = True
+        self._sleeping = True
+        self._sleep_mode = True
         self.finish_instruction(True)
 
     def load_instruction(self, address_bus: AddressBus, control_bus: ControlBus, data_bus: DataBus):
-        if self.__phase == Phases.NothingPending:
-            address_bus.address = self.__data_pointer
+        if self._phase == Phases.NothingPending:
+            address_bus.address = self._data_pointer
             control_bus.read_request = True
-            self.__phase = Phases.AwaitingInstruction
-        elif self.__phase == Phases.AwaitingInstruction:
+            self._phase = Phases.AwaitingInstruction
+        elif self._phase == Phases.AwaitingInstruction:
             if control_bus.response:
                 control_bus.response = False
-                self.__current_instruction = data_bus.data
-                self.__phase = Phases.NothingPending
+                self._current_instruction = data_bus.data
+                self._phase = Phases.NothingPending
 
     def execute_add(self):
-        if self.__phase == Phases.NothingPending:
-            self.__registers[3] = self.__registers[1] + self.__registers[2]
+        if self._phase == Phases.NothingPending:
+            self._registers[3] = self._registers[1] + self._registers[2]
             self.finish_instruction(True)
 
     def execute_sub(self):
-        if self.__phase == Phases.NothingPending:
-            self.__registers[3] = self.__registers[1] - self.__registers[2]
+        if self._phase == Phases.NothingPending:
+            self._registers[3] = self._registers[1] - self._registers[2]
             self.finish_instruction(True)
 
     def execute_integer_divide(self):
-        if self.__phase == Phases.NothingPending:
-            self.__registers[3] = self.__registers[1] // self.__registers[2]
+        if self._phase == Phases.NothingPending:
+            self._registers[3] = self._registers[1] // self._registers[2]
             self.finish_instruction(True)
 
     def execute_multiply(self):
-        if self.__phase == Phases.NothingPending:
-            self.__registers[3] = self.__registers[1] * self.__registers[2]
+        if self._phase == Phases.NothingPending:
+            self._registers[3] = self._registers[1] * self._registers[2]
             self.finish_instruction(True)
 
     def execute_lrr(self, address_bus: AddressBus, control_bus: ControlBus, data_bus: DataBus):
         value = self.request_two_operands(address_bus, control_bus, data_bus)
         if value is not None:
-            destination_register = self.__internal_stack.pop()
-            self.__registers[destination_register] = self.__registers[value]
+            destination_register = self._internal_stack.pop()
+            self._registers[destination_register] = self._registers[value]
             self.finish_instruction(True)
 
     def execute_lrm(self, address_bus: AddressBus, control_bus: ControlBus, data_bus: DataBus):
@@ -341,16 +341,16 @@ class Processor(BaseProcessor):
             data_bus_data: int = value
             match data_bus_data < 0:
                 case True:
-                    address_bus.address = self.__registers[abs(data_bus_data)]
+                    address_bus.address = self._registers[abs(data_bus_data)]
                 case _:
                     address_bus.address = value
             control_bus.read_request = True
             control_bus.response = False
-            self.__phase = Phases.AwaitingResponse
-        elif self.__phase == Phases.AwaitingResponse:
+            self._phase = Phases.AwaitingResponse
+        elif self._phase == Phases.AwaitingResponse:
             if control_bus.response:
                 control_bus.response = False
-                self.__registers[self.__internal_stack.pop()] = data_bus.data
+                self._registers[self._internal_stack.pop()] = data_bus.data
                 self.finish_instruction(True)
 
     def execute_mrm(self, address_bus: AddressBus, control_bus: ControlBus, data_bus: DataBus):
@@ -361,15 +361,15 @@ class Processor(BaseProcessor):
             data_bus_data: int = value
             match data_bus_data < 0:
                 case True:
-                    address_bus.address = self.__registers[abs(data_bus_data)]
+                    address_bus.address = self._registers[abs(data_bus_data)]
                 case _:
                     address_bus.address = value
 
-            data_bus.data = self.__registers[self.__internal_stack.pop()]
+            data_bus.data = self._registers[self._internal_stack.pop()]
             control_bus.write_request = True
             control_bus.response = False
-            self.__phase = Phases.AwaitingResponse
-        elif self.__phase == Phases.AwaitingResponse:
+            self._phase = Phases.AwaitingResponse
+        elif self._phase == Phases.AwaitingResponse:
             if control_bus.response:
                 control_bus.response = False
                 self.finish_instruction(True)
@@ -378,21 +378,21 @@ class Processor(BaseProcessor):
         value = self.request_two_operands(address_bus, control_bus, data_bus)
         if value is not None:
             value: int = value
-            destination_register = self.__internal_stack.pop()
-            self.__registers[destination_register] = value
+            destination_register = self._internal_stack.pop()
+            self._registers[destination_register] = value
             self.finish_instruction(True)
 
     def execute_jmp(self, address_bus: AddressBus, control_bus: ControlBus, data_bus: DataBus):
         value = self.request_single_operand(address_bus, control_bus, data_bus)
         if value is not None:
-            self.__data_pointer = value
+            self._data_pointer = value
             self.finish_instruction(False)
 
     def execute_je(self, address_bus: AddressBus, control_bus: ControlBus, data_bus: DataBus):
         value = self.request_single_operand(address_bus, control_bus, data_bus)
         if value is not None:
-            if self.__compare_result == CompareResults.Equal:
-                self.__data_pointer = value
+            if self._compare_result == CompareResults.Equal:
+                self._data_pointer = value
                 self.finish_instruction(False)
             else:
                 self.finish_instruction(True)
@@ -400,9 +400,9 @@ class Processor(BaseProcessor):
     def execute_jne(self, address_bus: AddressBus, control_bus: ControlBus, data_bus: DataBus):
         value = self.request_single_operand(address_bus, control_bus, data_bus)
         if value is not None:
-            if (self.__compare_result == CompareResults.GreaterThan
-                    or self.__compare_result == CompareResults.LessThan):
-                self.__data_pointer = value
+            if (self._compare_result == CompareResults.GreaterThan
+                    or self._compare_result == CompareResults.LessThan):
+                self._data_pointer = value
                 self.finish_instruction(False)
             else:
                 self.finish_instruction(True)
@@ -410,8 +410,8 @@ class Processor(BaseProcessor):
     def execute_jl(self, address_bus: AddressBus, control_bus: ControlBus, data_bus: DataBus):
         value = self.request_single_operand(address_bus, control_bus, data_bus)
         if value is not None:
-            if self.__compare_result == CompareResults.LessThan:
-                self.__data_pointer = value
+            if self._compare_result == CompareResults.LessThan:
+                self._data_pointer = value
                 self.finish_instruction(False)
             else:
                 self.finish_instruction(True)
@@ -419,126 +419,126 @@ class Processor(BaseProcessor):
     def execute_jg(self, address_bus: AddressBus, control_bus: ControlBus, data_bus: DataBus):
         value = self.request_single_operand(address_bus, control_bus, data_bus)
         if value is not None:
-            if self.__compare_result == CompareResults.GreaterThan:
-                self.__data_pointer = value
+            if self._compare_result == CompareResults.GreaterThan:
+                self._data_pointer = value
                 self.finish_instruction(False)
             else:
                 self.finish_instruction(True)
 
     def execute_cmp(self):
-        if self.__phase == Phases.NothingPending:
-            if self.__registers[1] == self.__registers[2]:
-                self.__compare_result = CompareResults.Equal
-            elif self.__registers[1] > self.__registers[2]:
-                self.__compare_result = CompareResults.GreaterThan
-            elif self.__registers[1] < self.__registers[2]:
-                self.__compare_result = CompareResults.LessThan
+        if self._phase == Phases.NothingPending:
+            if self._registers[1] == self._registers[2]:
+                self._compare_result = CompareResults.Equal
+            elif self._registers[1] > self._registers[2]:
+                self._compare_result = CompareResults.GreaterThan
+            elif self._registers[1] < self._registers[2]:
+                self._compare_result = CompareResults.LessThan
             self.finish_instruction(True)
 
     def execute_push(self, address_bus: AddressBus, control_bus: ControlBus, data_bus: DataBus):
         value = self.request_single_operand(address_bus, control_bus, data_bus)
         if value is not None:
-            self.__general_purpose_stack.append(self.__registers[value])
-            self.__phase = Phases.NothingPending
+            self._general_purpose_stack.append(self._registers[value])
+            self._phase = Phases.NothingPending
             self.finish_instruction(True)
 
     def execute_pop(self, address_bus: AddressBus, control_bus: ControlBus, data_bus: DataBus):
         value = self.request_single_operand(address_bus, control_bus, data_bus)
         if value is not None:
-            self.__registers[value] = self.__general_purpose_stack.pop()
+            self._registers[value] = self._general_purpose_stack.pop()
             self.finish_instruction(True)
 
     def execute_peek(self, address_bus: AddressBus, control_bus: ControlBus, data_bus: DataBus):
         value = self.request_single_operand(address_bus, control_bus, data_bus)
         if value is not None:
-            self.__registers[value] = self.__general_purpose_stack[-1]()
+            self._registers[value] = self._general_purpose_stack[-1]()
             self.finish_instruction(True)
 
     def execute_call(self, address_bus: AddressBus, control_bus: ControlBus, data_bus: DataBus):
         value = self.request_single_operand(address_bus, control_bus, data_bus)
         if value is not None:
-            pointer: int = self.__data_pointer
+            pointer: int = self._data_pointer
             self.make_call(pointer, value, False)
 
     def make_call(self, current_pointer, new_pointer, is_interrupt_sourced_call):
-        self.__call_source_stack.append(is_interrupt_sourced_call)
-        self.__sleeping = False
-        self.__call_stack.append(current_pointer)
-        self.__data_pointer = new_pointer
+        self._call_source_stack.append(is_interrupt_sourced_call)
+        self._sleeping = False
+        self._call_stack.append(current_pointer)
+        self._data_pointer = new_pointer
         self.push_registers()
         self.finish_instruction(False)
 
     def execute_rtn(self):
-        if self.__phase == Phases.NothingPending:
-            self.__data_pointer = self.__call_stack.pop()
+        if self._phase == Phases.NothingPending:
+            self._data_pointer = self._call_stack.pop()
             self.pop_registers()
-            is_interrupt_sourced_call = self.__call_source_stack.pop()
+            is_interrupt_sourced_call = self._call_source_stack.pop()
             if is_interrupt_sourced_call:
-                if self.__sleep_mode:
-                    self.__sleeping = True
-                self.__handling_interrupt = False
+                if self._sleep_mode:
+                    self._sleeping = True
+                self._handling_interrupt = False
 
             self.finish_instruction(True)
 
     def execute_siv(self, address_bus: AddressBus, control_bus: ControlBus, data_bus: DataBus):
         value = self.request_two_operands(address_bus, control_bus, data_bus)
         if value is not None:
-            interrupt_number = self.__internal_stack.pop()
-            self.__interrupt_vectors[interrupt_number] = value
+            interrupt_number = self._internal_stack.pop()
+            self._interrupt_vectors[interrupt_number] = value
             self.finish_instruction(True)
 
     # instruction helpers
     def request_operand(self, address_bus: AddressBus, control_bus: ControlBus):
-        self.__data_pointer += 1
-        address_bus.address = self.__data_pointer
+        self._data_pointer += 1
+        address_bus.address = self._data_pointer
         control_bus.read_request = True
         control_bus.response = False
 
     def finish_instruction(self, advance_pointer: bool = True):
         if advance_pointer:
-            self.__data_pointer += 1
-        self.__current_instruction = -1
-        self.__phase = Phases.NothingPending
+            self._data_pointer += 1
+        self._current_instruction = -1
+        self._phase = Phases.NothingPending
 
     def push_registers(self):
         for i in range(8):
-            self.__register_stack.append(self.__registers[i])
+            self._register_stack.append(self._registers[i])
 
     def pop_registers(self):
         for i in range(7, -1, -1):
-            self.__registers[i] = self.__register_stack.pop()
+            self._registers[i] = self._register_stack.pop()
 
     def execute_or(self):
-        if self.__phase == Phases.NothingPending:
-            self.__registers[3] = self.__registers[1] | self.__registers[2]
+        if self._phase == Phases.NothingPending:
+            self._registers[3] = self._registers[1] | self._registers[2]
             self.finish_instruction(True)
 
     def execute_and(self):
-        if self.__phase == Phases.NothingPending:
-            self.__registers[3] = self.__registers[1] & self.__registers[2]
+        if self._phase == Phases.NothingPending:
+            self._registers[3] = self._registers[1] & self._registers[2]
             self.finish_instruction(True)
 
     def execute_xor(self):
-        if self.__phase == Phases.NothingPending:
-            self.__registers[3] = self.__registers[1] ^ self.__registers[2]
+        if self._phase == Phases.NothingPending:
+            self._registers[3] = self._registers[1] ^ self._registers[2]
             self.finish_instruction(True)
 
     def execute_not(self):
-        if self.__phase == Phases.NothingPending:
-            self.__registers[3] = ~self.__registers[1]
+        if self._phase == Phases.NothingPending:
+            self._registers[3] = ~self._registers[1]
             self.finish_instruction(True)
 
     def execute_inc(self, address_bus: AddressBus, control_bus: ControlBus, data_bus: DataBus):
         value = self.request_single_operand(address_bus, control_bus, data_bus)
         if value is not None:
-            self.__registers[value] += 1
+            self._registers[value] += 1
             self.finish_instruction(True)
 
     def request_single_operand(self, address_bus: AddressBus, control_bus: ControlBus, data_bus: DataBus):
-        if self.__phase == Phases.NothingPending:
+        if self._phase == Phases.NothingPending:
             self.request_operand(address_bus, control_bus)
-            self.__phase = Phases.AwaitingFirstOperand
-        elif self.__phase == Phases.AwaitingFirstOperand:
+            self._phase = Phases.AwaitingFirstOperand
+        elif self._phase == Phases.AwaitingFirstOperand:
             if control_bus.response:
                 control_bus.response = False
                 return data_bus.data
@@ -558,10 +558,10 @@ class Processor(BaseProcessor):
         """
         value = self.request_single_operand(address_bus, control_bus, data_bus)
         if value is not None:
-            self.__internal_stack.append(value)
+            self._internal_stack.append(value)
             self.request_operand(address_bus, control_bus)
-            self.__phase = Phases.AwaitingSecondOperand
-        elif self.__phase == Phases.AwaitingSecondOperand:
+            self._phase = Phases.AwaitingSecondOperand
+        elif self._phase == Phases.AwaitingSecondOperand:
             if control_bus.response:
                 control_bus.response = False
                 return data_bus.data

@@ -123,8 +123,8 @@ class BaseDevice(abc.ABC):
         :param address_bus: The address bus to check the address from.
         :return: True if the address is valid, False otherwise.
         """
-        if ((address_bus.get_address() >= self.__startingAddress)
-                and (address_bus.get_address() < self.__startingAddress + self.__size)):
+        if ((address_bus.address >= self.__startingAddress)
+                and (address_bus.address < self.__startingAddress + self.__size)):
             return True
         else:
             return False

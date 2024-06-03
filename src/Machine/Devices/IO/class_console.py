@@ -395,7 +395,7 @@ class Console(BaseDevice):
         while self.is_running():
             self.control_bus().lock_bus()
             self.stop_running_if_halt_detected()
-            if self.control_bus().is_power_on():
+            if self.control_bus().power_on:
                 # if the display thread has ended, raise the halt interrupt
                 if not self.get_output_form().is_alive():
                     self.interrupt_bus().set_interrupt(Interrupts.halt)
@@ -405,17 +405,17 @@ class Console(BaseDevice):
                     self.__last_input_queue_hash = get_queue_hash(self.__input_queue)
                     self.interrupt_bus().set_interrupt(self.__interrupt_number)
                 if self.address_is_valid(self.address_bus()):
-                    if self.control_bus().get_read_request():
+                    if self.control_bus().read_request:
                         if not self.__input_queue.empty():
                             buffer_data = self.__input_queue.get()
-                            self.data_bus().set_data(buffer_data)
-                            self.control_bus().set_read_request(False)
-                            self.control_bus().set_response(True)
-                    if self.control_bus().get_write_request():
-                        data = self.data_bus().get_data()
+                            self.data_bus().data = buffer_data
+                            self.control_bus().read_request = False
+                            self.control_bus().response = True
+                    if self.control_bus().write_request:
+                        data = self.data_bus().data
                         self.process_output(data)
                         self.write_buffer_to_queue()
-                        self.control_bus().set_write_request(False)
-                        self.control_bus().set_response(True)
+                        self.control_bus().write_request = False
+                        self.control_bus().response = True
             self.control_bus().unlock_bus()
         self.set_finished()

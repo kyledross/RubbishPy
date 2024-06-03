@@ -109,13 +109,13 @@ class SoundCard(BaseDevice):
             queue_changed: bool = False
             self.control_bus().lock_bus()
             self.stop_running_if_halt_detected()
-            if self.control_bus().is_power_on():
+            if self.control_bus().power_on:
                 if self.address_is_valid(self.address_bus()):
-                    if self.control_bus().get_write_request():
-                        self.__command_queue.put(self.data_bus().get_data())
+                    if self.control_bus().write_request:
+                        self.__command_queue.put(self.data_bus().data)
                         queue_changed = True
-                        self.control_bus().set_write_request(False)
-                        self.control_bus().set_response(True)
+                        self.control_bus().write_request = False
+                        self.control_bus().response = True
             self.control_bus().unlock_bus()
             if queue_changed:
                 # run process_queue on new thread if not already running

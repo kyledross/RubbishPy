@@ -45,7 +45,7 @@ class Processor(BaseProcessor):
         self._handling_interrupt: bool = False
         self._call_source_stack = deque()
         self._disable_instruction_caching: bool = disable_instruction_caching
-        self._current_instruction: int = -1
+        self._current_instruction: int = InstructionSet.NoInstruction
         self._data_pointer: int = 0
         self._phase: int = 0
         self._registers = [0] * 8
@@ -272,7 +272,7 @@ class Processor(BaseProcessor):
         Returns:
 
         """
-        self._current_instruction = -1
+        self._current_instruction = InstructionSet.NoInstruction
         self._data_pointer = 0
         self._phase = 0
         self._internal_stack = deque()
@@ -497,7 +497,7 @@ class Processor(BaseProcessor):
     def finish_instruction(self, advance_pointer: bool = True):
         if advance_pointer:
             self._data_pointer += 1
-        self._current_instruction = -1
+        self._current_instruction = InstructionSet.NoInstruction
         self._phase = Phases.NothingPending
 
     def push_registers(self):

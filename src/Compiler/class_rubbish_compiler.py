@@ -53,7 +53,7 @@ class RubbishCompiler:
 
                         instruction = parameters[0].strip().upper()
                         # noinspection SpellCheckingInspection
-                        if instruction == "'":
+                        if instruction == "'" or instruction == "#":
                             # This is just a comment
                             pass
                         elif instruction == "NOP":

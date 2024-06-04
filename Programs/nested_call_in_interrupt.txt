@@ -8,9 +8,14 @@ lr 0 1
 debug
 call nested
 debug
+pop 1
+debug
 rtn
 
 nested:
 lr 0 2
 debug
+# retrieve byte to cause console to clear interrupt
+lrm 1 1024
+push 1
 rtn

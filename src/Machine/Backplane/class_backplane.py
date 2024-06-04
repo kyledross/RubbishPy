@@ -1,4 +1,5 @@
 import time
+from typing import List
 
 from Constants.class_interrupts import Interrupts
 from Machine.Buses.class_address_bus import AddressBus
@@ -16,15 +17,15 @@ class BackPlane:
 
     Attributes
     ----------
-    _devices : list
+    __devices : list
         a list to store the devices connected to the backplane
-    _addressBus : AddressBus
+    __addressBus : AddressBus
         the address bus of the backplane
-    _dataBus : DataBus
+    __dataBus : DataBus
         the data bus of the backplane
-    _controlBus : ControlBus
+    __controlBus : ControlBus
         the control bus of the backplane
-    _interruptBus : InterruptBus
+    __interruptBus : InterruptBus
         the interrupt bus of the backplane
 
     Methods
@@ -37,22 +38,31 @@ class BackPlane:
         Runs the backplane.
     """
 
-    _devices = []
-    _addressBus: AddressBus = None
-    _dataBus: DataBus = None
-    _controlBus: ControlBus = None
-    _interruptBus: InterruptBus = None
+    @property
+    def address_bus(self) -> AddressBus:
+        return self.__addressBus
 
-    _cataloged_devices = {}
+    @property
+    def data_bus(self) -> DataBus:
+        return self.__dataBus
+
+    @property
+    def control_bus(self) -> ControlBus:
+        return self.__controlBus
+
+    @property
+    def interrupt_bus(self) -> InterruptBus:
+        return self.__interruptBus
 
     def __init__(self):
         """
         Constructs all the necessary attributes for the backplane.
         """
-        self._addressBus = AddressBus()
-        self._controlBus = ControlBus()
-        self._dataBus = DataBus(self._controlBus)
-        self._interruptBus = InterruptBus()
+        self.__addressBus = AddressBus()
+        self.__controlBus = ControlBus()
+        self.__dataBus = DataBus(self.__controlBus)
+        self.__interruptBus = InterruptBus()
+        self.__devices: List[BaseDevice] = []
 
     def add_device(self, device: BaseDevice):
         """
@@ -61,35 +71,35 @@ class BackPlane:
         Parameters:
             device (BaseDevice): The device to be added to the backplane.
         """
-        self._devices.append(device)
+        self.__devices.append(device)
 
     def run(self):
         """
         Runs the backplane.
-        The backplane runs in an infinite loop, cycling through all the devices
-        connected to it.  When a HALT interrupt is detected, cycling stops.
+        The backplane runs creates instances of the buses and allows the devices to run on them.
+        When a HALT interrupt is detected, cycling stops.
 
         Raises:
             None
         """
-        running: bool = True
-        while running:
-            for device in self._devices:
-                device.cycle(self._addressBus, self._dataBus, self._controlBus, self._interruptBus)
-                # if the device has set the response line, save the address it responded to
-                if self._controlBus.peek_response():
-                    self._cataloged_devices[self._addressBus.get_address()] = device
-                # if the device is requesting an address, and we've cataloged the responding device for the address,
-                # cycle the responding device
-                if ((self._controlBus.get_read_request() or self._controlBus.get_write_request())
-                        and self._addressBus.get_address() in self._cataloged_devices):
-                    cataloged_device = self._cataloged_devices[self._addressBus.get_address()]
-                    cataloged_device.cycle(self._addressBus, self._dataBus, self._controlBus, self._interruptBus)
-                    # now cycle the current device again to give it a chance to respond to the read/write request
-                    device.cycle(self._addressBus, self._dataBus, self._controlBus, self._interruptBus)
+        self.control_bus.power_on = True
+        for device in self.__devices:
+            device.start()
+        while self.control_bus.power_on:
+            self.control_bus.lock_bus()
+            if self.interrupt_bus.test_interrupt(Interrupts.halt):
+                print("HALT interrupt detected.")
+                self.control_bus.power_on = False
+            self.control_bus.unlock_bus()
+        self.wait_for_devices_to_finish()
 
-                if self._interruptBus.test_interrupt(Interrupts.halt):
-                    print("HALT interrupt detected.")
-                    running = False
+    def wait_for_devices_to_finish(self):
+        print("Waiting for devices to finish.")
+        devices_busy = True
+        while devices_busy:
+            devices_busy = False
+            for device in self.__devices:
+                if device.finished is False:
+                    devices_busy = True
                     break
-            time.sleep(0)  # allow other threads (such as console 3.1) to run
+            time.sleep(.1)

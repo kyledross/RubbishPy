@@ -1,0 +1,78 @@
+' send a frame to the soundcard to play a middle C (261.63 Hz) for 1 second
+' then D then E'
+' then a harmony of C and E
+' requires soundcard at address 1025'
+
+call play_sound
+halt
+
+
+play_sound:
+start_frame:
+call send_duration
+call send_c
+call send_volume
+call end_frame
+call end_transaction
+
+call send_duration
+call send_d
+call send_volume
+call end_frame
+
+call send_duration
+call send_e
+call send_volume
+call end_frame
+
+' send harmony of C and E'
+call send_duration
+call send_c
+call send_volume
+call send_e
+call send_volume
+call end_frame
+
+call end_transaction
+rtn
+
+send_duration:
+' first byte of frame is the duration in milliseconds'
+lr 1 250
+mrm 1 1025
+rtn
+
+send_c:
+' second byte of frame is the frequency in Hz packed * 100
+lr 1 26163
+mrm 1 1025
+rtn
+
+send_volume:
+' third byte of frame is the volume 0-1 packed * 10
+' full volume = 1 * 10'
+lr 1 10
+mrm 1 1025
+rtn
+
+end_frame:
+' end frame with zero
+lr 1 -1
+mrm 1 1025
+rtn
+
+end_transaction:
+lr 1 -2
+mrm 1 1025
+rtn
+
+send_d:
+lr 1 29366
+mrm 1 1025
+rtn
+
+send_e:
+lr 1 32963
+mrm 1 1025
+rtn
+

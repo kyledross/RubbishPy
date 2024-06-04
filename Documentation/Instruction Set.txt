@@ -157,7 +157,7 @@ RST
 Sleep
 SLEEP
 Opcode: 28
-Purpose: Causes processor to remain in a state where no instructions are processed until an interrupt is handled.  The processor will return to sleep after a RTN.
+Purpose: Causes processor to remain in a state where no instructions are processed until an interrupt is handled.  The processor will return to sleep after an RTN.
 
 Wake
 WAKE

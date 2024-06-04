@@ -1,16 +1,10 @@
 from Compiler.class_rubbish_compiler import RubbishCompiler
-from Machine.Devices.IO.class_consolev5 import ConsoleV5
-from Machine.Devices.IO.class_consolev4 import ConsoleV4
-from Machine.Devices.IO.class_consolev2 import ConsoleV2
-from Machine.Devices.IO.class_consolev3 import ConsoleV3
-from Machine.Devices.IO.class_consolev31 import ConsoleV31
+from Machine.Devices.IO.class_console import Console
 from Machine.Devices.Memory.class_ram import RAM
 from Machine.Devices.Memory.class_rom import ROM
 from Machine.Devices.Processors.class_processor import Processor
-from Machine.Devices.Testers.class_debugger import Debugger
 from Machine.Backplane.class_backplane import BackPlane
-from Machine.Devices.IO.class_console import Console
-from Machine.Devices.IO.class_addressable_text_display import AddressableTextDisplay
+from Machine.Devices.IO.class_soundcard import SoundCard
 
 device_group = []
 
@@ -29,9 +23,9 @@ class MachineBuilder:
 
     Attributes
     ----------
-    _backplane : BackPlane
+    __backplane : BackPlane
         the backplane of the machine
-    device_group : list
+    __device_group : list
         a list to store the devices of the machine
 
     Methods
@@ -53,8 +47,8 @@ class MachineBuilder:
         Parameters:
         devices (list): The devices to be added to the machine.
         """
-        self._backplane = BackPlane()
-        self.device_group = devices
+        self.__backplane = BackPlane()
+        self.__device_group = devices
 
     def build_machine(self) -> BackPlane:
         """
@@ -63,10 +57,10 @@ class MachineBuilder:
         Returns:
         BackPlane: The outfitted backplane of the machine.
         """
-        for device in self.device_group:
+        for device in self.__device_group:
             self.check_device_overlap(device)
             self.attach_device(device)
-        return self._backplane
+        return self.__backplane
 
     def check_device_overlap(self, device):
         """
@@ -84,7 +78,7 @@ class MachineBuilder:
             if 'size' in device:
                 device_memory_end += int(device['size']) - 1
 
-            for check_device in self.device_group:
+            for check_device in self.__device_group:
                 if device is check_device:  # don't check yourself
                     continue
                 if 'address' in check_device:
@@ -131,45 +125,60 @@ class MachineBuilder:
         # noinspection SpellCheckingInspection
         match device_to_add:
             case 'ram':
-                self._backplane.add_device(RAM(starting_address=address, size=size))
+                self.__backplane.add_device(RAM(starting_address=address,
+                                                size=size,
+                                                address_bus=self.__backplane.address_bus,
+                                                data_bus=self.__backplane.data_bus,
+                                                control_bus=self.__backplane.control_bus,
+                                                interrupt_bus=self.__backplane.interrupt_bus))
             case 'processor':
-                self._backplane.add_device(Processor(size=size, starting_address=address,
-                                                     disable_instruction_caching=False))
+                self.__backplane.add_device(Processor(size=size,
+                                                      starting_address=address,
+                                                      disable_instruction_caching=False,
+                                                      address_bus=self.__backplane.address_bus,
+                                                      data_bus=self.__backplane.data_bus,
+                                                      control_bus=self.__backplane.control_bus,
+                                                      interrupt_bus=self.__backplane.interrupt_bus))
             case 'console':
-                self._backplane.add_device(Console(starting_address=address, interrupt=interrupt))
-            case 'consolev2':
-                self._backplane.add_device(ConsoleV2(starting_address=address, interrupt_number=interrupt))
-            case 'consolev3':
-                self._backplane.add_device(ConsoleV3(starting_address=address, width=width, height=height,
-                                                     interrupt_number=interrupt))
-            case 'consolev31':
-                self._backplane.add_device(ConsoleV31(starting_address=address, width=width, height=height,
-                                                      interrupt_number=interrupt))
-            case 'consolev4':
-                self._backplane.add_device(ConsoleV4(starting_address=address, width=width, height=height,
-                                                     interrupt_number=interrupt))
-            case 'consolev5':
-                self._backplane.add_device(ConsoleV5(starting_address=address, width=width, height=height,
-                                                     interrupt_number=interrupt))
-            case 'display':
-                self._backplane.add_device(AddressableTextDisplay(starting_address=address, width=width, height=height))
+                self.__backplane.add_device(Console(starting_address=address,
+                                                    width=width,
+                                                    height=height,
+                                                    interrupt_number=interrupt,
+                                                    address_bus=self.__backplane.address_bus,
+                                                    data_bus=self.__backplane.data_bus,
+                                                    control_bus=self.__backplane.control_bus,
+                                                    interrupt_bus=self.__backplane.interrupt_bus))
+            case 'soundcard':
+                self.__backplane.add_device(SoundCard(starting_address=address,
+                                                      address_bus=self.__backplane.address_bus,
+                                                      data_bus=self.__backplane.data_bus,
+                                                      control_bus=self.__backplane.control_bus,
+                                                      interrupt_bus=self.__backplane.interrupt_bus))
             case 'rom':
-                self._backplane.add_device(ROM(starting_address=address))
+                self.__backplane.add_device(ROM(starting_address=address,
+                                                address_bus=self.__backplane.address_bus,
+                                                data_bus=self.__backplane.data_bus,
+                                                control_bus=self.__backplane.control_bus,
+                                                interrupt_bus=self.__backplane.interrupt_bus))
             case 'compiler':
                 compiler = RubbishCompiler(address=address)
                 code = compiler.compile(program_pathname)
                 if len(code) > size:
                     print("Warning: The compiled program size exceeds the specified size.")
-                ram = RAM(starting_address=address, size=size)
+                ram = RAM(starting_address=address,
+                          size=size,
+                          address_bus=self.__backplane.address_bus,
+                          data_bus=self.__backplane.data_bus,
+                          control_bus=self.__backplane.control_bus,
+                          interrupt_bus=self.__backplane.interrupt_bus)
                 ram.load_data(data=code)
-                self._backplane.add_device(ram)
-            case 'debugger':
-                self._backplane.add_device(Debugger())
+                self.__backplane.add_device(ram)
+
             case _:
                 print(f"Device {device_to_add} not found.")
 
     @staticmethod
-    def read_file(filename):
+    def read_file(filename: str):
         """
         Function to read a file and return its contents.
 

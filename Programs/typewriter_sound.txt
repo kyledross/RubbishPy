@@ -5,7 +5,11 @@
 ' I/O Console at address 1024, interrupt 2
 
 ' Usage:
-' python3 main.py --compiler address=0 size=1024 program=../Programs/typewriter.txt --processor --console width=80 height=25 address=1024 interrupt=2
+' python3 main.py --compiler address=0 size=1024 program=../Programs/typewriter.txt --processor --console width=80 height=25 address=1024 interrupt=2 --soundcard address=1025
+
+' =======================================
+' Play startup sound
+call play_startup_sound
 
 ' =======================================
 ' Display title
@@ -29,7 +33,9 @@ jmp main
 ' =======================================
 ' Handle IRQ
 ' Load value at 1024 (the console) into register 1
-keypress: lrm 1 1024
+keypress:
+call play_click
+lrm 1 1024
 ' Load CR into register 2
 lr 2 13
 ' Compare registers 1 and 2
@@ -45,7 +51,8 @@ rtn
 ' Next Line routine
 ' =======================================
 ' Send a 13 (CR) then a 10 (LF) to the console (address 1024), then return from the interrupt handler
-CR: lr 3 13
+CR:
+lr 3 13
 mrm 3 1024
 lr 3 10
 mrm 3 1024
@@ -79,3 +86,89 @@ LRR 2 3
 ADD
 JMP print_loop
 print_return: rtn
+
+' =======================================
+' Sound
+
+play_click:
+lr 1 10
+mrm 1 1025
+
+' frequency of 1000 Hz'
+lr 1 100000
+mrm 1 1025
+
+call send_volume
+call end_frame
+call end_transaction
+
+rtn
+
+play_startup_sound:
+start_frame:
+call send_duration
+call send_c
+call send_volume
+call end_frame
+
+call send_duration
+call send_d
+call send_volume
+call end_frame
+
+call send_duration
+call send_e
+call send_volume
+call end_frame
+
+' send harmony of C and E'
+call send_duration
+call send_c
+call send_volume
+call send_e
+call send_volume
+call end_frame
+call end_transaction
+rtn
+
+send_duration:
+' first byte of frame is the duration in milliseconds'
+lr 1 250
+mrm 1 1025
+rtn
+
+send_c:
+' second byte of frame is the frequency in Hz packed * 100
+lr 1 26163
+mrm 1 1025
+rtn
+
+send_volume:
+' third byte of frame is the volume 0-1 packed * 10
+' full volume = 1 * 10'
+lr 1 10
+mrm 1 1025
+rtn
+
+end_frame:
+' end frame with zero
+lr 1 -1
+mrm 1 1025
+rtn
+
+end_transaction:
+lr 1 -2
+mrm 1 1025
+rtn
+
+send_d:
+lr 1 29366
+mrm 1 1025
+rtn
+
+send_e:
+lr 1 32963
+mrm 1 1025
+rtn
+
+

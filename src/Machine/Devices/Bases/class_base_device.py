@@ -1,30 +1,144 @@
+import abc
+import random
 import sys
-from abc import abstractmethod
+
+from Constants.class_interrupts import Interrupts
 from Machine.Buses.class_interrupt_bus import InterruptBus
 from Machine.Buses.class_address_bus import AddressBus
 from Machine.Buses.class_data_bus import DataBus
 from Machine.Buses.class_control_bus import ControlBus
 
 
-class BaseDevice:
+def base36encode(number) -> str:
+    """
+    Converts an integer to a base36 string.
+    """
+    if not isinstance(number, int):
+        raise TypeError('number must be an integer')
+
+    # noinspection SpellCheckingInspection
+    alphabet = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+
+    base36 = ''
+    while number:
+        number, i = divmod(number, 36)
+        base36 = alphabet[i] + base36
+
+    return base36 or alphabet[0]
+
+
+class BaseDevice(abc.ABC):
     """
     The BaseDevice class is an abstract base class for all devices in the system.
     It provides a common interface for all devices, including a method to
     cycle the device and check if an address is valid.
     """
 
-    _startingAddress: int = 0  # The starting address of the device
-    _size: int = 0  # The size of the device
-
-    def __init__(self, starting_address: int, size: int):
+    def __init__(self, starting_address: int, size: int, address_bus: AddressBus, data_bus: DataBus,
+                 control_bus: ControlBus, interrupt_bus: InterruptBus):
         """
         Constructor for the BaseDevice class.
         Initializes the starting address and size of the device.
         :param starting_address: The starting address of the device.
         :param size: The size of the device.
         """
-        self._startingAddress = starting_address
-        self._size = size
+        self.__startingAddress: int = starting_address
+        self.__size: int = size
+        self.__addressBus: AddressBus = address_bus
+        self.__dataBus: DataBus = data_bus
+        self.__controlBus: ControlBus = control_bus
+        self.__interruptBus: InterruptBus = interrupt_bus
+        self.__running: bool = True
+        self.__finished: bool = False
+        self.__deviceId: str = self.generate_device_id()
+
+    @classmethod
+    def generate_device_id(cls) -> str:
+        """
+        This method generates a unique device ID.
+        :return: A unique device ID.
+        """
+        device_id = cls.__name__ + "_" + base36encode(random.randint(0, 36 ** 2))
+        return device_id
+
+    @property
+    def device_id(self) -> str:
+        """
+        This property returns the device ID.
+        :return: The device ID.
+        """
+        return self.__deviceId
+
+    @property
+    def finished(self) -> bool:
+        """
+        This property returns whether the device has finished or not.
+        :return: True if the device has finished, False otherwise.
+        """
+        return self.__finished
+
+    @finished.setter
+    def finished(self, value: bool):
+        """
+        This property sets whether the device has finished or not.
+        :param value: True if the device has finished, False otherwise.
+        """
+        self.__finished = value
+
+    @abc.abstractmethod
+    def start(self):
+        """
+        This method starts the device.
+        """
+        pass
+
+    @property
+    def running(self) -> bool:
+        """
+        This property returns whether the device is running or not.
+        :return: True if the device is running, False otherwise.
+        """
+        return self.__running
+
+    @running.setter
+    def running(self, value: bool):
+        """
+        This property sets whether the device is running or not.
+        :param value: True if the device is running, False otherwise.
+        """
+        self.__running = value
+
+    @property
+    def address_bus(self) -> AddressBus:
+        return self.__addressBus
+
+    @address_bus.setter
+    def address_bus(self, value: AddressBus):
+        self.__addressBus = value
+
+    @property
+    def data_bus(self) -> DataBus:
+        return self.__dataBus
+
+    @data_bus.setter
+    def data_bus(self, value: DataBus):
+        self.__dataBus = value
+
+    @property
+    def control_bus(self) -> ControlBus:
+        return self.__controlBus
+
+    @control_bus.setter
+    def control_bus(self, value: ControlBus):
+        self.__controlBus = value
+
+    @property
+    def interrupt_bus(self) -> InterruptBus:
+        return self.__interruptBus
+
+    @interrupt_bus.setter
+    def interrupt_bus(self, value: InterruptBus):
+        self.__interruptBus = value
 
     @property
     def starting_address(self) -> int:
@@ -32,7 +146,7 @@ class BaseDevice:
         This property returns the starting address of the device.
         :return: The starting address of the device.
         """
-        return self._startingAddress
+        return self.__startingAddress
 
     @property
     def size(self) -> int:
@@ -40,22 +154,7 @@ class BaseDevice:
         This property returns the size of the device.
         :return: The size of the device.
         """
-        return self._size
-
-    @abstractmethod
-    def cycle(self, address_bus: AddressBus, data_bus: DataBus,
-              control_bus: ControlBus, interrupt_bus: InterruptBus):
-        """
-        This method is an abstract method that must be implemented by all subclasses.
-        It represents a cycle of the device, which involves interaction with the buses.
-        :param address_bus: The address bus to interact with.
-        :param data_bus: The data bus to interact with.
-        :param control_bus: The control bus to interact with.
-        :param interrupt_bus: The interrupt bus to interact with.
-        :raise NotImplementedError: If this method is called directly from the base class.
-        """
-        raise NotImplementedError("BaseDevice.Cycle: You may not call this method directly. It must be implemented by "
-                                  "a subclass.")
+        return self.__size
 
     def address_is_valid(self, address_bus: AddressBus) -> bool:
         """
@@ -64,14 +163,19 @@ class BaseDevice:
         :param address_bus: The address bus to check the address from.
         :return: True if the address is valid, False otherwise.
         """
-        if ((address_bus.get_address() >= self._startingAddress)
-                and (address_bus.get_address() < self._startingAddress + self._size)):
+        if ((address_bus.address >= self.__startingAddress)
+                and (address_bus.address < self.__startingAddress + self.__size)):
             return True
         else:
             return False
 
+    def stop_running_if_halt_detected(self):
+        # if halt interrupt has been raised, stop the thread
+        if self.interrupt_bus.test_interrupt(Interrupts.halt):
+            self.__running = False
 
-def log_message(message):
+
+def log_message(message: str):
     """
     A function to log a message if a debugger is attached.
     Args:

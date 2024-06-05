@@ -121,6 +121,11 @@ class SoundCard(BaseDevice):
 
     def process_buses(self) -> None:
         pygame.mixer.init()
+        self.main_loop()
+        self.wait_until_queue_is_empty()
+        self.finished = True
+
+    def main_loop(self):
         while self.running:
             queue_changed: bool = False
             self.control_bus.lock_bus()
@@ -137,9 +142,6 @@ class SoundCard(BaseDevice):
                 # run process_queue on new thread if not already running
                 if not self.processing_queue:
                     threading.Thread(target=self.process_queue, name=self.device_id + "::process_queue").start()
-
-        self.wait_until_queue_is_empty()
-        self.finished = True
 
     def process_queue(self) -> None:
         """

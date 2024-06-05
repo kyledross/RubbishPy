@@ -78,6 +78,10 @@ class RAM(BaseDevice):
         self.memory += [0] * (memory_size - len(self.memory))
 
     def process_buses(self) -> None:
+        self.main_loop()
+        self.finished = True
+
+    def main_loop(self):
         while self.running:
             self.control_bus.lock_bus()
             self.stop_running_if_halt_detected()
@@ -93,4 +97,3 @@ class RAM(BaseDevice):
                         self.control_bus.write_request = False
                         self.control_bus.response = True
             self.control_bus.unlock_bus()
-        self.finished = True

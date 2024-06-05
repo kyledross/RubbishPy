@@ -69,6 +69,10 @@ class ROM(BaseDevice):
         self.__memory = value
 
     def process_buses(self):
+        self.main_loop()
+        self.finished = True
+
+    def main_loop(self):
         while self.running:
             self.control_bus.lock_bus()
             self.stop_running_if_halt_detected()
@@ -79,4 +83,3 @@ class ROM(BaseDevice):
                         self.control_bus.read_request = False
                         self.control_bus.response = True
             self.control_bus.unlock_bus()
-        self.finished = True

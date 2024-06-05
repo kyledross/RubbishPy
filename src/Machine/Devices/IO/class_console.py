@@ -139,6 +139,17 @@ class Console(BaseDevice):
             self.__last_cursor_change = last_cursor_change
 
         def run(self) -> None:
+            def process_events() -> None:
+                while self.__running:
+                    for event in pygame.event.get():
+                        if event.type == pygame.QUIT:
+                            self.__running = False
+                        if event.type == pygame.KEYDOWN:
+                            # add to input queue
+                            if event.unicode:
+                                self.__input_queue.put(ord(event.unicode))
+                    time.sleep(0.05)
+
             pygame.init()
             pygame.display.set_caption("RubbishPy Console")
             icon = pygame.image.load('../Resources/graphics/console_icon.png')
@@ -159,22 +170,13 @@ class Console(BaseDevice):
             self.__running = True
             pygame.key.set_repeat(500, 50)
 
-            def process_events() -> None:
-                while self.__running:
-                    for event in pygame.event.get():
-                        if event.type == pygame.QUIT:
-                            self.__running = False
-                        if event.type == pygame.KEYDOWN:
-                            # add to input queue
-                            if event.unicode:
-                                self.__input_queue.put(ord(event.unicode))
-                    time.sleep(0.05)
-
             # Start the event processing in a separate thread
             event_thread = threading.Thread(target=process_events,
                                             name=self.__parent_console_device_id + "_Display::process_events")
             event_thread.start()
+            self.main_loop()
 
+        def main_loop(self):
             while self.__running:
                 while not self.__display_queue.empty():
                     command = self.__display_queue.get_nowait()

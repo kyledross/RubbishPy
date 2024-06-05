@@ -15,12 +15,20 @@ class InterruptBus:
         """
         self.__interruptBus = Interrupts.none
 
-    def interrupt_awaiting(self) -> bool:
+    def interrupt_awaiting(self) -> tuple[bool, int]:
         """
-        This method checks if any interrupts are set on the bus.
-        :return: True if any interrupts are set, False otherwise.
+        This method checks if any interrupts are set on the bus and, if so, returns the interrupt number to handle.
+        Interrupts with lower numbers have priority.
+        :return: Tuple with the first element being a boolean indicating if an interrupt is set on the bus,
+        and the second element being the number of the interrupt to handle.
         """
-        return self.__interruptBus != Interrupts.none
+        if self.__interruptBus == Interrupts.none:
+            return False, Interrupts.none
+        for interruptBit in range(0, 32):
+            interrupt_number = 2 ** interruptBit
+            if self.test_interrupt(interrupt_number):
+                return True, interrupt_number
+
 
     def set_interrupt(self, value: Constants.class_interrupts):
         """

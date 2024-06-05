@@ -32,6 +32,6 @@ example:
 ... more to come here.
 
 ## Why "RubbishPy"?
-The "Rubbish" part of the name is inspired by an alarm clock that my British wife had, which she claimed was "rubbish" because it couldn't keep time properly.  Considering this project is primarily a learning exercise for me, and that it is not a perfect implementation, I thought the name was fitting.
+The "Rubbish" part of the name is inspired by an alarm clock that my Cornish wife had, which she claimed was "rubbish" because it couldn't keep time properly.  Considering this project is primarily a learning exercise for me, and that it is not a perfect implementation, I thought the name was fitting.
 
 The "Py" suffix is to distinguish it as the Python version of the Rubbish emulator, as there were previous unpublished versions that I had written in Visual Basic 6 and VB.Net.

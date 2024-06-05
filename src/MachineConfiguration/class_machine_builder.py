@@ -85,8 +85,6 @@ class MachineBuilder:
                     check_device_memory_start = int(check_device['address'])
                     check_device_memory_end = check_device_memory_start
                     if 'size' in check_device:
-                        # todo: compiler doesn't require a size, but when one isn't supplied, this blows up
-                        # plus, since the size isn't known until the compiler finishes the job, we can't check
                         check_device_memory_end += int(check_device['size']) - 1
                     if (device_memory_start <= check_device_memory_end
                             and check_device_memory_start <= device_memory_end):

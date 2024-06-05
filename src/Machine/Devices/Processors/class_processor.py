@@ -32,7 +32,7 @@ def execute_halt(interrupt_bus: InterruptBus):
 
 class Processor(BaseProcessor):
 
-    def start(self):
+    def start(self) -> None:
         threading.Thread(target=self.process_cycle, name=self.device_id + "::process_cycle").start()
 
     def __init__(self, starting_address: int, size: int, disable_instruction_caching: bool,
@@ -68,7 +68,7 @@ class Processor(BaseProcessor):
         self._interrupt_to_handle: bool = False
         self._interrupt_number_to_handle: int = 0
 
-    def process_cycle(self):
+    def process_cycle(self) -> None:
         while self.running:
             self.control_bus.lock_bus()
             self.stop_running_if_halt_detected()
@@ -77,7 +77,7 @@ class Processor(BaseProcessor):
             self.control_bus.unlock_bus()
         self.finished = True
 
-    def perform_instruction_processing(self):
+    def perform_instruction_processing(self) -> None:
         address_bus = self.address_bus
         control_bus = self.control_bus
         data_bus = self.data_bus
@@ -208,7 +208,7 @@ class Processor(BaseProcessor):
             if not self.cached_instruction_will_be_used(address_bus, control_bus, data_bus):
                 break
 
-    def execute_debug(self):
+    def execute_debug(self) -> None:
         print(f"Processor: Debug instruction encountered at {datetime.now().strftime('%H:%M:%S')}")
         print("Current registers:")
         print(self._registers)
@@ -284,7 +284,7 @@ class Processor(BaseProcessor):
         self._sleep_mode = False
         self.finish_instruction(True)
 
-    def execute_sleep(self):
+    def execute_sleep(self) -> None:
         self._sleeping = True
         self._sleep_mode = True
         self.finish_instruction(True)
@@ -300,7 +300,7 @@ class Processor(BaseProcessor):
                 self._current_instruction = data_bus.data
                 self._phase = Phases.NothingPending
 
-    def execute_add(self):
+    def execute_add(self) -> None:
         if self._phase == Phases.NothingPending:
             self._registers[3] = self._registers[1] + self._registers[2]
             self.finish_instruction(True)
@@ -310,7 +310,7 @@ class Processor(BaseProcessor):
             self._registers[3] = self._registers[1] - self._registers[2]
             self.finish_instruction(True)
 
-    def execute_integer_divide(self):
+    def execute_integer_divide(self) -> None:
         if self._phase == Phases.NothingPending:
             self._registers[3] = self._registers[1] // self._registers[2]
             self.finish_instruction(True)
@@ -417,7 +417,7 @@ class Processor(BaseProcessor):
             else:
                 self.finish_instruction(True)
 
-    def execute_cmp(self):
+    def execute_cmp(self) -> None:
         if self._phase == Phases.NothingPending:
             if self._registers[1] == self._registers[2]:
                 self._compare_result = CompareResults.Equal
@@ -452,7 +452,7 @@ class Processor(BaseProcessor):
             pointer: int = self._data_pointer
             self.make_call(pointer, value, False)
 
-    def make_call(self, current_pointer, new_pointer, is_interrupt_sourced_call):
+    def make_call(self, current_pointer: int, new_pointer: int, is_interrupt_sourced_call: bool) -> None:
         self._call_source_stack.append(is_interrupt_sourced_call)
         self._sleeping = False
         self._call_stack.append(current_pointer)
@@ -460,7 +460,7 @@ class Processor(BaseProcessor):
         self.push_registers()
         self.finish_instruction(False)
 
-    def execute_rtn(self):
+    def execute_rtn(self) -> None:
         if self._phase == Phases.NothingPending:
             self._data_pointer = self._call_stack.pop()
             self.pop_registers()
@@ -494,11 +494,11 @@ class Processor(BaseProcessor):
         self._current_instruction = InstructionSet.NoInstruction
         self._phase = Phases.NothingPending
 
-    def push_registers(self):
+    def push_registers(self) -> None:
         for i in range(8):
             self._register_stack.append(self._registers[i])
 
-    def pop_registers(self):
+    def pop_registers(self) -> None:
         for i in range(7, -1, -1):
             self._registers[i] = self._register_stack.pop()
 

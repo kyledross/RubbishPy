@@ -40,7 +40,7 @@ class MachineBuilder:
         Attaches a device to the machine.
     """
 
-    def __init__(self, devices=None):
+    def __init__(self, devices=None) -> None:
         """
         Constructs all the necessary attributes for the machine builder.
 
@@ -62,7 +62,7 @@ class MachineBuilder:
             self.attach_device(device)
         return self.__backplane
 
-    def check_device_overlap(self, device):
+    def check_device_overlap(self, device: {}) -> bool:
         """
         Checks if a device overlaps with any other device in the machine.
 
@@ -93,7 +93,7 @@ class MachineBuilder:
                     else:
                         return False
 
-    def attach_device(self, device):
+    def attach_device(self, device: {}) -> None:
         """
         Attaches a device to the machine.
 

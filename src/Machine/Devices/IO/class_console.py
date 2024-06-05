@@ -138,7 +138,7 @@ class Console(BaseDevice):
         def last_cursor_change(self, last_cursor_change: int):
             self.__last_cursor_change = last_cursor_change
 
-        def run(self):
+        def run(self) -> None:
             pygame.init()
             pygame.display.set_caption("RubbishPy Console")
             icon = pygame.image.load('../Resources/graphics/console_icon.png')
@@ -159,7 +159,7 @@ class Console(BaseDevice):
             self.__running = True
             pygame.key.set_repeat(500, 50)
 
-            def process_events():
+            def process_events() -> None:
                 while self.__running:
                     for event in pygame.event.get():
                         if event.type == pygame.QUIT:
@@ -214,12 +214,12 @@ class Console(BaseDevice):
                 self.__clock.tick(FRAMERATE)
                 pygame.event.pump()
 
-        def turn_cursor_off(self):
+        def turn_cursor_off(self) -> None:
             # turn the cursor off before drawing the screen
             self.cursor_state = False
             self.update_cursor()
 
-        def update_cursor(self):
+        def update_cursor(self) -> None:
             if self.cursor_state:
                 cursor = self.__font.render('_', False, (255, 255, 255))
                 self.__screen.blit(cursor, (self.cursor_x * self.__character_width,
@@ -293,17 +293,17 @@ class Console(BaseDevice):
     def display_buffer(self, display_buffer: list):
         self.__display_buffer = display_buffer
 
-    def start(self):
+    def start(self) -> None:
         self.output_form = threading.Thread(target=self.__display.run, name=self.device_id + "::display_run")
         self.output_form.start()
         self.write_buffer_to_queue()
         threading.Thread(target=self.process_buses, name=self.device_id + "::process_buses").start()
 
-    def send_cursor_location(self):
+    def send_cursor_location(self) -> None:
         self.__output_queue.put(DisplayControl('cursor_x', str(self.cursor_x)))
         self.__output_queue.put(DisplayControl('cursor_y', str(self.cursor_y)))
 
-    def scroll_up(self):
+    def scroll_up(self) -> None:
         """
         Scrolls the display buffer up by one line.
         """
@@ -411,7 +411,7 @@ class Console(BaseDevice):
                 self.cursor_y = self.cursor_y - 1
         self.send_cursor_location()
 
-    def write_buffer_to_queue(self):
+    def write_buffer_to_queue(self) -> None:
         """
         Writes the display buffer to the output queue.
         """
@@ -421,7 +421,7 @@ class Console(BaseDevice):
                     self.display_buffer[y][x].redraw = False
                     self.__output_queue.put(self.display_buffer[y][x])
 
-    def process_buses(self):
+    def process_buses(self) -> None:
         while self.running:
             self.control_bus.lock_bus()
             self.stop_running_if_halt_detected()

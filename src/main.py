@@ -4,7 +4,7 @@ import sys
 from typing import List
 
 
-def intro():
+def intro() -> None:
     print("RubbishPy")
     print("Copyright (c) 2024 Kyle D. Ross")
     print("--help for help")
@@ -12,7 +12,7 @@ def intro():
     print("Session started.")
 
 
-def check_python_version():
+def check_python_version() -> bool:
     """Checks the python version.  Returns True if the version is 3.10 or greater.  Returns False otherwise."""
     if sys.version_info < (3, 11):
         print("Python 3.11 or greater is required.")
@@ -20,7 +20,7 @@ def check_python_version():
     return True
 
 
-def start_machine():
+def start_machine() -> None:
     """Starts the machine.  This is the entry point into the emulator."""
     intro()
     if check_python_version():
@@ -50,7 +50,7 @@ def check_required_parameters(device: str, parameters: {str}, keys: List[str]):
 
 
 # noinspection SpellCheckingInspection
-def add_sound_card(args, devices):
+def add_sound_card(args, devices: {}) -> None:
     if args.soundcard:
         soundcard_args = dict(args.soundcard)
         address = soundcard_args.get("address")
@@ -61,7 +61,7 @@ def add_sound_card(args, devices):
             {'device_name': 'soundcard', 'address': address})
 
 
-def parse_command_line():
+def parse_command_line() -> {}:
     """Parses the command line arguments and returns a list of device groups.  Each device group is a dictionary"""
     devices = []
     import argparse
@@ -90,7 +90,7 @@ def parse_command_line():
     return devices
 
 
-def add_compiler(args, devices):
+def add_compiler(args, devices: {}) -> None:
     if args.compiler:
         compiler_args = dict(args.compiler)
         address = compiler_args.get("address")
@@ -100,7 +100,7 @@ def add_compiler(args, devices):
         devices.append({'device_name': 'compiler', 'address': address, 'program': program, 'size': size})
 
 
-def add_console(args, devices):
+def add_console(args, devices: {}) -> None:
     if args.console:
         console_args = dict(args.console)
         address = console_args.get("address")
@@ -114,7 +114,7 @@ def add_console(args, devices):
             {'device_name': 'console', 'address': address, 'interrupt': interrupt, 'width': width, 'height': height})
 
 
-def add_ram(args, devices):
+def add_ram(args, devices: {}) -> None:
     if args.ram:
         ram_args = dict(args.ram)
         address = ram_args.get("address")
@@ -123,7 +123,7 @@ def add_ram(args, devices):
         devices.append({'device_name': 'ram', 'address': address, 'size': size})
 
 
-def add_processor(args, devices):
+def add_processor(args, devices: {}) -> None:
     if args.processor:
         devices.append({'device_name': 'processor', 'options': ''})
 

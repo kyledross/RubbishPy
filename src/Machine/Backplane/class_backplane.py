@@ -54,7 +54,7 @@ class BackPlane:
     def interrupt_bus(self) -> InterruptBus:
         return self.__interruptBus
 
-    def __init__(self):
+    def __init__(self) -> None:
         """
         Constructs all the necessary attributes for the backplane.
         """
@@ -73,7 +73,7 @@ class BackPlane:
         """
         self.__devices.append(device)
 
-    def run(self):
+    def run(self) -> None:
         """
         Runs the backplane.
         The backplane runs creates instances of the buses and allows the devices to run on them.
@@ -93,7 +93,7 @@ class BackPlane:
             self.control_bus.unlock_bus()
         self.wait_for_devices_to_finish()
 
-    def wait_for_devices_to_finish(self):
+    def wait_for_devices_to_finish(self) -> None:
         print("Waiting for devices to finish.")
         devices_busy = True
         while devices_busy:

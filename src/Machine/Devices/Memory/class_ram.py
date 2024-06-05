@@ -29,7 +29,7 @@ class RAM(BaseDevice):
         Executes a cycle of the RAM device.
     """
 
-    def start(self):
+    def start(self) -> None:
         threading.Thread(target=self.process_buses, name=self.device_id + "::process_buses").start()
 
     def __init__(self, starting_address: int, size: int, address_bus: AddressBus, data_bus: DataBus,
@@ -77,7 +77,7 @@ class RAM(BaseDevice):
         self.memory += data
         self.memory += [0] * (memory_size - len(self.memory))
 
-    def process_buses(self):
+    def process_buses(self) -> None:
         while self.running:
             self.control_bus.lock_bus()
             self.stop_running_if_halt_detected()

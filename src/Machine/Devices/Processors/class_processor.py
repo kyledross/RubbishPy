@@ -86,8 +86,8 @@ class Processor(BaseProcessor):
         while True:  # loop until a cached instruction request is not fulfilled
             # handle interrupts
             if self._sleeping and not self._handling_interrupt:
-                interrupt_awaiting, interrupt_number = interrupt_bus.interrupt_awaiting()
-                if interrupt_awaiting and interrupt_number in self._interrupt_vectors:
+                interrupt_number = interrupt_bus.interrupt_awaiting()
+                if interrupt_number in self._interrupt_vectors:
                     self._interrupt_to_handle = True
                     self._interrupt_number_to_handle = interrupt_number
                     self._sleeping = False
@@ -476,6 +476,8 @@ class Processor(BaseProcessor):
         value = self.request_two_operands(address_bus, control_bus, data_bus)
         if value is not None:
             interrupt_number = self._internal_stack.pop()
+            if interrupt_number <= Interrupts.none or interrupt_number >= Interrupts.irq8:
+                raise ValueError(f"Invalid interrupt number {interrupt_number}")
             self._interrupt_vectors[interrupt_number] = value
             self.finish_instruction(True)
 

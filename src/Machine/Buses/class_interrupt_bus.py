@@ -29,7 +29,6 @@ class InterruptBus:
             if self.test_interrupt(interrupt_number):
                 return True, interrupt_number
 
-
     def set_interrupt(self, value: Constants.class_interrupts):
         """
         This method sets an interrupt on the bus.

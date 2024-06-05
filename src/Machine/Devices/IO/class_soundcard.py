@@ -93,7 +93,7 @@ class SoundCard(BaseDevice):
     When the transaction is complete, the sound card will play the sound frames.
     """
 
-    def start(self):
+    def start(self) -> None:
         # start process_buses thread
         threading.Thread(target=self.process_buses, name=self.device_id + "::process_buses").start()
 
@@ -119,7 +119,7 @@ class SoundCard(BaseDevice):
     def processing_queue(self, value: bool):
         self.__processing_queue = value
 
-    def process_buses(self):
+    def process_buses(self) -> None:
         pygame.mixer.init()
         while self.running:
             queue_changed: bool = False
@@ -141,7 +141,7 @@ class SoundCard(BaseDevice):
         self.wait_until_queue_is_empty()
         self.finished = True
 
-    def process_queue(self):
+    def process_queue(self) -> None:
         """
         This method processes the command queue.
         Returns:
@@ -168,7 +168,7 @@ class SoundCard(BaseDevice):
             time.sleep(0)
         self.processing_queue = False
 
-    def wait_until_queue_is_empty(self):
+    def wait_until_queue_is_empty(self) -> None:
         """
         This method waits until the command queue is empty.
         Returns:

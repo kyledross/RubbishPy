@@ -8,7 +8,7 @@ class InterruptBus:
     It provides methods to set, test, and clear interrupts on the bus.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """
         Constructor for the InterruptBus class.
         Initializes the interrupts on the bus to 0.
@@ -25,7 +25,7 @@ class InterruptBus:
         if self.__interruptBus == Interrupts.none:
             return Interrupts.none
         for interruptBit in range(0, 32):
-            interrupt_number = 2 ** interruptBit
+            interrupt_number: Interrupts = 2 ** interruptBit
             if self.test_interrupt(interrupt_number):
                 return interrupt_number
 

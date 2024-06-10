@@ -28,7 +28,7 @@ class ROM(BaseDevice):
         Executes a cycle of the ROM device.
     """
 
-    def start(self):
+    def start(self) -> None:
         threading.Thread(target=self.process_buses, name=self.device_id + "::process_buses").start()
 
     def __init__(self, starting_address: int, address_bus: AddressBus, data_bus: DataBus,
@@ -68,11 +68,11 @@ class ROM(BaseDevice):
         """
         self.__memory = value
 
-    def process_buses(self):
+    def process_buses(self) -> None:
         self.main_loop()
         self.finished = True
 
-    def main_loop(self):
+    def main_loop(self) -> None:
         while self.running:
             self.control_bus.lock_bus()
             self.stop_running_if_halt_detected()

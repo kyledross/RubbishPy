@@ -60,7 +60,7 @@ class RAM(BaseDevice):
         """
         self.__memory = value
 
-    def load_data(self, data: List[int]):
+    def load_data(self, data: List[int]) -> None:
         """
         Loads data into the RAM device.
 

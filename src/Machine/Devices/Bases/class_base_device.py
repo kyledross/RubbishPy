@@ -86,7 +86,7 @@ class BaseDevice(abc.ABC):
         self.__finished = value
 
     @abc.abstractmethod
-    def start(self):
+    def start(self) -> None:
         """
         This method starts the device.
         """
@@ -169,7 +169,7 @@ class BaseDevice(abc.ABC):
         else:
             return False
 
-    def stop_running_if_halt_detected(self):
+    def stop_running_if_halt_detected(self) -> None:
         # if halt interrupt has been raised, stop the thread
         if self.interrupt_bus.test_interrupt(Interrupts.halt):
             self.__running = False

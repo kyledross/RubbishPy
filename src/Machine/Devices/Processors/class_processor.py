@@ -260,7 +260,7 @@ class Processor(BaseProcessor):
                 self._instruction_and_operand_cache[address_bus.address] = data_bus.data
 
     # instruction fetching and execution
-    def execute_reset(self):
+    def execute_reset(self) -> None:
         """
         Reset the processor's state.
         Returns:
@@ -279,7 +279,7 @@ class Processor(BaseProcessor):
         self._sleeping = False
         self._sleep_mode = False
 
-    def execute_wake(self):
+    def execute_wake(self) -> None:
         self._sleeping = False
         self._sleep_mode = False
         self.finish_instruction(True)
@@ -305,7 +305,7 @@ class Processor(BaseProcessor):
             self._registers[3] = self._registers[1] + self._registers[2]
             self.finish_instruction(True)
 
-    def execute_sub(self):
+    def execute_sub(self) -> None:
         if self._phase == Phases.NothingPending:
             self._registers[3] = self._registers[1] - self._registers[2]
             self.finish_instruction(True)
@@ -315,7 +315,7 @@ class Processor(BaseProcessor):
             self._registers[3] = self._registers[1] // self._registers[2]
             self.finish_instruction(True)
 
-    def execute_multiply(self):
+    def execute_multiply(self) -> None:
         if self._phase == Phases.NothingPending:
             self._registers[3] = self._registers[1] * self._registers[2]
             self.finish_instruction(True)
@@ -502,22 +502,22 @@ class Processor(BaseProcessor):
         for i in range(7, -1, -1):
             self._registers[i] = self._register_stack.pop()
 
-    def execute_or(self):
+    def execute_or(self) -> None:
         if self._phase == Phases.NothingPending:
             self._registers[3] = self._registers[1] | self._registers[2]
             self.finish_instruction(True)
 
-    def execute_and(self):
+    def execute_and(self) -> None:
         if self._phase == Phases.NothingPending:
             self._registers[3] = self._registers[1] & self._registers[2]
             self.finish_instruction(True)
 
-    def execute_xor(self):
+    def execute_xor(self) -> None:
         if self._phase == Phases.NothingPending:
             self._registers[3] = self._registers[1] ^ self._registers[2]
             self.finish_instruction(True)
 
-    def execute_not(self):
+    def execute_not(self) -> None:
         if self._phase == Phases.NothingPending:
             self._registers[3] = ~self._registers[1]
             self.finish_instruction(True)

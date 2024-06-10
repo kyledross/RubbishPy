@@ -128,7 +128,7 @@ def add_processor(args, devices: {}) -> None:
         devices.append({'device_name': 'processor', 'options': ''})
 
 
-def show_help():
+def show_help() -> None:
     """Displays the help screen."""
     print("Commands:")
     print()

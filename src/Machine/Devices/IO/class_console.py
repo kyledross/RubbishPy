@@ -176,7 +176,7 @@ class Console(BaseDevice):
             event_thread.start()
             self.main_loop()
 
-        def main_loop(self):
+        def main_loop(self) -> None:
             while self.__running:
                 while not self.__display_queue.empty():
                     command = self.__display_queue.get_nowait()
@@ -319,7 +319,7 @@ class Console(BaseDevice):
         # add a clear command to the output queue
         self.__output_queue.put(DisplayControl('clear', ''))
 
-    def find_last_non_space_character_on_current_row(self):
+    def find_last_non_space_character_on_current_row(self) -> int:
         """
         Finds the last non-space character on the current row.
         Returns:

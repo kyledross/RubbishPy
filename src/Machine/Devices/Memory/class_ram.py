@@ -81,7 +81,7 @@ class RAM(BaseDevice):
         self.main_loop()
         self.finished = True
 
-    def main_loop(self):
+    def main_loop(self) -> None:
         while self.running:
             self.control_bus.lock_bus()
             self.stop_running_if_halt_detected()

@@ -125,7 +125,7 @@ class SoundCard(BaseDevice):
         self.wait_until_queue_is_empty()
         self.finished = True
 
-    def main_loop(self):
+    def main_loop(self) -> None:
         while self.running:
             queue_changed: bool = False
             self.control_bus.lock_bus()

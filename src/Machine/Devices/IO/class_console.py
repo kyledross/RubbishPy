@@ -2,6 +2,7 @@ import os
 import queue
 import threading
 import time
+from enum import IntFlag
 
 import pygame
 
@@ -22,6 +23,15 @@ The number of milliseconds between cursor blinks.
 """
 
 
+class DisplayCommandList(IntFlag):
+    """
+    A list of commands that can be sent to the display.
+    """
+    clear = 0
+    cursor_x = 1
+    cursor_y = 2
+
+
 class DisplayCommand:
     """
     This is the base class for display elements and display controls.
@@ -34,17 +44,16 @@ class DisplayControl(DisplayCommand):
     This is used to send commands to the display.
     """
 
-    # todo: change string commands to an enumerated list of commands
-    def __init__(self, command: str, value: str):
+    def __init__(self, command: DisplayCommandList, value: str):
         self.__value = value
         self.__command = command
 
     @property
-    def command(self) -> str:
+    def command(self) -> DisplayCommandList:
         return self.__command
 
     @command.setter
-    def command(self, command: str):
+    def command(self, command: DisplayCommandList):
         self.__command = command
 
     @property
@@ -123,10 +132,12 @@ class Console(BaseDevice):
     """
     A text display and input device.
     """
+
     class Display:
         """
         The visible display of the console.
         """
+
         def __init__(self, console_device_id: str, output_q: queue.Queue, input_q: queue.Queue, display_width: int,
                      display_height: int, character_width: int, character_height: int, font_size: int):
             self.__font = None
@@ -234,6 +245,7 @@ class Console(BaseDevice):
             Returns:
 
             """
+
             def process_events() -> None:
                 """
                 This method continuously processes events for the display,
@@ -288,13 +300,13 @@ class Console(BaseDevice):
                     command = self.__display_queue.get_nowait()
                     # if command is a DisplayControl object, process it
                     if isinstance(command, DisplayControl):
-                        if command.command == 'clear':
+                        if command.command == DisplayCommandList.clear:
                             self.__screen.fill((0, 0, 0))
                     if isinstance(command, DisplayControl):
-                        if command.command == 'cursor_x':
+                        if command.command == DisplayCommandList.cursor_x:
                             self.turn_cursor_off()
                             self.cursor_x = int(command.value)
-                        if command.command == 'cursor_y':
+                        if command.command == DisplayCommandList.cursor_y:
                             self.turn_cursor_off()
                             self.cursor_y = int(command.value)
                     if isinstance(command, DisplayElement):
@@ -507,8 +519,8 @@ class Console(BaseDevice):
         Returns:
 
         """
-        self.__output_queue.put(DisplayControl('cursor_x', str(self.cursor_x)))
-        self.__output_queue.put(DisplayControl('cursor_y', str(self.cursor_y)))
+        self.__output_queue.put(DisplayControl(DisplayCommandList.cursor_x, str(self.cursor_x)))
+        self.__output_queue.put(DisplayControl(DisplayCommandList.cursor_y, str(self.cursor_y)))
 
     def scroll_up(self) -> None:
         """
@@ -522,7 +534,7 @@ class Console(BaseDevice):
             self.display_buffer[self.height - 1][x].character = ' '
             self.display_buffer[self.height - 1][x].redraw = True
         # add a clear command to the output queue
-        self.__output_queue.put(DisplayControl('clear', ''))
+        self.__output_queue.put(DisplayControl(DisplayCommandList.clear, ''))
 
     def find_last_non_space_character_on_current_row(self) -> int:
         """
@@ -573,7 +585,7 @@ class Console(BaseDevice):
             return True
         elif data == 12:  # FF
             self.display_buffer = [[DisplayElement(x, y, ' ') for x in range(80)] for y in range(25)]
-            self.__output_queue.put(DisplayControl('clear', ''))
+            self.__output_queue.put(DisplayControl(DisplayCommandList.clear, ''))
             self.cursor_x = 0
             self.cursor_y = 0
             self.send_cursor_location()

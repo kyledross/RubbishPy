@@ -31,9 +31,17 @@ def execute_halt(interrupt_bus: InterruptBus):
 
 
 class Processor(BaseProcessor):
+    """
+    The Processor class represents a processor in the system.
+    """
 
-    def start(self):
-        threading.Thread(target=self.process_cycle, name=self.device_id + "::process_cycle").start()
+    def start(self) -> None:
+        """
+        This method starts the processor.
+        Returns:
+
+        """
+        threading.Thread(target=self.main_loop, name=self.device_id + "::process_cycle").start()
 
     def __init__(self, starting_address: int, size: int, disable_instruction_caching: bool,
                  address_bus: AddressBus, data_bus: DataBus, control_bus: ControlBus, interrupt_bus: InterruptBus):
@@ -68,7 +76,12 @@ class Processor(BaseProcessor):
         self._interrupt_to_handle: bool = False
         self._interrupt_number_to_handle: int = 0
 
-    def process_cycle(self):
+    def main_loop(self) -> None:
+        """
+        The main loop of the processor.  This runs continuously to process instructions.
+        Returns:
+
+        """
         while self.running:
             self.control_bus.lock_bus()
             self.stop_running_if_halt_detected()
@@ -77,7 +90,14 @@ class Processor(BaseProcessor):
             self.control_bus.unlock_bus()
         self.finished = True
 
-    def perform_instruction_processing(self):
+    def perform_instruction_processing(self) -> None:
+        """
+        Perform instruction processing.
+        This method will load instructions and operands from the instruction cache, or from memory if not cached.
+        It then executes the instruction, accordingly.
+        Returns:
+
+        """
         address_bus = self.address_bus
         control_bus = self.control_bus
         data_bus = self.data_bus
@@ -208,7 +228,13 @@ class Processor(BaseProcessor):
             if not self.cached_instruction_will_be_used(address_bus, control_bus, data_bus):
                 break
 
-    def execute_debug(self):
+    def execute_debug(self) -> None:
+        """
+        Execute the debug instruction.
+        This will print the current registers.
+        Returns:
+
+        """
         print(f"Processor: Debug instruction encountered at {datetime.now().strftime('%H:%M:%S')}")
         print("Current registers:")
         print(self._registers)
@@ -260,7 +286,7 @@ class Processor(BaseProcessor):
                 self._instruction_and_operand_cache[address_bus.address] = data_bus.data
 
     # instruction fetching and execution
-    def execute_reset(self):
+    def execute_reset(self) -> None:
         """
         Reset the processor's state.
         Returns:
@@ -279,17 +305,27 @@ class Processor(BaseProcessor):
         self._sleeping = False
         self._sleep_mode = False
 
-    def execute_wake(self):
+    def execute_wake(self) -> None:
         self._sleeping = False
         self._sleep_mode = False
         self.finish_instruction(True)
 
-    def execute_sleep(self):
+    def execute_sleep(self) -> None:
         self._sleeping = True
         self._sleep_mode = True
         self.finish_instruction(True)
 
     def load_instruction(self, address_bus: AddressBus, control_bus: ControlBus, data_bus: DataBus):
+        """
+        Load an instruction from memory.
+        Args:
+            address_bus:
+            control_bus:
+            data_bus:
+
+        Returns:
+
+        """
         if self._phase == Phases.NothingPending:
             address_bus.address = self._data_pointer
             control_bus.read_request = True
@@ -300,22 +336,22 @@ class Processor(BaseProcessor):
                 self._current_instruction = data_bus.data
                 self._phase = Phases.NothingPending
 
-    def execute_add(self):
+    def execute_add(self) -> None:
         if self._phase == Phases.NothingPending:
             self._registers[3] = self._registers[1] + self._registers[2]
             self.finish_instruction(True)
 
-    def execute_sub(self):
+    def execute_sub(self) -> None:
         if self._phase == Phases.NothingPending:
             self._registers[3] = self._registers[1] - self._registers[2]
             self.finish_instruction(True)
 
-    def execute_integer_divide(self):
+    def execute_integer_divide(self) -> None:
         if self._phase == Phases.NothingPending:
             self._registers[3] = self._registers[1] // self._registers[2]
             self.finish_instruction(True)
 
-    def execute_multiply(self):
+    def execute_multiply(self) -> None:
         if self._phase == Phases.NothingPending:
             self._registers[3] = self._registers[1] * self._registers[2]
             self.finish_instruction(True)
@@ -417,7 +453,7 @@ class Processor(BaseProcessor):
             else:
                 self.finish_instruction(True)
 
-    def execute_cmp(self):
+    def execute_cmp(self) -> None:
         if self._phase == Phases.NothingPending:
             if self._registers[1] == self._registers[2]:
                 self._compare_result = CompareResults.Equal
@@ -452,7 +488,7 @@ class Processor(BaseProcessor):
             pointer: int = self._data_pointer
             self.make_call(pointer, value, False)
 
-    def make_call(self, current_pointer, new_pointer, is_interrupt_sourced_call):
+    def make_call(self, current_pointer: int, new_pointer: int, is_interrupt_sourced_call: bool) -> None:
         self._call_source_stack.append(is_interrupt_sourced_call)
         self._sleeping = False
         self._call_stack.append(current_pointer)
@@ -460,7 +496,7 @@ class Processor(BaseProcessor):
         self.push_registers()
         self.finish_instruction(False)
 
-    def execute_rtn(self):
+    def execute_rtn(self) -> None:
         if self._phase == Phases.NothingPending:
             self._data_pointer = self._call_stack.pop()
             self.pop_registers()
@@ -483,41 +519,68 @@ class Processor(BaseProcessor):
 
     # instruction helpers
     def request_operand(self, address_bus: AddressBus, control_bus: ControlBus):
+        """
+        Requests an operand for the current instruction.
+        Args:
+            address_bus:
+            control_bus:
+
+        Returns:
+
+        """
         self._data_pointer += 1
         address_bus.address = self._data_pointer
         control_bus.read_request = True
         control_bus.response = False
 
     def finish_instruction(self, advance_pointer: bool = True):
+        """
+        Finishes the execution of the current instruction and advances the data pointer if necessary.
+        Args:
+            advance_pointer:
+
+        Returns:
+
+        """
         if advance_pointer:
             self._data_pointer += 1
         self._current_instruction = InstructionSet.NoInstruction
         self._phase = Phases.NothingPending
 
-    def push_registers(self):
+    def push_registers(self) -> None:
+        """
+        Pushes all registers onto the register stack.
+        Returns:
+
+        """
         for i in range(8):
             self._register_stack.append(self._registers[i])
 
-    def pop_registers(self):
+    def pop_registers(self) -> None:
+        """
+        Pops all registers from the register stack.
+        Returns:
+
+        """
         for i in range(7, -1, -1):
             self._registers[i] = self._register_stack.pop()
 
-    def execute_or(self):
+    def execute_or(self) -> None:
         if self._phase == Phases.NothingPending:
             self._registers[3] = self._registers[1] | self._registers[2]
             self.finish_instruction(True)
 
-    def execute_and(self):
+    def execute_and(self) -> None:
         if self._phase == Phases.NothingPending:
             self._registers[3] = self._registers[1] & self._registers[2]
             self.finish_instruction(True)
 
-    def execute_xor(self):
+    def execute_xor(self) -> None:
         if self._phase == Phases.NothingPending:
             self._registers[3] = self._registers[1] ^ self._registers[2]
             self.finish_instruction(True)
 
-    def execute_not(self):
+    def execute_not(self) -> None:
         if self._phase == Phases.NothingPending:
             self._registers[3] = ~self._registers[1]
             self.finish_instruction(True)
@@ -529,6 +592,16 @@ class Processor(BaseProcessor):
             self.finish_instruction(True)
 
     def request_single_operand(self, address_bus: AddressBus, control_bus: ControlBus, data_bus: DataBus):
+        """
+        Request a single operand from the address bus and data bus for the current instruction.
+        Args:
+            address_bus:
+            control_bus:
+            data_bus:
+
+        Returns:
+
+        """
         if self._phase == Phases.NothingPending:
             self.request_operand(address_bus, control_bus)
             self._phase = Phases.AwaitingFirstOperand

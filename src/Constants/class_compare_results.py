@@ -3,7 +3,7 @@ from enum import IntFlag
 
 class CompareResults(IntFlag):
     """
-    The CompareResults class is a simple class that represents the possible results of a comparison operation.
+    The CompareResults class is a class that represents the possible results of a compare operation.
     It contains three class variables: Equal, GreaterThan, and LessThan.
     These variables are used to represent the three possible outcomes of a comparison operation.
     """

@@ -11,25 +11,14 @@ from Machine.Devices.Bases.class_base_device import BaseDevice
 class RAM(BaseDevice):
     """
     A class used to represent a RAM device.
-
-    ...
-
-    Attributes
-    ----------
-    __memory : list
-        a list to store the memory of the RAM device
-
-    Methods
-    -------
-    __init__(starting_address, size):
-        Constructs all the necessary attributes for the RAM device.
-    load_data(data):
-        Loads data into the RAM device.
-    cycle(address_bus, data_bus, control_bus, interrupt_bus):
-        Executes a cycle of the RAM device.
     """
 
-    def start(self):
+    def start(self) -> None:
+        """
+        This method starts the RAM device.
+        Returns:
+
+        """
         threading.Thread(target=self.process_buses, name=self.device_id + "::process_buses").start()
 
     def __init__(self, starting_address: int, size: int, address_bus: AddressBus, data_bus: DataBus,
@@ -60,7 +49,7 @@ class RAM(BaseDevice):
         """
         self.__memory = value
 
-    def load_data(self, data: List[int]):
+    def load_data(self, data: List[int]) -> None:
         """
         Loads data into the RAM device.
 
@@ -77,7 +66,16 @@ class RAM(BaseDevice):
         self.memory += data
         self.memory += [0] * (memory_size - len(self.memory))
 
-    def process_buses(self):
+    def process_buses(self) -> None:
+        self.main_loop()
+        self.finished = True
+
+    def main_loop(self) -> None:
+        """
+        The main loop of the RAM device.  This runs continuously to monitor for read and write requests.
+        Returns:
+
+        """
         while self.running:
             self.control_bus.lock_bus()
             self.stop_running_if_halt_detected()
@@ -93,4 +91,3 @@ class RAM(BaseDevice):
                         self.control_bus.write_request = False
                         self.control_bus.response = True
             self.control_bus.unlock_bus()
-        self.finished = True

@@ -4,7 +4,7 @@ class AddressBus:
     It provides methods to get and set the address on the bus.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """
         Constructor for the AddressBus class.
         Initializes the address on the bus to 0.

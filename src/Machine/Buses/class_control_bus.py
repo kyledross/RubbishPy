@@ -8,7 +8,7 @@ class ControlBus:
     It provides methods to get and set the read request, write request, and response on the bus.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """
         Constructor for the ControlBus class.
         Initializes the read request, write request, and response on the bus to False.
@@ -19,13 +19,13 @@ class ControlBus:
         self.__Response = False
         self.__busLock = Lock()
 
-    def lock_bus(self):
+    def lock_bus(self) -> None:
         """
-        This method locks the bus.
+        This method locks the bus. This is used to prevent multiple devices from accessing the bus at the same time.
         """
         self.__busLock.acquire()
 
-    def unlock_bus(self):
+    def unlock_bus(self) -> None:
         """
         This method unlocks the bus.
         """

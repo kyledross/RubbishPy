@@ -51,6 +51,15 @@ def check_required_parameters(device: str, parameters: {str}, keys: List[str]):
 
 # noinspection SpellCheckingInspection
 def add_sound_card(args, devices: {}) -> None:
+    """
+    Adds a sound card device to the list of devices to add to the backplane.
+    Args:
+        args: The command line arguments.
+        devices: The list of devices that will be added to the machine.
+
+    Returns:
+
+    """
     if args.soundcard:
         soundcard_args = dict(args.soundcard)
         address = soundcard_args.get("address")
@@ -91,6 +100,15 @@ def parse_command_line() -> {}:
 
 
 def add_compiler(args, devices: {}) -> None:
+    """
+    Adds a RAM device to the list of devices to add to the backplane, and loads it with a compiled program.
+    Args:
+        args: The command line arguments.
+        devices: The list of devices that will be added to the machine.
+
+    Returns:
+
+    """
     if args.compiler:
         compiler_args = dict(args.compiler)
         address = compiler_args.get("address")
@@ -101,6 +119,15 @@ def add_compiler(args, devices: {}) -> None:
 
 
 def add_console(args, devices: {}) -> None:
+    """
+    Adds a console device to the list of devices to add to the backplane.
+    Args:
+        args: The command line arguments.
+        devices: The list of devices that will be added to the machine.
+
+    Returns:
+
+    """
     if args.console:
         console_args = dict(args.console)
         address = console_args.get("address")
@@ -115,6 +142,15 @@ def add_console(args, devices: {}) -> None:
 
 
 def add_ram(args, devices: {}) -> None:
+    """
+    Adds a RAM device to the list of devices to add to the backplane.
+    Args:
+        args: The command line arguments.
+        devices: The list of devices that will be added to the machine.
+
+    Returns:
+
+    """
     if args.ram:
         ram_args = dict(args.ram)
         address = ram_args.get("address")
@@ -124,6 +160,15 @@ def add_ram(args, devices: {}) -> None:
 
 
 def add_processor(args, devices: {}) -> None:
+    """
+    Adds a processor device to the list of devices to add to the backplane.
+    Args:
+        args: The command line arguments.
+        devices: The list of devices that will be added to the machine.
+
+    Returns:
+
+    """
     if args.processor:
         devices.append({'device_name': 'processor', 'options': ''})
 
@@ -188,4 +233,7 @@ def show_help() -> None:
 
 
 if __name__ == '__main__':
+    """
+    This is the entry point into the emulator.
+    """
     start_machine()

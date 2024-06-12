@@ -18,26 +18,6 @@ device_group = []
 class MachineBuilder:
     """
     A class used to build a machine.
-
-    ...
-
-    Attributes
-    ----------
-    __backplane : BackPlane
-        the backplane of the machine
-    __device_group : list
-        a list to store the devices of the machine
-
-    Methods
-    -------
-    __init__(devices):
-        Constructs all the necessary attributes for the machine builder.
-    build_machine():
-        Builds the machine and returns the outfitted backplane.
-    check_device_overlap(device):
-        Checks if a device overlaps with any other device in the machine.
-    attach_device(device):
-        Attaches a device to the machine.
     """
 
     def __init__(self, devices=None) -> None:
@@ -159,7 +139,7 @@ class MachineBuilder:
                                                 control_bus=self.__backplane.control_bus,
                                                 interrupt_bus=self.__backplane.interrupt_bus))
             case 'compiler':
-                compiler = RubbishCompiler(address=address)
+                compiler = RubbishCompiler(starting_address=address)
                 code = compiler.compile(program_pathname)
                 if len(code) > size:
                     print("Warning: The compiled program size exceeds the specified size.")

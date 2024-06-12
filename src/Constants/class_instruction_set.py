@@ -4,7 +4,8 @@ from enum import IntFlag
 class InstructionSet(IntFlag):
     """
     The InstructionSet class represents the set of instructions that the Rubbish language supports.
-    Each instruction is represented by a class variable with a unique integer value.
+    Each instruction is represented by a class variable with a unique integer value representing the instruction's
+    opcode.
     """
     NoInstruction = -1
     NOP = 0  # No operation instruction

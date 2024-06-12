@@ -21,7 +21,7 @@ class ControlBus:
 
     def lock_bus(self) -> None:
         """
-        This method locks the bus.
+        This method locks the bus. This is used to prevent multiple devices from accessing the bus at the same time.
         """
         self.__busLock.acquire()
 

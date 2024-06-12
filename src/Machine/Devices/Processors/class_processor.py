@@ -31,8 +31,16 @@ def execute_halt(interrupt_bus: InterruptBus):
 
 
 class Processor(BaseProcessor):
+    """
+    The Processor class represents a processor in the system.
+    """
 
     def start(self) -> None:
+        """
+        This method starts the processor.
+        Returns:
+
+        """
         threading.Thread(target=self.main_loop, name=self.device_id + "::process_cycle").start()
 
     def __init__(self, starting_address: int, size: int, disable_instruction_caching: bool,
@@ -69,6 +77,11 @@ class Processor(BaseProcessor):
         self._interrupt_number_to_handle: int = 0
 
     def main_loop(self) -> None:
+        """
+        The main loop of the processor.  This runs continuously to process instructions.
+        Returns:
+
+        """
         while self.running:
             self.control_bus.lock_bus()
             self.stop_running_if_halt_detected()
@@ -78,6 +91,13 @@ class Processor(BaseProcessor):
         self.finished = True
 
     def perform_instruction_processing(self) -> None:
+        """
+        Perform instruction processing.
+        This method will load instructions and operands from the instruction cache, or from memory if not cached.
+        It then executes the instruction, accordingly.
+        Returns:
+
+        """
         address_bus = self.address_bus
         control_bus = self.control_bus
         data_bus = self.data_bus
@@ -209,6 +229,12 @@ class Processor(BaseProcessor):
                 break
 
     def execute_debug(self) -> None:
+        """
+        Execute the debug instruction.
+        This will print the current registers.
+        Returns:
+
+        """
         print(f"Processor: Debug instruction encountered at {datetime.now().strftime('%H:%M:%S')}")
         print("Current registers:")
         print(self._registers)
@@ -290,6 +316,16 @@ class Processor(BaseProcessor):
         self.finish_instruction(True)
 
     def load_instruction(self, address_bus: AddressBus, control_bus: ControlBus, data_bus: DataBus):
+        """
+        Load an instruction from memory.
+        Args:
+            address_bus:
+            control_bus:
+            data_bus:
+
+        Returns:
+
+        """
         if self._phase == Phases.NothingPending:
             address_bus.address = self._data_pointer
             control_bus.read_request = True
@@ -483,22 +519,49 @@ class Processor(BaseProcessor):
 
     # instruction helpers
     def request_operand(self, address_bus: AddressBus, control_bus: ControlBus):
+        """
+        Requests an operand for the current instruction.
+        Args:
+            address_bus:
+            control_bus:
+
+        Returns:
+
+        """
         self._data_pointer += 1
         address_bus.address = self._data_pointer
         control_bus.read_request = True
         control_bus.response = False
 
     def finish_instruction(self, advance_pointer: bool = True):
+        """
+        Finishes the execution of the current instruction and advances the data pointer if necessary.
+        Args:
+            advance_pointer:
+
+        Returns:
+
+        """
         if advance_pointer:
             self._data_pointer += 1
         self._current_instruction = InstructionSet.NoInstruction
         self._phase = Phases.NothingPending
 
     def push_registers(self) -> None:
+        """
+        Pushes all registers onto the register stack.
+        Returns:
+
+        """
         for i in range(8):
             self._register_stack.append(self._registers[i])
 
     def pop_registers(self) -> None:
+        """
+        Pops all registers from the register stack.
+        Returns:
+
+        """
         for i in range(7, -1, -1):
             self._registers[i] = self._register_stack.pop()
 
@@ -529,6 +592,16 @@ class Processor(BaseProcessor):
             self.finish_instruction(True)
 
     def request_single_operand(self, address_bus: AddressBus, control_bus: ControlBus, data_bus: DataBus):
+        """
+        Request a single operand from the address bus and data bus for the current instruction.
+        Args:
+            address_bus:
+            control_bus:
+            data_bus:
+
+        Returns:
+
+        """
         if self._phase == Phases.NothingPending:
             self.request_operand(address_bus, control_bus)
             self._phase = Phases.AwaitingFirstOperand

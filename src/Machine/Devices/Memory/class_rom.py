@@ -13,22 +13,14 @@ class ROM(BaseDevice):
     """
     A class used to represent a ROM device.
 
-    ...
-
-    Attributes
-    ----------
-    __memory : list
-        a list to store the memory of the ROM device
-
-    Methods
-    -------
-    __init__(starting_address):
-        Constructs all the necessary attributes for the ROM device.
-    cycle(address_bus, data_bus, control_bus, interrupt_bus):
-        Executes a cycle of the ROM device.
     """
 
     def start(self) -> None:
+        """
+        This method starts the ROM device.
+        Returns:
+
+        """
         threading.Thread(target=self.process_buses, name=self.device_id + "::process_buses").start()
 
     def __init__(self, starting_address: int, address_bus: AddressBus, data_bus: DataBus,
@@ -69,10 +61,20 @@ class ROM(BaseDevice):
         self.__memory = value
 
     def process_buses(self) -> None:
+        """
+        Initializes the ROM device and starts the main loop.
+        Returns:
+
+        """
         self.main_loop()
         self.finished = True
 
     def main_loop(self) -> None:
+        """
+        The main loop of the ROM device.  This runs continuously to monitor for read requests.
+        Returns:
+
+        """
         while self.running:
             self.control_bus.lock_bus()
             self.stop_running_if_halt_detected()

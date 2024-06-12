@@ -33,7 +33,17 @@ def play_sounds(sounds: List[Sound]):
         time.sleep(0.05)
 
 
-def build_sound(duration_ms: int, frequency: float, volume: float):
+def build_sound(duration_ms: int, frequency: float, volume: float) -> Sound:
+    """
+    This method builds a pygame sound to be played
+    Args:
+        duration_ms: The duration of the sound in milliseconds.
+        frequency: The frequency of the sound.
+        volume: The volume of the sound.
+
+    Returns: A pygame sound to be played.
+
+    """
     sample_rate: int = 44100
     n_samples: int = int(round(duration_ms / 1000 * sample_rate))
     buf = numpy.zeros((n_samples, 2), dtype=numpy.int16)
@@ -94,7 +104,11 @@ class SoundCard(BaseDevice):
     """
 
     def start(self) -> None:
-        # start process_buses thread
+        """
+        This method starts the sound card.
+        Returns:
+
+        """
         threading.Thread(target=self.process_buses, name=self.device_id + "::process_buses").start()
 
     def __init__(self, starting_address: int, address_bus: AddressBus, data_bus: DataBus, control_bus: ControlBus,
@@ -120,12 +134,23 @@ class SoundCard(BaseDevice):
         self.__processing_queue = value
 
     def process_buses(self) -> None:
+        """
+        Initializes the sound card and starts the main loop.
+        Returns:
+
+        """
         pygame.mixer.init()
         self.main_loop()
         self.wait_until_queue_is_empty()
         self.finished = True
 
     def main_loop(self) -> None:
+        """
+        The main loop of the sound card.  This runs continuously to monitor for sound requests.
+        The loop ends when the sound card is halted.
+        Returns:
+
+        """
         while self.running:
             queue_changed: bool = False
             self.control_bus.lock_bus()

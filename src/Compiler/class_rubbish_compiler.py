@@ -3,29 +3,28 @@ from typing import List
 
 class RubbishCompiler:
     """
-    The RubbishCompiler class represents a compiler for the Rubbish language.
-    It provides methods to compile the source code into machine code.
+    The RubbishCompiler class is used to compile Rubbish code into machine code.
     """
 
-    def __init__(self, address: int):
+    def __init__(self, starting_address: int):
         """
         Constructor for the RubbishCompiler class.
-        Initializes the source code and the address to compile to.
-        :param address: The address to compile to.
+        Initializes the source code and the starting address to compile to.
+        :param starting_address: The address to compile to.
         """
         self.labels = {}
-        self.address: int = address
+        self.starting_address: int = starting_address
 
-    def compile(self, source_pathname: str):
+    def compile(self, source_pathname: str) -> List[int]:
         """
         This method compiles the source code into machine code.
         It goes through two phases:
-        Phase 1 - compile code, so we know the offset of labels
-        Phase 2 - compile code and use label address offsets
-        :return: The compiled machine code.
+        Phase 1 - compile code, so that the offset of labels is determined
+        Phase 2 - compile code and use label address offsets in branch instructions
+        :return: The compiled machine code as a list of integers.
 
         Args:
-            source_pathname:
+            source_pathname: The pathname of the source code file to compile.
         """
         code = []
         try:
@@ -44,7 +43,7 @@ class RubbishCompiler:
                         if ":" in parameters[0]:
                             label_name = parameters[0][:parameters[0].index(":")]
                             if phase == 1:
-                                self.labels[label_name] = len(code) + self.address
+                                self.labels[label_name] = len(code) + self.starting_address
                             parameters[0] = parameters[0].replace(label_name + ":", "")
                             if len(parameters[0]) == 0:
                                 parameters.pop(0)
@@ -84,6 +83,15 @@ class RubbishCompiler:
             pass
 
     def read_file(self, source_pathname: str, lines: List[str]):
+        """
+        This method reads the source code file into a list of strings for further processing.
+        Args:
+            source_pathname: The pathname of the source code file to read.
+            lines: The list of strings to read the source code into.
+
+        Returns:
+
+        """
         with open(source_pathname, 'r') as file:
             for line in file:
                 strip = line.strip()
@@ -92,12 +100,11 @@ class RubbishCompiler:
                 else:
                     lines.append(strip)
 
-    # Function to cross-reference register
     @staticmethod
     def cross_reference_register(parameters: List[str], parameter_number: int):
         """
-        This function checks if the parameter starts with '@' and if so, it multiplies the parameter by -1.
-        This is used to indicate that the parameter is a register.
+        This function checks if the parameter starts with '@' and, if so, it multiplies the parameter by -1.
+        This is used to indicate to the processor that the parameter is a register.
         :param parameters: The list of parameters.
         :param parameter_number: The index of the parameter to cross-reference.
         """
@@ -137,21 +144,19 @@ class RubbishCompiler:
 
     def add_instruction(self, instruction: int, parameters: List[str], code: List[int], cross_reference_labels: bool):
         """
-        This method adds an instruction to the code.
-        Cross-references labels and registers and then adds the instruction and its parameters to the code.
+        This method appends an instruction to the compiled code.
         :param instruction: The instruction to add.
         :param parameters: The parameters for the instruction.
-        :param code: The code to add the instruction to.
+        :param code: The compiled code to append the instruction to.
         :param cross_reference_labels: Whether to cross-reference labels or not.
         """
-        # code.extend(parameters)
         code.append(instruction)
         for parameter_index in range(1, len(parameters)):
             self.cross_reference_label(parameters, parameter_index, cross_reference_labels)
             self.cross_reference_register(parameters, parameter_index)
             code.append(int(parameters[parameter_index]))
 
-    def get_address_from_label(self, label: str):
+    def get_address_from_label(self, label: str) -> str:
         """
         This method returns the address for the given label.
         :param label: The label to get the address for.
@@ -161,7 +166,7 @@ class RubbishCompiler:
 
     # Function to get instruction code
     @staticmethod
-    def get_instruction_code(instruction: str):
+    def get_instruction_code(instruction: str) -> int:
         """
         This function returns the op code for the given instruction.
         :param instruction: The instruction to get the op code for.
@@ -178,7 +183,7 @@ class RubbishCompiler:
         return op_codes[instruction]
 
     @staticmethod
-    def is_numeric(s: str):
+    def is_numeric(s: str) -> bool:
         """
         This function checks if the input string can be converted to a float.
         It returns True if the string can be converted to a float, otherwise it returns False.

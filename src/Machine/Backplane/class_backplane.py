@@ -11,50 +11,45 @@ from Machine.Devices.Bases.class_base_device import BaseDevice
 
 class BackPlane:
     """
-    A class used to represent a BackPlane.
-
-    ...
-
-    Attributes
-    ----------
-    __devices : list
-        a list to store the devices connected to the backplane
-    __addressBus : AddressBus
-        the address bus of the backplane
-    __dataBus : DataBus
-        the data bus of the backplane
-    __controlBus : ControlBus
-        the control bus of the backplane
-    __interruptBus : InterruptBus
-        the interrupt bus of the backplane
-
-    Methods
-    -------
-    __init__():
-        Constructs all the necessary attributes for the backplane.
-    add_device(device):
-        Adds a device to the backplane.
-    run():
-        Runs the backplane.
+    A class used to represent the machine's backplane.
+    One or more devices are attached to the backplane.
+    The backplane provides the buses for the devices.
+    When the backplane is run, it starts each of the attached devices.
     """
 
     @property
     def address_bus(self) -> AddressBus:
+        """
+        The address bus of the backplane.
+
+        """
         return self.__addressBus
 
     @property
     def data_bus(self) -> DataBus:
+        """
+        The data bus of the backplane.
+
+        """
         return self.__dataBus
 
     @property
     def control_bus(self) -> ControlBus:
+        """
+        The control bus of the backplane.
+
+        """
         return self.__controlBus
 
     @property
     def interrupt_bus(self) -> InterruptBus:
+        """
+        The interrupt bus of the backplane.
+
+        """
         return self.__interruptBus
 
-    def __init__(self):
+    def __init__(self) -> None:
         """
         Constructs all the necessary attributes for the backplane.
         """
@@ -73,14 +68,11 @@ class BackPlane:
         """
         self.__devices.append(device)
 
-    def run(self):
+    def run(self) -> None:
         """
         Runs the backplane.
-        The backplane runs creates instances of the buses and allows the devices to run on them.
-        When a HALT interrupt is detected, cycling stops.
+        The backplane calls the start method of each device attached to it to start the machine.
 
-        Raises:
-            None
         """
         self.control_bus.power_on = True
         for device in self.__devices:
@@ -93,7 +85,11 @@ class BackPlane:
             self.control_bus.unlock_bus()
         self.wait_for_devices_to_finish()
 
-    def wait_for_devices_to_finish(self):
+    def wait_for_devices_to_finish(self) -> None:
+        """
+        Waits for all devices to finish when the machine is halted.
+
+        """
         print("Waiting for devices to finish.")
         devices_busy = True
         while devices_busy:

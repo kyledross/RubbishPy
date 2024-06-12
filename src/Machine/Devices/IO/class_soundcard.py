@@ -33,7 +33,17 @@ def play_sounds(sounds: List[Sound]):
         time.sleep(0.05)
 
 
-def build_sound(duration_ms: int, frequency: float, volume: float):
+def build_sound(duration_ms: int, frequency: float, volume: float) -> Sound:
+    """
+    This method builds a pygame sound to be played
+    Args:
+        duration_ms: The duration of the sound in milliseconds.
+        frequency: The frequency of the sound.
+        volume: The volume of the sound.
+
+    Returns: A pygame sound to be played.
+
+    """
     sample_rate: int = 44100
     n_samples: int = int(round(duration_ms / 1000 * sample_rate))
     buf = numpy.zeros((n_samples, 2), dtype=numpy.int16)
@@ -93,8 +103,12 @@ class SoundCard(BaseDevice):
     When the transaction is complete, the sound card will play the sound frames.
     """
 
-    def start(self):
-        # start process_buses thread
+    def start(self) -> None:
+        """
+        This method starts the sound card.
+        Returns:
+
+        """
         threading.Thread(target=self.process_buses, name=self.device_id + "::process_buses").start()
 
     def __init__(self, starting_address: int, address_bus: AddressBus, data_bus: DataBus, control_bus: ControlBus,
@@ -119,8 +133,24 @@ class SoundCard(BaseDevice):
     def processing_queue(self, value: bool):
         self.__processing_queue = value
 
-    def process_buses(self):
+    def process_buses(self) -> None:
+        """
+        Initializes the sound card and starts the main loop.
+        Returns:
+
+        """
         pygame.mixer.init()
+        self.main_loop()
+        self.wait_until_queue_is_empty()
+        self.finished = True
+
+    def main_loop(self) -> None:
+        """
+        The main loop of the sound card.  This runs continuously to monitor for sound requests.
+        The loop ends when the sound card is halted.
+        Returns:
+
+        """
         while self.running:
             queue_changed: bool = False
             self.control_bus.lock_bus()
@@ -138,10 +168,7 @@ class SoundCard(BaseDevice):
                 if not self.processing_queue:
                     threading.Thread(target=self.process_queue, name=self.device_id + "::process_queue").start()
 
-        self.wait_until_queue_is_empty()
-        self.finished = True
-
-    def process_queue(self):
+    def process_queue(self) -> None:
         """
         This method processes the command queue.
         Returns:
@@ -168,7 +195,7 @@ class SoundCard(BaseDevice):
             time.sleep(0)
         self.processing_queue = False
 
-    def wait_until_queue_is_empty(self):
+    def wait_until_queue_is_empty(self) -> None:
         """
         This method waits until the command queue is empty.
         Returns:

@@ -16,7 +16,8 @@ This is by no means a perfect design or implementation.  But, it works.
 ## Requirements
 RubbishPy requires the following:
 Python 3.11 or later.  
-PyGame 2.5.2 or later required (pip install pygame).
+Python package PyGame 2.5.2 or later required (pip install pygame).
+Python package Numpy 1.26 or later required (pip install numpy).
 
 RubbishPy was developed with JetBrains PyCharm.  
 
@@ -26,7 +27,9 @@ python3 main.py  {options}
 example:  
 
 ```commandline
-cd RubbishPy/src*  
+cd RubbishPy/src
+```
+```commandline
 python3 main.py --compiler address=0 size=1024 program=../Programs/typewriter.txt --processor --console width=80 height=25 address=1024 interrupt=2*
 ```
 ## Adding a new device

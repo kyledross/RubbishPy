@@ -30,7 +30,7 @@ example:
 cd RubbishPy/src
 ```
 ```commandline
-python3 main.py --compiler address=0 size=1024 program=../Programs/typewriter.txt --processor --console width=80 height=25 address=1024 interrupt=2*
+python3 main.py --compiler address=0 size=1024 program=../Programs/typewriter.txt --processor --console width=80 height=25 address=1024 interrupt=2
 ```
 ## Adding a new device
 

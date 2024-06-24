@@ -211,8 +211,7 @@ def show_help() -> None:
     print()
     print("--compiler")
     print("   Adds a RAM device to the backplane and compiles a Rubbish assembly language program into the")
-    print("   address space of the RAM.  The size of the RAM that is added is exactly the size of the compiled")
-    print("   program.")
+    print("   address space of the RAM.")
     print()
     print("   Syntax:")
     print("         --compiler address={starting address} size={size of ram address space} "

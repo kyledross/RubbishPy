@@ -91,7 +91,8 @@ print_return: rtn
 ' Sound
 
 play_click:
-lr 1 10
+' milliseconds of sound
+lr 1 7
 mrm 1 1025
 
 ' frequency of 1000 Hz'

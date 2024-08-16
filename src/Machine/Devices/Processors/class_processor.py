@@ -144,6 +144,9 @@ class Processor(BaseProcessor):
                     case InstructionSet.INC:
                         self.execute_inc(address_bus, control_bus, data_bus)
 
+                    case InstructionSet.DEC:
+                        self.execute_dec(address_bus, control_bus, data_bus)
+
                     case InstructionSet.ADD:
                         self.execute_add()
 
@@ -589,6 +592,12 @@ class Processor(BaseProcessor):
         value = self.request_single_operand(address_bus, control_bus, data_bus)
         if value is not None:
             self._registers[value] += 1
+            self.finish_instruction(True)
+
+    def execute_dec(self, address_bus: AddressBus, control_bus: ControlBus, data_bus: DataBus):
+        value = self.request_single_operand(address_bus, control_bus, data_bus)
+        if value is not None:
+            self._registers[value] -= 1
             self.finish_instruction(True)
 
     def request_single_operand(self, address_bus: AddressBus, control_bus: ControlBus, data_bus: DataBus):

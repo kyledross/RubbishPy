@@ -66,7 +66,7 @@ class RubbishCompiler:
 
                         elif instruction in {"LR", "LRM", "LRR", "MRM", "ADD", "DIV", "MUL", "SUB", "JMP", "HALT",
                                              "DEBUG", "RST", "CMP", "JE", "JNE", "JL", "JG", "PUSH", "POP", "CALL",
-                                             "RTN", "SIV", "SLEEP", "WAKE", "PEEK", "OR", "AND", "XOR", "NOT", "INC"}:
+                                             "RTN", "SIV", "SLEEP", "WAKE", "PEEK", "OR", "AND", "XOR", "NOT", "INC", "DEC"}:
                             self.add_instruction(self.get_instruction_code(instruction), parameters, code, phase == 2)
 
                         else:
@@ -177,7 +177,7 @@ class RubbishCompiler:
             "LR": 1, "LRM": 2, "LRR": 3, "MRM": 4, "ADD": 5, "SUB": 6, "MUL": 7, "DIV": 8, "HALT": 9,
             "DEBUG": 10, "JMP": 11, "RST": 12, "CMP": 13, "JE": 14, "JNE": 15, "JL": 16, "JG": 17, "PUSH": 18,
             "POP": 19, "CALL": 20, "RTN": 21, "NOT": 22, "OR": 23, "AND": 24, "XOR": 25, "SIV": 26, "INC": 27,
-            "SLEEP": 28, "WAKE": 29, "PEEK": 34,
+            "SLEEP": 28, "WAKE": 29, "DEC": 30, "PEEK": 34,
 
         }
         return op_codes[instruction]

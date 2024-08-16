@@ -260,6 +260,16 @@ JE :inc_ok
 JMP :problem
 inc_ok: nop
 
+' DEC
+LR 0 19
+LR 1 1
+LR 2 0
+DEC 1
+CMP
+JE :dec_ok
+JMP :problem
+dec_ok: nop
+
 
 finish: lr 0 -69
 

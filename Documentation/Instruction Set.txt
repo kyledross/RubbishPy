@@ -46,6 +46,10 @@ Pop Off Of Common Stack (into register)
 POP reg
 Opcode: 19
 
+Peek At Top Of Common Stack (into register)
+PEEK reg
+Opcode: 34
+
 =======================================================
 -- Integer math instructions
 

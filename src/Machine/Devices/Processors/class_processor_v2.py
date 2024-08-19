@@ -35,6 +35,9 @@ class ProcessorV2(BaseProcessor):
 
         self.registers: list[int] = []
         self.register_stack: list[list[int]] = []
+        
+
+        self.interrupt_vectors: dict[int, int] = {}
 
         self.user_stack: list[int] = []
 
@@ -112,15 +115,18 @@ class ProcessorV2(BaseProcessor):
                 self.control_bus.lock_bus()
                 self.control_bus.halt = True
                 self.control_bus.unlock_bus()
+                self.instruction_pointer += 1
             case InstructionSet.DEBUG:
                 print(f"Processor: Debug instruction encountered at {datetime.now().strftime('%H:%M:%S')}")
                 print("Current registers:")
                 print(self._registers)
+                self.instruction_pointer += 1
             case InstructionSet.JMP:
                 destination_address: int = self.convert_register_pointer_if_necessary(self.get_byte(self.instruction_pointer + 1))
                 self.instruction_pointer = destination_address
             case InstructionSet.RST:
                 # todo: implement processor reset
+                self.instruction_pointer += 1
                 pass
             case InstructionSet.CMP:
                 if self.registers[1] < self.registers[2]:
@@ -129,6 +135,7 @@ class ProcessorV2(BaseProcessor):
                     self.compare_result = CompareResults.GreaterThan
                 else:
                     self.compare_result = CompareResults.Equal
+                self.instruction_pointer += 1
             case InstructionSet.JE:
                 if self.compare_result == CompareResults.Equal:
                     destination_address: int = self.convert_register_pointer_if_necessary(self.get_byte(self.instruction_pointer + 1))
@@ -162,11 +169,16 @@ class ProcessorV2(BaseProcessor):
                 self.registers[destination_register] = self.user_stack.pop()
                 self.instruction_pointer += 2
             case InstructionSet.CALL:
-                # todo: implement call
-                pass
+                destination_address: int = self.convert_register_pointer_if_necessary(self.get_byte(self.instruction_pointer + 1))
+                self.register_stack.append(self.registers.copy())
+                self.instruction_pointer += 2 # address of next instruction after call
+                self.instruction_pointer_stack.append(self.instruction_pointer)
+                self.instruction_pointer = destination_address
             case InstructionSet.RTN:
-                # todo: implement return
-                pass
+                self.registers = self.register_stack.pop()
+                self.instruction_pointer = self.instruction_pointer_stack.pop()
+                if self.instruction_pointer_stack.count == 0:
+                    self.sleeping = self.sleep_mode
             case InstructionSet.NOT:
                 self.registers[3] = ~self.registers[1]
                 self.instruction_pointer += 1
@@ -180,8 +192,13 @@ class ProcessorV2(BaseProcessor):
                 self.registers[3] = self.registers[1] ^ self.registers[2]
                 self.instruction_pointer += 1
             case InstructionSet.SIV:
-                # todo: implement set interrupt vector
-                pass
+                interrupt_number: int = self.get_byte(self.instruction_pointer + 1)
+                destination_address: int = self.convert_register_pointer_if_necessary(self.get_byte(self.instruction_pointer + 2))
+                if interrupt_number in self.interrupt_vectors:
+                    self.interrupt_vectors[interrupt_number] = destination_address
+                else:
+                    self.interrupt_vectors[interrupt_number] = destination_address
+                self.instruction_pointer += 3
             case InstructionSet.INC:
                 destination_register: int = self.get_byte(self.instruction_pointer + 1)
                 self.registers[destination_register] += 1
@@ -191,11 +208,13 @@ class ProcessorV2(BaseProcessor):
                 self.registers[destination_register] -= 1
                 self.instruction_pointer += 2
             case InstructionSet.SLEEP:
-                # todo: implement sleep
-                pass
+                self.sleep_mode = True
+                self.sleeping = True
+                self.instruction_pointer += 1
             case InstructionSet.WAKE:
-                # todo: implement wake
-                pass
+                self.sleep_mode = False
+                self.sleeping = False
+                self.instruction_pointer += 1
             case InstructionSet.PEEK:
                 destination_register: int = self.get_byte(self.instruction_pointer + 1)
                 self.registers[destination_register] = self.user_stack[-1]

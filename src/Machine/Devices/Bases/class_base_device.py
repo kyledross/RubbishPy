@@ -228,7 +228,6 @@ class BaseDevice(abc.ABC):
         if self.interrupt_bus.test_interrupt(Interrupts.halt):
             self.__running = False
 
-
 def log_message(message: str):
     """
     A function to log a message if a debugger is attached.

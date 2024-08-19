@@ -5,6 +5,7 @@ from Machine.Devices.Memory.class_rom import ROM
 from Machine.Devices.Processors.class_processor import Processor
 from Machine.Backplane.class_backplane import BackPlane
 from Machine.Devices.IO.class_soundcard import SoundCard
+from Machine.Devices.Processors.class_processor_v2 import ProcessorV2
 
 device_group = []
 
@@ -117,6 +118,14 @@ class MachineBuilder:
                                                       data_bus=self.__backplane.data_bus,
                                                       control_bus=self.__backplane.control_bus,
                                                       interrupt_bus=self.__backplane.interrupt_bus))
+            case 'processor_v2':
+                self.__backplane.add_device(ProcessorV2(size=size,
+                                                        starting_address=address,
+                                                        disable_instruction_caching=False,
+                                                        address_bus=self.__backplane.address_bus,
+                                                        data_bus=self.__backplane.data_bus,
+                                                        control_bus=self.__backplane.control_bus,
+                                                        interrupt_bus=self.__backplane.interrupt_bus))
             case 'console':
                 self.__backplane.add_device(Console(starting_address=address,
                                                     width=width,

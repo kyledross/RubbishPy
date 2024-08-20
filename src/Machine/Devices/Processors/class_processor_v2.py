@@ -1,9 +1,10 @@
 import threading
-from asyncio import sleep
 from datetime import datetime
+from time import sleep
 
 from Constants.class_compare_results import CompareResults
 from Constants.class_instruction_set import InstructionSet
+from Constants.class_interrupts import Interrupts
 from Machine.Buses.class_address_bus import AddressBus
 from Machine.Buses.class_control_bus import ControlBus
 from Machine.Buses.class_data_bus import DataBus
@@ -18,7 +19,7 @@ class ProcessorV2(BaseProcessor):
         self.control_bus.read_request = True
         self.control_bus.unlock_bus()
         while not self.control_bus.response:
-            sleep(.1)
+            sleep(0)
         self.control_bus.lock_bus()
         value:int = self.data_bus.data
         self.control_bus.response = False
@@ -26,8 +27,7 @@ class ProcessorV2(BaseProcessor):
         return value
             
     
-    def __init__(self, starting_address: int, size: int, disable_instruction_caching: bool,
-                 address_bus: AddressBus, data_bus: DataBus, control_bus: ControlBus, interrupt_bus: InterruptBus):
+    def __init__(self, starting_address: int, size: int, address_bus: AddressBus, data_bus: DataBus, control_bus: ControlBus, interrupt_bus: InterruptBus):
 
         super().__init__(starting_address, size, address_bus, data_bus, control_bus, interrupt_bus)
         self.instruction_pointer: int = 0
@@ -47,6 +47,14 @@ class ProcessorV2(BaseProcessor):
         self.compare_result: CompareResults = CompareResults.Inconclusive
         
 
+    def reset_processor(self):
+        self.instruction_pointer = 0
+        self.registers = [0] * 8
+        self.register_stack = []
+        self.sleeping = False
+        self.sleep_mode = False
+        self.compare_result = CompareResults.Inconclusive
+        self.user_stack = []
 
     def start(self) -> None:
 
@@ -59,6 +67,7 @@ class ProcessorV2(BaseProcessor):
             
         
     def main_loop(self) -> None:
+        self.reset_processor()
         while self.running:
             self.control_bus.lock_bus()
             self.stop_running_if_halt_detected()
@@ -113,21 +122,19 @@ class ProcessorV2(BaseProcessor):
                 self.instruction_pointer += 1
             case InstructionSet.HALT:
                 self.control_bus.lock_bus()
-                self.control_bus.halt = True
+                self.interrupt_bus.set_interrupt(Interrupts.halt)
                 self.control_bus.unlock_bus()
                 self.instruction_pointer += 1
             case InstructionSet.DEBUG:
                 print(f"Processor: Debug instruction encountered at {datetime.now().strftime('%H:%M:%S')}")
                 print("Current registers:")
-                print(self._registers)
+                print(self.registers)
                 self.instruction_pointer += 1
             case InstructionSet.JMP:
                 destination_address: int = self.convert_register_pointer_if_necessary(self.get_byte(self.instruction_pointer + 1))
                 self.instruction_pointer = destination_address
             case InstructionSet.RST:
-                # todo: implement processor reset
-                self.instruction_pointer += 1
-                pass
+                self.reset_processor()
             case InstructionSet.CMP:
                 if self.registers[1] < self.registers[2]:
                     self.compare_result = CompareResults.LessThan
@@ -170,14 +177,12 @@ class ProcessorV2(BaseProcessor):
                 self.instruction_pointer += 2
             case InstructionSet.CALL:
                 destination_address: int = self.convert_register_pointer_if_necessary(self.get_byte(self.instruction_pointer + 1))
-                self.register_stack.append(self.registers.copy())
                 self.instruction_pointer += 2 # address of next instruction after call
-                self.instruction_pointer_stack.append(self.instruction_pointer)
-                self.instruction_pointer = destination_address
+                self.execute_call(destination_address)
             case InstructionSet.RTN:
                 self.registers = self.register_stack.pop()
                 self.instruction_pointer = self.instruction_pointer_stack.pop()
-                if self.instruction_pointer_stack.count == 0:
+                if len(self.instruction_pointer_stack) == 0:
                     self.sleeping = self.sleep_mode
             case InstructionSet.NOT:
                 self.registers[3] = ~self.registers[1]
@@ -194,10 +199,7 @@ class ProcessorV2(BaseProcessor):
             case InstructionSet.SIV:
                 interrupt_number: int = self.get_byte(self.instruction_pointer + 1)
                 destination_address: int = self.convert_register_pointer_if_necessary(self.get_byte(self.instruction_pointer + 2))
-                if interrupt_number in self.interrupt_vectors:
-                    self.interrupt_vectors[interrupt_number] = destination_address
-                else:
-                    self.interrupt_vectors[interrupt_number] = destination_address
+                self.interrupt_vectors[interrupt_number] = destination_address
                 self.instruction_pointer += 3
             case InstructionSet.INC:
                 destination_register: int = self.get_byte(self.instruction_pointer + 1)
@@ -222,15 +224,20 @@ class ProcessorV2(BaseProcessor):
             case _:
                 # Raise an error for unknown instruction
                 raise ValueError(f"Unknown instruction encountered at address {self.instruction_pointer}. Opcode is {instruction}")
-                
+
+    def execute_call(self, destination_address):
+        self.register_stack.append(self.registers.copy())
+        self.instruction_pointer_stack.append(self.instruction_pointer)
+        self.instruction_pointer = destination_address
+
     def process_interrupts(self):
-        # self.control_bus.lock_bus()
-        self.sleeping = False
-        # todo: implement interrupt processing
-        # in rtn, check if the call stack is empty
-        # if it is, and the processor is in sleep mode, put the processor back to sleep
-        # self.control_bus.unlock_bus()
-        pass
+        self.control_bus.lock_bus()
+        interrupt_number = self.interrupt_bus.interrupt_awaiting()
+        self.control_bus.unlock_bus()
+        if interrupt_number in self.interrupt_vectors:
+            destination_address = self.interrupt_vectors[interrupt_number]
+            self.sleeping = False
+            self.execute_call(destination_address)
 
     def convert_register_pointer_if_necessary(self, address: int) -> int:
         if address < 0:
@@ -239,8 +246,10 @@ class ProcessorV2(BaseProcessor):
         return address
 
     def send_byte(self, address: int, value: int):
-        pass
-        
-        
-    
-        
+        self.control_bus.lock_bus()
+        self.address_bus.address = address
+        self.data_bus.data = value
+        self.control_bus.write_request = True
+        self.control_bus.unlock_bus()
+        while not self.control_bus.response:
+            sleep(0)

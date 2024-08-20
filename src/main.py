@@ -176,7 +176,8 @@ def add_processor(args, devices: {}) -> None:
 
 def add_processor_v2(args, devices: {}) -> None:
     """
-    Adds a processor device to the list of devices to add to the backplane.
+    Adds processor version 2 device to the list of devices to add to the backplane.
+    Processor version 2 is a simplified design that maintains compatibility with the original processor.
     Args:
         args: The command line arguments.
         devices: The list of devices that will be added to the machine.
@@ -212,7 +213,7 @@ def show_help() -> None:
     print()
     print("   Note:  Console's size is always 1 and can't be changed.")
     print()
-    print("--processor")
+    print("--processor or --processor_v2")
     print("   Adds a processor device to the backplane.")
     print()
     print("   Syntax:")

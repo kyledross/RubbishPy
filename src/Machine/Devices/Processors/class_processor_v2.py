@@ -18,7 +18,7 @@ class ProcessorV2(BaseProcessor):
         self.address_bus.address = address
         self.control_bus.read_request = True
         self.control_bus.unlock_bus()
-        while not self.control_bus.response:
+        while not self.control_bus.response and self.control_bus.power_on:
             sleep(0)
         self.control_bus.lock_bus()
         value:int = self.data_bus.data
@@ -76,8 +76,16 @@ class ProcessorV2(BaseProcessor):
             if power_is_on:
                 self.process_interrupts()
                 if not self.sleeping:
-                    self.perform_instruction_processing()
-        self.finished = True
+                    try:
+                        self.perform_instruction_processing()
+                    except Exception as e:
+                        print(f"Exception caught: {e}")
+                        print(f"Instruction Pointer: {self.instruction_pointer}")
+                        print(f"Registers: {self.registers}")
+                        self.control_bus.lock_bus()
+                        self.interrupt_bus.set_interrupt(Interrupts.halt)
+                        self.control_bus.unlock_bus()
+            self.finished = True
 
     def perform_instruction_processing(self) -> None:
         instruction = self.get_byte(self.instruction_pointer)
@@ -251,6 +259,7 @@ class ProcessorV2(BaseProcessor):
         self.data_bus.data = value
         self.control_bus.write_request = True
         self.control_bus.unlock_bus()
-        while not self.control_bus.response:
+        while not self.control_bus.response and self.control_bus.power_on:
             sleep(0)
         self.control_bus.response = False
+

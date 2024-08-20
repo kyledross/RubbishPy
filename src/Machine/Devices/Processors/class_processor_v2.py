@@ -253,3 +253,4 @@ class ProcessorV2(BaseProcessor):
         self.control_bus.unlock_bus()
         while not self.control_bus.response:
             sleep(0)
+        self.control_bus.response = False

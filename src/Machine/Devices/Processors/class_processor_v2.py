@@ -38,6 +38,8 @@ class ProcessorV2(BaseProcessor):
         
 
         self.interrupt_vectors: dict[int, int] = {}
+        self.handling_interrupt: bool = False
+        self.interrupt_instruction_pointer_stack_depth: int = 0
 
         self.user_stack: list[int] = []
 
@@ -192,6 +194,12 @@ class ProcessorV2(BaseProcessor):
                 self.instruction_pointer = self.instruction_pointer_stack.pop()
                 if len(self.instruction_pointer_stack) == 0:
                     self.sleeping = self.sleep_mode
+                if self.handling_interrupt:
+                    # we remembered how deep into the instruction pointer stack we were when the interrupt was raised.
+                    # if we are back to that point, the interrupt has been handled. we can now handle another
+                    # interrupt by clearing the handling_interrupt flag
+                    if self.interrupt_instruction_pointer_stack_depth == len(self.instruction_pointer_stack):
+                        self.handling_interrupt = False
             case InstructionSet.NOT:
                 self.registers[3] = ~self.registers[1]
                 self.instruction_pointer += 1
@@ -239,13 +247,16 @@ class ProcessorV2(BaseProcessor):
         self.instruction_pointer = destination_address
 
     def process_interrupts(self):
-        self.control_bus.lock_bus()
-        interrupt_number = self.interrupt_bus.interrupt_awaiting()
-        self.control_bus.unlock_bus()
-        if interrupt_number in self.interrupt_vectors:
-            destination_address = self.interrupt_vectors[interrupt_number]
-            self.sleeping = False
-            self.execute_call(destination_address)
+        if not self.handling_interrupt:
+            self.control_bus.lock_bus()
+            interrupt_number = self.interrupt_bus.interrupt_awaiting()
+            self.control_bus.unlock_bus()
+            if interrupt_number in self.interrupt_vectors:
+                destination_address = self.interrupt_vectors[interrupt_number]
+                self.sleeping = False
+                self.handling_interrupt = True
+                self.interrupt_instruction_pointer_stack_depth = len(self.instruction_pointer_stack)
+                self.execute_call(destination_address)
 
     def convert_register_pointer_if_necessary(self, address: int) -> int:
         if address < 0:

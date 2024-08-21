@@ -14,7 +14,7 @@
     <option name="ADD_SOURCE_ROOTS" value="true" />
     <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
     <option name="SCRIPT_NAME" value="$Sourcepath$/main.py" />
-    <option name="PARAMETERS" value="--compiler address=0 size=1024 program=../Programs/continuous_console_fill_and_scroll.txt --processor --console width=80 height=25 address=1024 interrupt=2" />
+    <option name="PARAMETERS" value="--compiler address=0 size=1024 program=../Programs/continuous_console_fill_and_scroll.txt --processor_v2 --console width=80 height=25 address=1024 interrupt=2" />
     <option name="SHOW_COMMAND_LINE" value="false" />
     <option name="EMULATE_TERMINAL" value="false" />
     <option name="MODULE_MODE" value="false" />

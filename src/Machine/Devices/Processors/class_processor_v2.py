@@ -14,6 +14,25 @@ from Machine.Devices.Bases.class_base_processor import BaseProcessor
 class ProcessorV2(BaseProcessor):
 
     def get_byte(self, address: int, cacheable=False):
+        """
+        This function retrieves a byte of data from the specified address.
+        It can optionally cache the data for future use.
+
+        Args:
+            address (int): The memory address from which to retrieve the byte of data.
+            cacheable (bool, optional): If True, the retrieved byte will be cached for future use.
+            Defaults to False.
+
+        Returns:
+            int: The retrieved byte of data.
+
+        Note:
+            - If `cacheable` is True and the requested address is already present in the cache,
+                the byte will be retrieved from the cache.
+            - If `cacheable` is True and the requested address is not present in the cache,
+                the byte will be retrieved from the memory and then cached for future use.
+            - If `cacheable` is False, the byte will always be retrieved from the memory.
+        """
         if cacheable:
             if address in self.data_cache:
                 return self.data_cache[address]
@@ -29,11 +48,24 @@ class ProcessorV2(BaseProcessor):
         self.control_bus.unlock_bus()
         if cacheable:
             self.data_cache[address] = value
+        else:
+            self.data_cache.pop(address, None)
         return value
 
     def send_byte(self, address: int, value: int, cacheable=False):
+        """
+        Sends a byte to a given address.
+
+        Args:
+            address: The address to send the byte to.
+            value: The value of the byte to send.
+            cacheable: Boolean indicating whether the value can be cached.
+            Default is False.
+        """
         if cacheable:
             self.data_cache[address] = value
+        else:
+            self.data_cache.pop(address, None)
         self.control_bus.lock_bus()
         self.address_bus.address = address
         self.data_bus.data = value
@@ -289,6 +321,4 @@ class ProcessorV2(BaseProcessor):
             address = abs(address)
             return self.registers[address]
         return address
-
-
 

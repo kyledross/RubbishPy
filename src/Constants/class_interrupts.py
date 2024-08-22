@@ -1,7 +1,5 @@
-from enum import IntFlag
 
-
-class Interrupts(IntFlag):
+class Interrupts:
     """
     The Interrupts class represents the different types of interrupts that can be set on the interrupt bus.
     Interrupts with lower numbers have higher priority.

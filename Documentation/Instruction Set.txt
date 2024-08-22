@@ -144,6 +144,11 @@ RETURN
 Opcode: 21
 Purpose: Pops instruction pointer off instruction pointer stack, pops general purpose registers off of the register stack, and continues executing at the next address.
 
+Raise Interrupt
+INT interrupt bitmap (1, 2, 4, 8, 16 etc)
+Opcode: 31
+Purpose: Raises the designated interrrupt on the interrupt bus
+
 =======================================================
 -- Processor control
 

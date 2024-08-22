@@ -89,6 +89,7 @@ class Processor(BaseProcessor):
         self.interrupt_vectors: dict[int, int] = {}
         self.handling_interrupt: bool = False
         self.interrupt_instruction_pointer_stack_depth: int = 0
+        self.processor_raised_interrupt: int = 0 # the interrupt number that the processor raised via INT instruction
 
         self.user_stack: list[int] = []
 
@@ -295,6 +296,12 @@ class Processor(BaseProcessor):
                 destination_register: int = self.get_byte(self.instruction_pointer + 1, cacheable=True)
                 self.registers[destination_register] = self.user_stack[-1]
                 self.instruction_pointer += 2
+            case InstructionSet.INT:
+                interrupt_number: int = self.get_byte(self.instruction_pointer + 1, cacheable=True)
+                self.processor_raised_interrupt = interrupt_number
+                self.interrupt_bus.set_interrupt(interrupt_number)
+                self.instruction_pointer += 2
+
             case _:
                 # Raise an error for unknown instruction
                 raise ValueError(f"Unknown instruction encountered at address {self.instruction_pointer}. Opcode is {instruction}")
@@ -310,6 +317,9 @@ class Processor(BaseProcessor):
             interrupt_number = self.interrupt_bus.interrupt_awaiting()
             self.control_bus.unlock_bus()
             if interrupt_number in self.interrupt_vectors:
+                if interrupt_number == self.processor_raised_interrupt:
+                    self.interrupt_bus.clear_interrupt(interrupt_number)
+                    self.processor_raised_interrupt = 0
                 destination_address = self.interrupt_vectors[interrupt_number]
                 self.sleeping = False
                 self.handling_interrupt = True

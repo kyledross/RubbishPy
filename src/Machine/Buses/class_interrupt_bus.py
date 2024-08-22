@@ -1,6 +1,11 @@
 import Constants.class_interrupts
 from Constants.class_interrupts import Interrupts
 
+# todo: the structure of interrupts really needs to change
+# this implementation tries to replicate bitwise interrupts, and that ends up being just wonky
+# in the real world, an interrupt is an interrupt.  interrupt 3 isn't interrupts 1 and 2... it's 3
+# so rather than be a bitmap, the interrupt bus needs to be a dictionary of bits with the key being the interrupt
+# number and the value being the state
 
 class InterruptBus:
     """

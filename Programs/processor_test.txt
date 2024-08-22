@@ -270,8 +270,35 @@ JE :dec_ok
 JMP :problem
 dec_ok: nop
 
+' SIV/INT
+lr 0 20
+' test siv and int by
+' setting register 1 to 0
+lr 1 0
+' setting register 2 to 1
+lr 2 1
+' send 0 to address 1024
+lr 3 0
+mrm 3 1024
+' setting interrupt vector for interrupt line 4 to int_target
+siv 4 int_target
+' at target, set memory at 1024 to 1 then return
+' raise interrupt
+int 4
+' after raising interrupt, move 1024 to register 1
+lrm 1 1024
+' register 1 should now be 1
+cmp
+' jump if equal to sivint_ok
+je sivint_ok
+' otherwise jump to problem
+jmp problem
+int_target: mrm 2 1024
+rtn
+sivint_ok: nop
+
+
 
 finish: lr 0 -69
-
 problem: debug
 halt

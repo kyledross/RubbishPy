@@ -147,7 +147,7 @@ Purpose: Pops instruction pointer off instruction pointer stack, pops general pu
 Raise Interrupt
 INT interrupt bitmap (1, 2, 4, 8, 16 etc)
 Opcode: 31
-Purpose: Raises the designated interrrupt on the interrupt bus
+Purpose: Raises the designated interrupt on the interrupt bus
 
 =======================================================
 -- Processor control

@@ -81,7 +81,6 @@ def parse_command_line() -> {}:
     parser.add_argument('--help', action='store_const', const=True)
     parser.add_argument('--ram', type=lambda x: x.split('='), nargs='+')
     parser.add_argument('--processor', action='store_const', const=True)
-    parser.add_argument("--processor_v2", action='store_const', const=True)
     parser.add_argument('--console', type=lambda x: x.split('='), nargs='+')
     parser.add_argument("--compiler", type=lambda x: x.split('='), nargs='+')
     parser.add_argument('--soundcard', type=lambda x: x.split('='), nargs='+')
@@ -93,7 +92,6 @@ def parse_command_line() -> {}:
 
     # build the devices list to pass to the machine builder
     add_processor(args, devices)
-    add_processor_v2(args, devices)
     add_ram(args, devices)
     add_console(args, devices)
     add_compiler(args, devices)
@@ -174,20 +172,6 @@ def add_processor(args, devices: {}) -> None:
     if args.processor:
         devices.append({'device_name': 'processor', 'options': ''})
 
-def add_processor_v2(args, devices: {}) -> None:
-    """
-    Adds processor version 2 device to the list of devices to add to the backplane.
-    Processor version 2 is a simplified design that maintains compatibility with the original processor.
-    Args:
-        args: The command line arguments.
-        devices: The list of devices that will be added to the machine.
-
-    Returns:
-
-    """
-    if args.processor_v2:
-        devices.append({'device_name': 'processor_v2', 'options': ''})
-
 def show_help() -> None:
     """Displays the help screen."""
     print("Commands:")
@@ -213,7 +197,7 @@ def show_help() -> None:
     print()
     print("   Note:  Console's size is always 1 and can't be changed.")
     print()
-    print("--processor or --processor_v2")
+    print("--processor")
     print("   Adds a processor device to the backplane.")
     print()
     print("   Syntax:")

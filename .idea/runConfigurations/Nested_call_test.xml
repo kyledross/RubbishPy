@@ -14,7 +14,7 @@
     <option name="ADD_SOURCE_ROOTS" value="true" />
     <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
     <option name="SCRIPT_NAME" value="$Sourcepath$/main.py" />
-    <option name="PARAMETERS" value="--compiler address=0 size=2048 program=../Programs/nested_call.txt --processor_v2" />
+    <option name="PARAMETERS" value="--compiler address=0 size=2048 program=../Programs/nested_call.txt --processor" />
     <option name="SHOW_COMMAND_LINE" value="false" />
     <option name="EMULATE_TERMINAL" value="false" />
     <option name="MODULE_MODE" value="false" />

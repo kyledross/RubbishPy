@@ -39,4 +39,5 @@ class InstructionSet(IntFlag):
     SLEEP = 28  # Sleep instruction
     WAKE = 29  # Wake instruction
     DEC = 30 # Decrement instruction
+    INT = 31 # Raise interrupt instruction
     PEEK = 34  # Peek at top of stack instruction

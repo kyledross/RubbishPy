@@ -46,6 +46,10 @@ Pop Off Of Common Stack (into register)
 POP reg
 Opcode: 19
 
+Peek At Top Of Common Stack (into register)
+PEEK reg
+Opcode: 34
+
 =======================================================
 -- Integer math instructions
 
@@ -139,6 +143,11 @@ Return
 RETURN
 Opcode: 21
 Purpose: Pops instruction pointer off instruction pointer stack, pops general purpose registers off of the register stack, and continues executing at the next address.
+
+Raise Interrupt
+INT interrupt bitmap (1, 2, 4, 8, 16 etc)
+Opcode: 31
+Purpose: Raises the designated interrupt on the interrupt bus
 
 =======================================================
 -- Processor control

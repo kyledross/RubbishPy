@@ -30,7 +30,7 @@ def play_sounds(sounds: List[Sound]):
         time.sleep(0)
 
     while any(channel.get_busy() for channel in channels):
-        time.sleep(0.05)
+        time.sleep(0)
 
 
 def build_sound(duration_ms: int, frequency: float, volume: float) -> Sound:

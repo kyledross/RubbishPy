@@ -13,25 +13,25 @@ from Machine.Devices.Bases.class_base_processor import BaseProcessor
 
 class Processor(BaseProcessor):
 
-    def get_byte(self, address: int, cacheable=False):
+    def get_value_from_address(self, address: int, cacheable=False):
         """
-        This function retrieves a byte of data from the specified address.
+        This function retrieves data from the specified address.
         It can optionally cache the data for future use.
 
         Args:
-            address (int): The memory address from which to retrieve the byte of data.
-            cacheable (bool, optional): If True, the retrieved byte will be cached for future use.
+            address (int): The memory address from which to retrieve the data.
+            cacheable (bool, optional): If True, the retrieved data will be cached for future use.
             Defaults to False.
 
         Returns:
-            int: The retrieved byte of data.
+            int: The retrieved data.
 
         Note:
             - If `cacheable` is True and the requested address is already present in the cache,
-                the byte will be retrieved from the cache.
+                the data will be retrieved from the cache.
             - If `cacheable` is True and the requested address is not present in the cache,
-                the byte will be retrieved from the memory and then cached for future use.
-            - If `cacheable` is False, the byte will always be retrieved from the memory.
+                the data will be retrieved from the memory and then cached for future use.
+            - If `cacheable` is False, the data will always be retrieved from the memory.
         """
         if cacheable:
             if address in self.data_cache:
@@ -52,13 +52,13 @@ class Processor(BaseProcessor):
             self.data_cache.pop(address, None)
         return value
 
-    def send_byte(self, address: int, value: int, cacheable=False):
+    def send_value_to_address(self, address: int, value: int, cacheable=False):
         """
-        Sends a byte to a given address.
+        Sends a value to a given address.
 
         Args:
-            address: The address to send the byte to.
-            value: The value of the byte to send.
+            address: The address to send the value to.
+            value: The value to send.
             cacheable: Boolean indicating whether the value can be cached.
             Default is False.
         """
@@ -142,33 +142,33 @@ class Processor(BaseProcessor):
             self.finished = True
 
     def perform_instruction_processing(self) -> None:
-        instruction = self.get_byte(self.instruction_pointer, cacheable=True)
+        instruction = self.get_value_from_address(self.instruction_pointer, cacheable=True)
 
         match instruction:
             case InstructionSet.NOP:
                 self.instruction_pointer += 1
             case InstructionSet.LR:
-                destination_register:int = self.get_byte(self.instruction_pointer + 1, cacheable=True)
-                value: int = self.get_byte(self.instruction_pointer + 2, cacheable=True)
+                destination_register:int = self.get_value_from_address(self.instruction_pointer + 1, cacheable=True)
+                value: int = self.get_value_from_address(self.instruction_pointer + 2, cacheable=True)
                 self.registers[destination_register] = value
                 self.instruction_pointer += 3
             case InstructionSet.LRM:
-                destination_register:int = self.get_byte(self.instruction_pointer + 1, cacheable=True)
-                address: int = self.get_byte(self.instruction_pointer + 2)
+                destination_register:int = self.get_value_from_address(self.instruction_pointer + 1, cacheable=True)
+                address: int = self.get_value_from_address(self.instruction_pointer + 2)
                 address = self.convert_register_pointer_if_necessary(address)
-                value: int = self.get_byte(address)
+                value: int = self.get_value_from_address(address)
                 self.registers[destination_register] = value
                 self.instruction_pointer += 3
             case InstructionSet.LRR:
-                destination_register:int = self.get_byte(self.instruction_pointer + 1, cacheable=True)
-                source_register:int = self.get_byte(self.instruction_pointer + 2, cacheable=True)
+                destination_register:int = self.get_value_from_address(self.instruction_pointer + 1, cacheable=True)
+                source_register:int = self.get_value_from_address(self.instruction_pointer + 2, cacheable=True)
                 self.registers[destination_register] = self.registers[source_register]
                 self.instruction_pointer += 3
             case InstructionSet.MRM:
-                source_register:int = self.get_byte(self.instruction_pointer + 1, cacheable=True)
-                address: int = self.get_byte(self.instruction_pointer + 2, cacheable=True)
+                source_register:int = self.get_value_from_address(self.instruction_pointer + 1, cacheable=True)
+                address: int = self.get_value_from_address(self.instruction_pointer + 2, cacheable=True)
                 address = self.convert_register_pointer_if_necessary(address)
-                self.send_byte(address, self.registers[source_register])
+                self.send_value_to_address(address, self.registers[source_register])
                 self.instruction_pointer += 3
             case InstructionSet.ADD:
                 self.registers[3] = self.registers[1] + self.registers[2]
@@ -194,7 +194,7 @@ class Processor(BaseProcessor):
                 self.instruction_pointer += 1
             case InstructionSet.JMP:
                 destination_address: int = self.convert_register_pointer_if_necessary(
-                    self.get_byte(self.instruction_pointer + 1, cacheable=True))
+                    self.get_value_from_address(self.instruction_pointer + 1, cacheable=True))
                 self.instruction_pointer = destination_address
             case InstructionSet.RST:
                 self.reset_processor()
@@ -209,42 +209,42 @@ class Processor(BaseProcessor):
             case InstructionSet.JE:
                 if self.compare_result == CompareResults.Equal:
                     destination_address: int = self.convert_register_pointer_if_necessary(
-                        self.get_byte(self.instruction_pointer + 1, cacheable=True))
+                        self.get_value_from_address(self.instruction_pointer + 1, cacheable=True))
                     self.instruction_pointer = destination_address
                 else:
                     self.instruction_pointer += 2
             case InstructionSet.JNE:
                 if self.compare_result != CompareResults.Equal:
                     destination_address: int = self.convert_register_pointer_if_necessary(
-                        self.get_byte(self.instruction_pointer + 1, cacheable=True))
+                        self.get_value_from_address(self.instruction_pointer + 1, cacheable=True))
                     self.instruction_pointer = destination_address
                 else:
                     self.instruction_pointer += 2
             case InstructionSet.JL:
                 if self.compare_result == CompareResults.LessThan:
                     destination_address: int = self.convert_register_pointer_if_necessary(
-                        self.get_byte(self.instruction_pointer + 1, cacheable=True))
+                        self.get_value_from_address(self.instruction_pointer + 1, cacheable=True))
                     self.instruction_pointer = destination_address
                 else:
                     self.instruction_pointer += 2
             case InstructionSet.JG:
                 if self.compare_result == CompareResults.GreaterThan:
                     destination_address: int = self.convert_register_pointer_if_necessary(
-                        self.get_byte(self.instruction_pointer + 1, cacheable=True))
+                        self.get_value_from_address(self.instruction_pointer + 1, cacheable=True))
                     self.instruction_pointer = destination_address
                 else:
                     self.instruction_pointer += 2
             case InstructionSet.PUSH:
-                source_register: int = self.get_byte(self.instruction_pointer + 1, cacheable=True)
+                source_register: int = self.get_value_from_address(self.instruction_pointer + 1, cacheable=True)
                 self.user_stack.append(self.registers[source_register])
                 self.instruction_pointer += 2
             case InstructionSet.POP:
-                destination_register: int = self.get_byte(self.instruction_pointer + 1, cacheable=True)
+                destination_register: int = self.get_value_from_address(self.instruction_pointer + 1, cacheable=True)
                 self.registers[destination_register] = self.user_stack.pop()
                 self.instruction_pointer += 2
             case InstructionSet.CALL:
                 destination_address: int = self.convert_register_pointer_if_necessary(
-                    self.get_byte(self.instruction_pointer + 1, cacheable=True))
+                    self.get_value_from_address(self.instruction_pointer + 1, cacheable=True))
                 self.instruction_pointer += 2 # address of next instruction after call
                 self.execute_call(destination_address)
             case InstructionSet.RTN:
@@ -271,17 +271,17 @@ class Processor(BaseProcessor):
                 self.registers[3] = self.registers[1] ^ self.registers[2]
                 self.instruction_pointer += 1
             case InstructionSet.SIV:
-                interrupt_number: int = self.get_byte(self.instruction_pointer + 1, cacheable=True)
+                interrupt_number: int = self.get_value_from_address(self.instruction_pointer + 1, cacheable=True)
                 destination_address: int = self.convert_register_pointer_if_necessary(
-                    self.get_byte(self.instruction_pointer + 2, cacheable=True))
+                    self.get_value_from_address(self.instruction_pointer + 2, cacheable=True))
                 self.interrupt_vectors[interrupt_number] = destination_address
                 self.instruction_pointer += 3
             case InstructionSet.INC:
-                destination_register: int = self.get_byte(self.instruction_pointer + 1, cacheable=True)
+                destination_register: int = self.get_value_from_address(self.instruction_pointer + 1, cacheable=True)
                 self.registers[destination_register] += 1
                 self.instruction_pointer += 2
             case InstructionSet.DEC:
-                destination_register: int = self.get_byte(self.instruction_pointer + 1, cacheable=True)
+                destination_register: int = self.get_value_from_address(self.instruction_pointer + 1, cacheable=True)
                 self.registers[destination_register] -= 1
                 self.instruction_pointer += 2
             case InstructionSet.SLEEP:
@@ -293,11 +293,11 @@ class Processor(BaseProcessor):
                 self.sleeping = False
                 self.instruction_pointer += 1
             case InstructionSet.PEEK:
-                destination_register: int = self.get_byte(self.instruction_pointer + 1, cacheable=True)
+                destination_register: int = self.get_value_from_address(self.instruction_pointer + 1, cacheable=True)
                 self.registers[destination_register] = self.user_stack[-1]
                 self.instruction_pointer += 2
             case InstructionSet.INT:
-                interrupt_number: int = self.get_byte(self.instruction_pointer + 1, cacheable=True)
+                interrupt_number: int = self.get_value_from_address(self.instruction_pointer + 1, cacheable=True)
                 self.processor_raised_interrupt = interrupt_number
                 self.interrupt_bus.set_interrupt(interrupt_number)
                 self.instruction_pointer += 2

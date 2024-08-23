@@ -13,6 +13,7 @@
 ' 6. Each test should be self-contained and not rely upon the state of any previous test.
 ' 7. If scratch memory is needed, use addresses >= 1024. Anything before that should be considered program memory.
 
+' ----------------------------------------
 ' LR
 begin_test:LR 0 1
 LR 1 69
@@ -20,6 +21,7 @@ LR 2 69
 CMP
 JNE :problem
 
+' ----------------------------------------
 ' CMP/JE
 LR 0 2
 LR 1 0
@@ -32,6 +34,7 @@ JE :cmp_je_ok
 JMP :problem
 cmp_je_ok: nop
 
+' ----------------------------------------
 ' JNE
 LR 0 3
 LR 1 0
@@ -44,6 +47,7 @@ JNE :jne_ok
 JMP :problem
 jne_ok: nop
 
+' ----------------------------------------
 ' JG
 LR 0 4
 LR 1 0
@@ -56,6 +60,7 @@ JG :jg_ok
 JMP :problem
 jg_ok: nop
 
+' ----------------------------------------
 ' JL
 LR 0 5
 LR 1 0
@@ -68,6 +73,7 @@ JL :jl_ok
 JMP :problem
 jl_ok: nop
 
+' ----------------------------------------
 ' ADD/LRR
 LR 0 6
 LR 1 0
@@ -83,6 +89,7 @@ JE :add_ok
 JMP :problem
 add_ok: nop
 
+' ----------------------------------------
 ' SUB
 LR 0 7
 LR 1 0
@@ -98,6 +105,7 @@ JE :sub_ok
 JMP :problem
 sub_ok: nop
 
+' ----------------------------------------
 ' MUL
 LR 0 8
 LR 1 0
@@ -113,6 +121,7 @@ JE :mul_ok
 JMP :problem
 mul_ok: nop
 
+' ----------------------------------------
 ' DIV
 LR 0 9
 LR 1 0
@@ -128,6 +137,7 @@ JE :div_ok
 JMP :problem
 div_ok: nop
 
+' ----------------------------------------
 ' MRM/LRM
 LR 0 10
 LR 1 0
@@ -141,6 +151,7 @@ JE :mrm_ok
 JMP :problem
 mrm_ok: nop
 
+' ----------------------------------------
 ' PUSH/POP
 LR 0 11
 LR 1 0
@@ -154,6 +165,7 @@ JE :push_okay
 JMP :problem
 push_okay: nop
 
+' ----------------------------------------
 ' CALL/RTN test call was actually made
 ' This test writes a value to memory during the call, which is checked upon return.
 ' This proves the call was actually made
@@ -174,6 +186,7 @@ MRM 3 1024
 RTN
 test_call_was_made_okay: nop
 
+' ----------------------------------------
 ' CALL/RTN test push and pop registers
 ' This test shows that the registers are pushed upon CALL and popped upon RTN to prove pop and push registers works
 LR 0 13
@@ -191,6 +204,7 @@ test_call_push_and_pop: LR 1 68
 RTN
 call_push_and_pop_okay: nop
 
+' ----------------------------------------
 ' OR
 LR 0 14
 LR 1 0
@@ -206,6 +220,7 @@ JE :or_ok
 JMP :problem
 or_ok: nop
 
+' ----------------------------------------
 ' AND
 LR 0 15
 LR 1 0
@@ -221,6 +236,7 @@ JE :and_ok
 JMP :problem
 and_ok: nop
 
+' ----------------------------------------
 ' XOR
 LR 0 16
 LR 1 0
@@ -236,6 +252,7 @@ JE :xor_ok
 JMP :problem
 xor_ok: nop
 
+' ----------------------------------------
 ' NOT
 LR 0 17
 LR 1 0
@@ -250,6 +267,7 @@ JE :not_ok
 JMP :problem
 not_ok: nop
 
+' ----------------------------------------
 ' INC
 LR 0 18
 LR 1 0
@@ -260,6 +278,7 @@ JE :inc_ok
 JMP :problem
 inc_ok: nop
 
+' ----------------------------------------
 ' DEC
 LR 0 19
 LR 1 1
@@ -270,33 +289,49 @@ JE :dec_ok
 JMP :problem
 dec_ok: nop
 
+' ----------------------------------------'
 ' SIV/INT
 lr 0 20
 ' test siv and int by
+
 ' setting register 1 to 0
 lr 1 0
+
 ' setting register 2 to 1
 lr 2 1
+
 ' send 0 to address 1024
 lr 3 0
 mrm 3 1024
-' setting interrupt vector for interrupt line 4 to int_target
-siv 4 int_target
+
+' setting interrupt vector for interrupt 4 to int_target
 ' at target, set memory at 1024 to 1 then return
+siv 4 int_target
+
 ' raise interrupt
 int 4
+
 ' after raising interrupt, move 1024 to register 1
 lrm 1 1024
 ' register 1 should now be 1
+
+' compare to see if the value made it from memory to the register
+' the only way 1 would make it back from memory is if the interrupt fired and the code at the vector
+' sent a 1 to memory
 cmp
+
 ' jump if equal to sivint_ok
 je sivint_ok
+
 ' otherwise jump to problem
 jmp problem
+
+' interrupt vector
+' send register 2 (which is a 1) to memory, which is currently a 0
 int_target: mrm 2 1024
 rtn
-sivint_ok: nop
 
+sivint_ok: nop
 
 
 finish: lr 0 -69

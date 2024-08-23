@@ -15,7 +15,7 @@ rtn
 nested:
 lr 0 2
 debug
-# retrieve byte to cause console to clear interrupt
+# retrieve data to cause console to clear interrupt
 lrm 1 1024
 push 1
 rtn

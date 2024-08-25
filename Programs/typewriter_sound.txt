@@ -133,19 +133,19 @@ call end_transaction
 rtn
 
 send_duration:
-' first byte of frame is the duration in milliseconds'
+' first value of frame is the duration in milliseconds'
 lr 1 250
 mrm 1 1025
 rtn
 
 send_c:
-' second byte of frame is the frequency in Hz packed * 100
+' second value of frame is the frequency in Hz packed * 100
 lr 1 26163
 mrm 1 1025
 rtn
 
 send_volume:
-' third byte of frame is the volume 0-1 packed * 10
+' third value of frame is the volume 0-1 packed * 10
 ' full volume = 1 * 10'
 lr 1 10
 mrm 1 1025

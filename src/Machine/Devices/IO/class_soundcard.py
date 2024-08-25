@@ -63,14 +63,14 @@ def build_sounds_from_queue(command_queue: queue.Queue) -> List[Sound]:
     sounds = []
     # build a list of sounds from the queue
     duration_ms = command_queue.get()
-    queue_byte: int
-    queue_byte = command_queue.get()
-    while queue_byte != END_OF_FRAME:
-        frequency: float = queue_byte / 100
+    queue_value: int
+    queue_value = command_queue.get()
+    while queue_value != END_OF_FRAME:
+        frequency: float = queue_value / 100
         volume: float = command_queue.get() / 10
         sound = build_sound(duration_ms, frequency, volume)
         sounds.append(sound)
-        queue_byte = command_queue.get()
+        queue_value = command_queue.get()
     return sounds
 
 
@@ -182,10 +182,10 @@ class SoundCard(BaseDevice):
             transaction = []
             # copy transaction to new queue
             transaction_queue = queue.Queue()
-            queue_byte = self.command_queue.get()
-            while queue_byte != END_OF_TRANSACTION:
-                transaction_queue.put(queue_byte)
-                queue_byte = self.command_queue.get()
+            queue_value = self.command_queue.get()
+            while queue_value != END_OF_TRANSACTION:
+                transaction_queue.put(queue_value)
+                queue_value = self.command_queue.get()
             while complete_frame_is_ready(transaction_queue):
                 frame_sounds = build_sounds_from_queue(transaction_queue)
                 transaction.append(frame_sounds)

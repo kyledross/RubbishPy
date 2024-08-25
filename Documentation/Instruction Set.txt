@@ -182,7 +182,7 @@ Purpose: Represents an address in the compiled code.  Typically used as an addre
 Example: someLabel:
 
 DATA string
-Purpose: Directly inserts the string as bytes into the compiled program. Typically used with a label so that the data can be located.  Supports \r, \n, and \0 for carriage returns, line feeds, and ASCII NUL.
+Purpose: Directly inserts the string as values into the compiled program. Typically used with a label so that the data can be located.  Supports \r, \n, and \0 for carriage returns, line feeds, and ASCII NUL.
 Example: someLabel: DATA This is a string.\r\n\0
 
 Include pathname

@@ -1,7 +1,7 @@
 ' console at 1024
 
 ' go to the letter of Z
-lr 2 90
+lr 2 91
 begin:
 ' start with the letter of A
 lr 1 65
@@ -9,5 +9,5 @@ loop:
 mrm 1 1024
 inc 1
 cmp
-jg begin
-jmp loop
+jl loop
+jmp begin

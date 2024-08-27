@@ -8,13 +8,6 @@ from Machine.Devices.IO.class_soundcard import SoundCard
 
 device_group = []
 
-
-# This class is instantiated by the entry point.
-# This class creates an instance of the backplane.
-# This class creates instances of each device and attaches them to the backplane.
-# This class then returns an outfitted machine to the entry point, where the machine is started.
-
-
 class MachineBuilder:
     """
     A class used to build a machine.

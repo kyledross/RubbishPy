@@ -262,7 +262,7 @@ class Console(BaseDevice):
                             # add to input queue
                             if event.unicode:
                                 self.__input_queue.put(ord(event.unicode))
-                    time.sleep(0.05)
+                    time.sleep(0)
 
             pygame.init()
             pygame.display.set_caption("RubbishPy Console")

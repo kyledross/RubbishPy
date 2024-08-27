@@ -83,7 +83,7 @@ class BackPlane:
                 print("HALT interrupt detected.")
                 self.control_bus.power_on = False
             self.control_bus.unlock_bus()
-            time.sleep(0)
+            time.sleep(.5)
         self.wait_for_devices_to_finish()
 
     def wait_for_devices_to_finish(self) -> None:
@@ -99,4 +99,4 @@ class BackPlane:
                 if device.finished is False:
                     devices_busy = True
                     break
-            time.sleep(.1)
+            time.sleep(.5)

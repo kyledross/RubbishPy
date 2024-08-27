@@ -153,6 +153,8 @@ class Processor(BaseProcessor):
                 value: int = self.get_value_from_address(
                     self.instruction_pointer + 2, cacheable=True)
                 self.registers[destination_register] = value
+                if destination_register == 1 or destination_register == 2:
+                    self.perform_register_compare()
                 self.instruction_pointer += 3
             case InstructionSet.LRM:
                 destination_register: int = self.get_value_from_address(
@@ -161,6 +163,8 @@ class Processor(BaseProcessor):
                     self.convert_register_pointer_if_necessary(
                         self.get_value_from_address(self.instruction_pointer + 2)))
                 self.registers[destination_register] = value
+                if destination_register == 1 or destination_register == 2:
+                    self.perform_register_compare()
                 self.instruction_pointer += 3
             case InstructionSet.LRR:
                 destination_register: int = self.get_value_from_address(
@@ -168,6 +172,8 @@ class Processor(BaseProcessor):
                 source_register: int = self.get_value_from_address(
                     self.instruction_pointer + 2, cacheable=True)
                 self.registers[destination_register] = self.registers[source_register]
+                if destination_register == 1 or destination_register == 2:
+                    self.perform_register_compare()
                 self.instruction_pointer += 3
             case InstructionSet.MRM:
                 source_register: int = self.get_value_from_address(
@@ -206,12 +212,7 @@ class Processor(BaseProcessor):
             case InstructionSet.RST:
                 self.reset_processor()
             case InstructionSet.CMP:
-                if self.registers[1] < self.registers[2]:
-                    self.compare_result = CompareResults.LessThan
-                elif self.registers[1] > self.registers[2]:
-                    self.compare_result = CompareResults.GreaterThan
-                else:
-                    self.compare_result = CompareResults.Equal
+                # no longer necessary, as any change to registers 1 or 2 will trigger an automatic compare
                 self.instruction_pointer += 1
             case InstructionSet.JE:
                 if self.compare_result == CompareResults.Equal:
@@ -254,6 +255,8 @@ class Processor(BaseProcessor):
                 destination_register: int = self.get_value_from_address(
                     self.instruction_pointer + 1, cacheable=True)
                 self.registers[destination_register] = self.user_stack.pop()
+                if destination_register == 1 or destination_register == 2:
+                    self.perform_register_compare()                
                 self.instruction_pointer += 2
             case InstructionSet.CALL:
                 destination_address: int = self.convert_register_pointer_if_necessary(
@@ -262,6 +265,7 @@ class Processor(BaseProcessor):
                 self.execute_call(destination_address)
             case InstructionSet.RTN:
                 self.registers = self.register_stack.pop()
+                self.perform_register_compare()                
                 self.instruction_pointer = self.instruction_pointer_stack.pop()
                 if len(self.instruction_pointer_stack) == 0:
                     self.sleeping = self.sleep_mode
@@ -295,11 +299,15 @@ class Processor(BaseProcessor):
                 destination_register: int = self.get_value_from_address(
                     self.instruction_pointer + 1, cacheable=True)
                 self.registers[destination_register] += 1
+                if destination_register == 1 or destination_register == 2:
+                    self.perform_register_compare()                
                 self.instruction_pointer += 2
             case InstructionSet.DEC:
                 destination_register: int = self.get_value_from_address(
                     self.instruction_pointer + 1, cacheable=True)
                 self.registers[destination_register] -= 1
+                if destination_register == 1 or destination_register == 2:
+                    self.perform_register_compare()               
                 self.instruction_pointer += 2
             case InstructionSet.SLEEP:
                 self.sleep_mode = True
@@ -313,6 +321,8 @@ class Processor(BaseProcessor):
                 destination_register: int = self.get_value_from_address(
                     self.instruction_pointer + 1, cacheable=True)
                 self.registers[destination_register] = self.user_stack[-1]
+                if destination_register == 1 or destination_register == 2:
+                    self.perform_register_compare()                
                 self.instruction_pointer += 2
             case InstructionSet.INT:
                 interrupt_number: int = self.get_value_from_address(
@@ -325,6 +335,14 @@ class Processor(BaseProcessor):
                 # Raise an error for unknown instruction
                 raise ValueError(
                     f"Unknown instruction encountered at address {self.instruction_pointer}. Opcode is {instruction}")
+
+    def perform_register_compare(self):
+        if self.registers[1] < self.registers[2]:
+            self.compare_result = CompareResults.LessThan
+        elif self.registers[1] > self.registers[2]:
+            self.compare_result = CompareResults.GreaterThan
+        else:
+            self.compare_result = CompareResults.Equal
 
     def execute_call(self, destination_address):
         self.register_stack.append(self.registers.copy())

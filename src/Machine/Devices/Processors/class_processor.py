@@ -14,6 +14,67 @@ from Machine.Devices.Bases.class_base_processor import BaseProcessor
 
 class Processor(BaseProcessor):
 
+    def __init__(self, starting_address: int, size: int, address_bus: AddressBus, data_bus: DataBus,
+                 control_bus: ControlBus, interrupt_bus: InterruptBus):
+
+        super().__init__(starting_address, size, address_bus, data_bus,
+                         control_bus, interrupt_bus)
+        # flow control
+        self.instruction_pointer: int = 0
+        self.instruction_pointer_stack: list[int] = []
+        self.interrupt_vectors: dict[int, int] = {}
+        self.handling_interrupt: bool = False
+        self.interrupt_instruction_pointer_stack_depth: int = 0
+        self.processor_raised_interrupt: int = 0  # the interrupt number that the processor raised via INT instruction
+        self.sleeping: bool = False
+        self.sleep_mode: bool = False
+
+        # data
+        self.registers: list[int] = []
+        self.register_stack: list[list[int]] = []
+        self.user_stack: list[int] = []
+        self.data_cache: dict[int, int] = {}
+        self.compare_result: CompareResults = CompareResults.Inconclusive
+
+    def reset_processor(self):
+        self.instruction_pointer = 0
+        self.registers = [0] * 8
+        self.register_stack = []
+        self.sleeping = False
+        self.sleep_mode = False
+        self.compare_result = CompareResults.Inconclusive
+        self.user_stack = []
+
+    def start(self) -> None:
+
+        """
+        This method starts the processor.
+        Returns:
+
+        """
+        threading.Thread(target=self.main_loop, name=self.device_id + "::process_cycle").start()
+
+    def main_loop(self) -> None:
+        self.reset_processor()
+        while self.running:
+            self.control_bus.lock_bus()
+            self.stop_running_if_halt_detected()
+            power_is_on: bool = self.control_bus.power_on
+            self.control_bus.unlock_bus()
+            if power_is_on:
+                self.process_interrupts()
+                if not self.sleeping:
+                    try:
+                        self.perform_instruction_processing()
+                    except Exception as e:
+                        print(f"Exception caught: {e}")
+                        print(f"Instruction Pointer: {self.instruction_pointer}")
+                        print(f"Registers: {self.registers}")
+                        self.control_bus.lock_bus()
+                        self.interrupt_bus.set_interrupt(Interrupts.halt)
+                        self.control_bus.unlock_bus()
+            self.finished = True
+
     def get_value_from_address(self, address: int, cacheable: bool = False):
         """
         This function retrieves data from the specified address.
@@ -74,71 +135,7 @@ class Processor(BaseProcessor):
         self.control_bus.unlock_bus()
         while not self.control_bus.response and self.control_bus.power_on:
             sleep(0)
-        self.control_bus.response = False
-
-    def __init__(self, starting_address: int, size: int, address_bus: AddressBus, data_bus: DataBus,
-                 control_bus: ControlBus, interrupt_bus: InterruptBus):
-
-        super().__init__(starting_address, size, address_bus, data_bus,
-                         control_bus, interrupt_bus)
-        self.instruction_pointer: int = 0
-        self.instruction_pointer_stack: list[int] = []
-
-        self.registers: list[int] = []
-        self.register_stack: list[list[int]] = []
-
-        self.interrupt_vectors: dict[int, int] = {}
-        self.handling_interrupt: bool = False
-        self.interrupt_instruction_pointer_stack_depth: int = 0
-        self.processor_raised_interrupt: int = 0  # the interrupt number that the processor raised via INT instruction
-
-        self.user_stack: list[int] = []
-
-        self.sleeping: bool = False
-        self.sleep_mode: bool = False
-
-        self.data_cache: dict[int, int] = {}
-
-        self.compare_result: CompareResults = CompareResults.Inconclusive
-
-    def reset_processor(self):
-        self.instruction_pointer = 0
-        self.registers = [0] * 8
-        self.register_stack = []
-        self.sleeping = False
-        self.sleep_mode = False
-        self.compare_result = CompareResults.Inconclusive
-        self.user_stack = []
-
-    def start(self) -> None:
-
-        """
-        This method starts the processor.
-        Returns:
-
-        """
-        threading.Thread(target=self.main_loop, name=self.device_id + "::process_cycle").start()
-
-    def main_loop(self) -> None:
-        self.reset_processor()
-        while self.running:
-            self.control_bus.lock_bus()
-            self.stop_running_if_halt_detected()
-            power_is_on: bool = self.control_bus.power_on
-            self.control_bus.unlock_bus()
-            if power_is_on:
-                self.process_interrupts()
-                if not self.sleeping:
-                    try:
-                        self.perform_instruction_processing()
-                    except Exception as e:
-                        print(f"Exception caught: {e}")
-                        print(f"Instruction Pointer: {self.instruction_pointer}")
-                        print(f"Registers: {self.registers}")
-                        self.control_bus.lock_bus()
-                        self.interrupt_bus.set_interrupt(Interrupts.halt)
-                        self.control_bus.unlock_bus()
-            self.finished = True
+        self.control_bus.response = False            
 
     def perform_instruction_processing(self) -> None:
         instruction: int = self.get_value_from_address(

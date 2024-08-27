@@ -43,7 +43,7 @@ class MachineBuilder:
         device (dict): The device to be checked for overlap.
 
         Returns:
-        bool: True if the device overlaps with any other device, True otherwise.
+        bool: True if the device address space overlaps with any other device, False otherwise.
         """
         if 'address' in device:
             device_memory_start = int(device['address'])

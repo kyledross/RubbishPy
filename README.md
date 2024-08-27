@@ -11,7 +11,9 @@ This project serves two purposes:
 1. To provide an example of emulating a Von Neumann architecture computer in Python, and
 2. To provide myself with a project that I am interested in that I can use to learn Python.
 
-This is by no means a perfect design or implementation.  But, it works.
+This is by no means a perfect design or implementation. You're bound to see things that are less-than-stellar. Maybe even hideous.
+
+But, it works.
 
 ## Requirements
 RubbishPy requires the following:

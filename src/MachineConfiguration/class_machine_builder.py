@@ -8,13 +8,6 @@ from Machine.Devices.IO.class_soundcard import SoundCard
 
 device_group = []
 
-
-# This class is instantiated by the entry point.
-# This class creates an instance of the backplane.
-# This class creates instances of each device and attaches them to the backplane.
-# This class then returns an outfitted machine to the entry point, where the machine is started.
-
-
 class MachineBuilder:
     """
     A class used to build a machine.
@@ -50,7 +43,7 @@ class MachineBuilder:
         device (dict): The device to be checked for overlap.
 
         Returns:
-        bool: True if the device overlaps with any other device, True otherwise.
+        bool: True if the device address space overlaps with any other device, False otherwise.
         """
         if 'address' in device:
             device_memory_start = int(device['address'])

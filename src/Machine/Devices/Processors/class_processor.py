@@ -35,6 +35,7 @@ class Processor(BaseProcessor):
         self.user_stack: list[int] = []
         self.data_cache: dict[int, int] = {}
         self.compare_result: CompareResults = CompareResults.Inconclusive
+        self.cache_enabled: bool = True
 
     def reset_processor(self):
         self.instruction_pointer = 0
@@ -95,7 +96,7 @@ class Processor(BaseProcessor):
                 the data will be retrieved from the memory and then cached for future use.
             - If `cacheable` is False, the data will always be retrieved from the memory.
         """
-        if cacheable:
+        if self.cache_enabled and cacheable:
             if address in self.data_cache:
                 return self.data_cache[address]
         self.control_bus.lock_bus()
@@ -108,7 +109,7 @@ class Processor(BaseProcessor):
         value: int = self.data_bus.data
         self.control_bus.response = False
         self.control_bus.unlock_bus()
-        if cacheable:
+        if self.cache_enabled and cacheable:
             self.data_cache[address] = value
         else:
             self.data_cache.pop(address, None)
@@ -124,7 +125,7 @@ class Processor(BaseProcessor):
             cacheable: Boolean indicating whether the value can be cached.
             Default is False.
         """
-        if cacheable:
+        if self.cache_enabled and cacheable:
             self.data_cache[address] = value
         else:
             self.data_cache.pop(address, None)

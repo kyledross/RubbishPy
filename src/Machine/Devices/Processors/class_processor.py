@@ -129,6 +129,8 @@ class Processor(BaseProcessor):
             self.data_cache[address] = value
         else:
             self.data_cache.pop(address, None)
+        while self.control_bus.read_request or self.control_bus.write_request:
+            sleep(0)
         self.control_bus.lock_bus()
         self.address_bus.address = address
         self.data_bus.data = value

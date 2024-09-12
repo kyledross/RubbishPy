@@ -38,6 +38,11 @@ class Processor(BaseProcessor):
         self.cache_enabled: bool = True
 
     def reset_processor(self):
+        """
+        Resets the state of the processor to its initial conditions.
+
+        Sets instruction pointer to 0, initializes registers to zero, clears stacks, and sets flags.
+        """
         self.instruction_pointer = 0
         self.registers = [0] * 8
         self.register_stack = []
@@ -56,6 +61,9 @@ class Processor(BaseProcessor):
         threading.Thread(target=self.main_loop, name=self.device_id + "::process_cycle").start()
 
     def main_loop(self) -> None:
+        """
+        Handles the main execution loop of the processor, managing power state, interrupt processing, and exception handling.
+        """
         self.reset_processor()
         while self.running:
             self.control_bus.lock_bus()
@@ -141,6 +149,9 @@ class Processor(BaseProcessor):
         self.control_bus.response = False            
 
     def perform_instruction_processing(self) -> None:
+        """
+        Processes instructions based on the current instruction pointer and modifies registers, memory, or control flow accordingly.
+        """
         instruction: int = self.get_value_from_address(
             self.instruction_pointer, cacheable=True)
 
@@ -337,6 +348,11 @@ class Processor(BaseProcessor):
                     f"Unknown instruction encountered at address {self.instruction_pointer}. Opcode is {instruction}")
 
     def perform_register_compare(self):
+        """
+        Compares the values of two registers and updates the compare_result attribute with the comparison result.
+
+        The comparison is made between the values in registers[1] and registers[2], setting compare_result to LessThan, GreaterThan, or Equal accordingly.
+        """
         if self.registers[1] < self.registers[2]:
             self.compare_result = CompareResults.LessThan
         elif self.registers[1] > self.registers[2]:
@@ -345,11 +361,20 @@ class Processor(BaseProcessor):
             self.compare_result = CompareResults.Equal
 
     def execute_call(self, destination_address):
+        """
+        Executes a call by saving the current state and jumping to the destination address.
+
+        Args:
+            destination_address: The address to jump to for execution.
+        """
         self.register_stack.append(self.registers.copy())
         self.instruction_pointer_stack.append(self.instruction_pointer)
         self.instruction_pointer = destination_address
 
     def process_interrupts(self):
+        """
+        Handles pending interrupts by locking the control bus, checking for awaiting interrupts, and executing the appropriate service routine if a valid interrupt is found.
+        """
         if not self.handling_interrupt:
             self.control_bus.lock_bus()
             interrupt_number = self.interrupt_bus.interrupt_awaiting()
@@ -365,6 +390,19 @@ class Processor(BaseProcessor):
                 self.execute_call(destination_address)
 
     def convert_register_pointer_if_necessary(self, address: int) -> int:
+        """
+        This method checks if the given address is a negative number. If it is,
+        the method converts the address to a positive number and returns the
+        value from the 'registers' list at the converted address. Otherwise,
+        it returns the original address.
+
+        Args:
+            address (int): The register address to check and possibly convert.
+
+        Returns:
+            int: The value from the 'registers' list at the converted address,
+            or the original address if it is non-negative.
+        """
         if address < 0:
             address = abs(address)
             return self.registers[address]

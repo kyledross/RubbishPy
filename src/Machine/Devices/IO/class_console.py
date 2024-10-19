@@ -321,9 +321,7 @@ class Console(BaseDevice):
                         pygame.draw.rect(self.__screen, (0, 0, 0),
                                          (position[0], position[1], text_size[0], text_size[1]))
                         # draw the character
-                        self.__screen.blit(text, (
-                            display_element.x * self.__character_width,
-                            display_element.y * self.__character_height))
+                        self.__screen.blit(text, position)
 
                 # draw the cursor
                 if pygame.time.get_ticks() - self.last_cursor_change > CURSOR_BLINK_MILLISECONDS:

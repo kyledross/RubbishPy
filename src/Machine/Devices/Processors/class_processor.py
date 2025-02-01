@@ -84,7 +84,7 @@ class Processor(BaseProcessor):
                         self.control_bus.unlock_bus()
             self.finished = True
 
-    def get_value_from_address(self, address: int, cacheable: bool = False):
+    def get_value_from_address(self, address: int, cacheable: bool):
         """
         This function retrieves data from the specified address.
         It can optionally cache the data for future use.
@@ -123,7 +123,7 @@ class Processor(BaseProcessor):
             self.data_cache.pop(address, None)
         return value
 
-    def send_value_to_address(self, address: int, value: int, cacheable: bool = False):
+    def send_value_to_address(self, address: int, value: int, cacheable: bool):
         """
         Sends a value to a given address.
 
@@ -172,7 +172,7 @@ class Processor(BaseProcessor):
                     self.instruction_pointer + 1, cacheable=True)
                 value: int = self.get_value_from_address(
                     self.convert_register_pointer_if_necessary(
-                        self.get_value_from_address(self.instruction_pointer + 2)))
+                        self.get_value_from_address(self.instruction_pointer + 2, cacheable=False)), cacheable=False)
                 self.registers[destination_register] = value
                 if destination_register == 1 or destination_register == 2:
                     self.perform_register_compare()
@@ -192,7 +192,7 @@ class Processor(BaseProcessor):
                 address = self.convert_register_pointer_if_necessary(
                     self.get_value_from_address(
                         self.instruction_pointer + 2, cacheable=True))
-                self.send_value_to_address(address, self.registers[source_register])
+                self.send_value_to_address(address, self.registers[source_register], cacheable=False)
                 self.instruction_pointer += 3
             case InstructionSet.ADD:
                 self.registers[3] = self.registers[1] + self.registers[2]

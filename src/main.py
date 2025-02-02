@@ -3,10 +3,11 @@
 import sys
 from typing import List
 
+# hello
 
 def intro() -> None:
     print("RubbishPy")
-    print("Copyright (c) 2024 Kyle D. Ross")
+    print("Copyright (c) 2025 Kyle D. Ross")
     print("--help for help")
     print()
     print("Session started.")
@@ -193,9 +194,9 @@ def show_help() -> None:
     print("           width={width of console} height={height of console}")
     print()
     print("   Example:")
-    print("         --console address=1024 interrupt=2")
+    print("         --console address=1024 interrupt=2 --width=80 --height=24")
     print()
-    print("   Note:  Console's size is always 1 and can't be changed.")
+    print("   Note:  Console's memory size is always 1 and can't be changed.")
     print()
     print("--processor")
     print("   Adds a processor device to the backplane.")

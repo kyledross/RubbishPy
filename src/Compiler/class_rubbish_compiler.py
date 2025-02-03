@@ -26,7 +26,7 @@ class RubbishCompiler:
         Args:
             source_pathname: The pathname of the source code file to compile.
         """
-        code = []
+        code = List[int]
         try:
             lines = []
             self.read_file(source_pathname, lines)
@@ -79,12 +79,11 @@ class RubbishCompiler:
                             print(out)
                             raise Exception(out)
 
-            return code
 
         except Exception as ex:
             raise ex
         finally:
-            pass
+            return code
 
     def read_file(self, source_pathname: str, lines: List[str]):
         """

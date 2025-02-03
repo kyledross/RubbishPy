@@ -15,8 +15,8 @@ def intro() -> None:
 
 def check_python_version() -> bool:
     """Checks the python version.  Returns True if the version is 3.10 or greater.  Returns False otherwise."""
-    if sys.version_info < (3, 11):
-        print("Python 3.11 or greater is required.")
+    if sys.version_info < (3, 10):
+        print("Python 3.10 or greater is required.")
         return False
     return True
 

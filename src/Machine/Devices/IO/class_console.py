@@ -66,6 +66,19 @@ class DisplayControl(DisplayCommand):
 
 
 class DisplayElement(DisplayCommand):
+    """
+    A display element for rendering characters on a screen.
+
+    This class represents an element with properties such as position and a character to
+    display. It provides methods to retrieve and update these attributes while keeping
+    track of whether the element needs to be redrawn.
+
+    Attributes:
+        x (int): The horizontal position of the display element.
+        y (int): The vertical position of the display element.
+        character (str): The character to display.
+        redraw (bool): Indicates if the element needs to be redrawn.
+    """
     def __init__(self, x, y, character: str):
         self.__x = x
         self.__y = y

@@ -5,6 +5,7 @@ from Machine.Devices.IO.class_soundcard import SoundCard
 from Machine.Devices.Memory.class_ram import RAM
 from Machine.Devices.Memory.class_rom import ROM
 from Machine.Devices.Processors.class_processor import Processor
+from Machine.Devices.Utility.real_time_clock import RealTimeClock
 
 device_group = []
 
@@ -103,6 +104,13 @@ class MachineBuilder:
                                                 data_bus=self.__backplane.data_bus,
                                                 control_bus=self.__backplane.control_bus,
                                                 interrupt_bus=self.__backplane.interrupt_bus))
+            case "rtc":
+                self.__backplane.add_device(RealTimeClock(starting_address=address,interrupt=interrupt,
+                                                          address_bus=self.__backplane.address_bus,
+                                                          data_bus=self.__backplane.data_bus,
+                                                          control_bus=self.__backplane.control_bus,
+                                                          interrupt_bus=self.__backplane.interrupt_bus)
+                )
             case 'processor':
                 self.__backplane.add_device(Processor(size=size,
                                                       starting_address=address,

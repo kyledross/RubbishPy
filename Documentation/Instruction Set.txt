@@ -57,7 +57,7 @@ Add Registers 1 and 2 (Result stored in Register 3)
 ADD
 Opcode:5
 
-Divide (Integer) Registers 1 and 2 (Result stored in Register 3)
+Divide Register 1 by register 2 (Quotient stored in Register 3, remainder stored in register 4)
 DIV
 Opcode:8
 

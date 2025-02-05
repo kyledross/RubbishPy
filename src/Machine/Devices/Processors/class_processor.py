@@ -203,7 +203,7 @@ class Processor(BaseProcessor):
             case InstructionSet.MUL:
                 self.registers[3] = self.registers[1] * self.registers[2]
                 self.instruction_pointer += 1
-            case InstructionSet.DIV:
+            case InstructionSet.DIV: # todo: implement sending remainder to register 4
                 self.registers[3] = self.registers[1] // self.registers[2]
                 self.instruction_pointer += 1
             case InstructionSet.HALT:

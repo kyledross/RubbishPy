@@ -47,6 +47,7 @@ class RealTimeClock(BaseDevice):
                         self.data_bus.data = int(time.time())  # Number of seconds since Unix epoch
                         self.control_bus.read_request = False
                         self.control_bus.response = True
+                        self.interrupt_bus.clear_interrupt(self._interrupt)
 
                 # Interrupt generation logic... a non-precision timer
                 current_time = time.time()
@@ -54,3 +55,4 @@ class RealTimeClock(BaseDevice):
                     if self._interrupt != -1:
                         self.interrupt_bus.set_interrupt(self._interrupt)
                     last_interrupt_time = current_time  # Update the last interrupt time
+            self.control_bus.unlock_bus()

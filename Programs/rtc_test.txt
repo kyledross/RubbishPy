@@ -50,4 +50,4 @@ lr 2 1970
 add
 # register 3 contains the approximate year
 
-
+# todo: continue implementing code to parse value into date and times

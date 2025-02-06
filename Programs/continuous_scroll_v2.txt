@@ -8,5 +8,6 @@ lr 1 65
 loop:
 mrm 1 1024
 inc 1
+cmp
 jl loop
 jmp begin

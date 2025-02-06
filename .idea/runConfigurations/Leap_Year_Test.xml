@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="RTC Test" type="PythonConfigurationType" factoryName="Python">
+  <configuration default="false" name="Leap Year Test" type="PythonConfigurationType" factoryName="Python">
     <module name="RubbishPy" />
     <option name="ENV_FILES" value="" />
     <option name="INTERPRETER_OPTIONS" value="" />
@@ -14,7 +14,7 @@
     <option name="ADD_SOURCE_ROOTS" value="true" />
     <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
     <option name="SCRIPT_NAME" value="$Sourcepath$/main.py" />
-    <option name="PARAMETERS" value="--compiler address=0 size=1024 program=../Programs/rtc_test.txt --processor --rtc address=1024 interrupt=7 interval=1000" />
+    <option name="PARAMETERS" value="--compiler address=0 size=1024 program=../Programs/leap_year_test.txt --processor" />
     <option name="SHOW_COMMAND_LINE" value="false" />
     <option name="EMULATE_TERMINAL" value="false" />
     <option name="MODULE_MODE" value="false" />

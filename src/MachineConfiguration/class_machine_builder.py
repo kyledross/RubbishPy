@@ -1,10 +1,11 @@
 from Compiler.class_rubbish_compiler import RubbishCompiler
+from Machine.Backplane.class_backplane import BackPlane
 from Machine.Devices.IO.class_console import Console
+from Machine.Devices.IO.class_soundcard import SoundCard
 from Machine.Devices.Memory.class_ram import RAM
 from Machine.Devices.Memory.class_rom import ROM
 from Machine.Devices.Processors.class_processor import Processor
-from Machine.Backplane.class_backplane import BackPlane
-from Machine.Devices.IO.class_soundcard import SoundCard
+from Machine.Devices.Utility.real_time_clock import RealTimeClock
 
 device_group = []
 
@@ -65,6 +66,7 @@ class MachineBuilder:
                         return True
                     else:
                         return False
+        return False
 
     def attach_device(self, device: {}) -> None:
         """
@@ -78,6 +80,7 @@ class MachineBuilder:
         interrupt: int = 0
         width: int = 0
         height: int = 0
+        interval: int = 0
         program_pathname: str = ""
         device_to_add: str = device['device_name']
         if 'address' in device:
@@ -92,6 +95,8 @@ class MachineBuilder:
             width: int = int(device['width'])
         if 'height' in device:
             height: int = int(device['height'])
+        if 'interval' in device:
+            interval: int = int(device['interval'])
 
         # noinspection SpellCheckingInspection
         match device_to_add:
@@ -102,6 +107,14 @@ class MachineBuilder:
                                                 data_bus=self.__backplane.data_bus,
                                                 control_bus=self.__backplane.control_bus,
                                                 interrupt_bus=self.__backplane.interrupt_bus))
+            case "rtc":
+                self.__backplane.add_device(RealTimeClock(starting_address=address,interrupt=interrupt,
+                                                          interval_milliseconds=interval,
+                                                          address_bus=self.__backplane.address_bus,
+                                                          data_bus=self.__backplane.data_bus,
+                                                          control_bus=self.__backplane.control_bus,
+                                                          interrupt_bus=self.__backplane.interrupt_bus)
+                )
             case 'processor':
                 self.__backplane.add_device(Processor(size=size,
                                                       starting_address=address,

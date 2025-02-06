@@ -15,8 +15,8 @@ def intro() -> None:
 
 def check_python_version() -> bool:
     """Checks the python version.  Returns True if the version is 3.10 or greater.  Returns False otherwise."""
-    if sys.version_info < (3, 11):
-        print("Python 3.11 or greater is required.")
+    if sys.version_info < (3, 10):
+        print("Python 3.10 or greater is required.")
         return False
     return True
 
@@ -71,6 +71,15 @@ def add_sound_card(args, devices: {}) -> None:
             {'device_name': 'soundcard', 'address': address})
 
 
+def add_rtc(args, devices):
+    if args.rtc:
+        rtc_args = dict(args.rtc)
+        address = rtc_args.get("address")
+        interrupt = rtc_args.get("interrupt")
+        interval = rtc_args.get("interval")
+        check_required_parameters("RTC", rtc_args, ["address", "interrupt", "interval"])
+        devices.append({'device_name': 'rtc', 'address': address, 'interrupt': interrupt, 'interval': interval})
+
 def parse_command_line() -> {}:
     """Parses the command line arguments and returns a list of device groups.  Each device group is a dictionary"""
     devices = []
@@ -85,6 +94,7 @@ def parse_command_line() -> {}:
     parser.add_argument('--console', type=lambda x: x.split('='), nargs='+')
     parser.add_argument("--compiler", type=lambda x: x.split('='), nargs='+')
     parser.add_argument('--soundcard', type=lambda x: x.split('='), nargs='+')
+    parser.add_argument("--rtc", type=lambda x: x.split('='), nargs='+')
 
     args = parser.parse_args()
     if args.help:
@@ -97,6 +107,7 @@ def parse_command_line() -> {}:
     add_console(args, devices)
     add_compiler(args, devices)
     add_sound_card(args, devices)
+    add_rtc(args, devices)
     return devices
 
 

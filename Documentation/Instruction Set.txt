@@ -57,7 +57,7 @@ Add Registers 1 and 2 (Result stored in Register 3)
 ADD
 Opcode:5
 
-Divide (Integer) Registers 1 and 2 (Result stored in Register 3)
+Divide Register 1 by register 2 (Quotient stored in Register 3, remainder stored in register 4)
 DIV
 Opcode:8
 
@@ -198,15 +198,14 @@ Example: ' This is a comment
 =======================================================
 Pointers
 
-:labelAddress pointer
+:labelAddress pointer (leading colon is deprecated, use colon-less label pointer)
 labelAddress pointer
 Purpose: Represents the address where the label is found.
-Example: LRM 4 :someLabel   - would move the value located at the specified label into register 4
+Example: LRM 4 :someLabel   - deprecated... use colon-less label pointer below
 Example: LRM 4 someLabel    - would move the value located at the specified label into register 4
-Any instruction that takes an address as a parameter can use the :labelAddress or labelAddress pointer
+Any instruction that takes an address as a parameter can use the labelAddress pointer
 
 @register pointer
 Purpose: Represents an address of a value to use.  Typically used to load a value from memory whose address is in a register.
 Example:  LRM 2 @4    - would load the value at the address located in register 4 into register 2
 The @register pointer can only be used with certain instructions (see the instruction's information for details)
-Note: This pointer generates code that requires Rubbish Processor Version 1.1 or later

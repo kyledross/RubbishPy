@@ -1,0 +1,18 @@
+' Real-time clock test
+' Pre-requisites:
+' Compiler at address 0
+' Processor
+' RTC at 1024
+
+' Usage:
+' python3 main.py --compiler address=0 size=1024 --rtc address=1024 interrupt=7 program=../Programs/rtc_test.txt --processor --ram address=1025 size=32
+'
+
+siv 7 clock_tick
+main: sleep
+jmp main
+
+clock_tick:
+lrm 1 1024
+debug
+rtn

@@ -205,6 +205,7 @@ class Processor(BaseProcessor):
                 self.instruction_pointer += 1
             case InstructionSet.DIV:
                 self.registers[3] = self.registers[1] // self.registers[2]
+                self.registers[4] = self.registers[1] % self.registers[2]
                 self.instruction_pointer += 1
             case InstructionSet.HALT:
                 self.control_bus.lock_bus()

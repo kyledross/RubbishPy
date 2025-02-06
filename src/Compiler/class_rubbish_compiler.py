@@ -55,10 +55,6 @@ class RubbishCompiler:
                         if instruction == "'" or instruction == "#":
                             # This is just a comment
                             pass
-                        elif instruction == "CMP":
-                            # compare is no longer necessary, as the processor will trigger an automatic compare
-                            # on every change of register 1 or 2
-                            pass
                         elif instruction == "NOP":
                             self.add_instruction(0, [], code, phase == 2)
 
@@ -69,7 +65,7 @@ class RubbishCompiler:
                             code.extend(ord(char) for char in data)
 
                         elif instruction in {"LR", "LRM", "LRR", "MRM", "ADD", "DIV", "MUL", "SUB", "JMP", "HALT",
-                                             "DEBUG", "RST", "JE", "JNE", "JL", "JG", "PUSH", "POP", "CALL",
+                                             "DEBUG", "RST", "CMP", "JE", "JNE", "JL", "JG", "PUSH", "POP", "CALL",
                                              "RTN", "SIV", "SLEEP", "WAKE", "PEEK", "OR", "AND", "XOR", "NOT", "INC", "DEC", "INT"}:
                             self.add_instruction(self.get_instruction_code(instruction), parameters, code, phase == 2)
 

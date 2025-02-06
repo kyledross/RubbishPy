@@ -1,17 +1,23 @@
+# 2024 is a leap year (evenly divisible by 4)
 lr 1 2024
 call check_is_leap_year
 pop 2
 debug
 
+# 1900 is not a leap year (divisible by 100, but not 400)
+lr 1 1900
+call check_is_leap_year
+pop 2
+debug
+
+# 2000 is a leap year (evenly divisible by 400)
 lr 1 2000
 call check_is_leap_year
 pop 2
 debug
 
-lr 1 1900
-call check_is_leap_year
-pop 2
-debug
+
+
 
 halt
 

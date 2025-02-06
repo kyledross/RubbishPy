@@ -11,8 +11,9 @@ lr 2 4
 div
 lr 1 0
 lrr 2 4
-jne not_a_leap_year
+cmp
 pop 1
+jne not_a_leap_year
 
 # is the year in register 1 evenly divisible by 100?
 push 1
@@ -20,8 +21,9 @@ lr 2 100
 div
 lr 1 0
 lrr 2 4
-jne is_a_leap_year
+cmp
 pop 1
+jne is_a_leap_year
 
 # is the year in register 1 evenly divisible by 400?
 push 1
@@ -29,17 +31,15 @@ lr 2 400
 div
 lr 1 0
 lrr 2 4
+cmp
+pop 1
 jne not_a_leap_year
 jmp is_a_leap_year
 
 is_a_leap_year: lr 5 1
-# pop year off of stack, else we'll leak stack
-pop 1
 push 5
 rtn
 
 not_a_leap_year: lr 5 0
-# pop year off of stack, else we'll leak stack
-pop 1
 push 5
 rtn

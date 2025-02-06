@@ -9,7 +9,7 @@ from Machine.Devices.Bases.class_base_device import BaseDevice
 class RealTimeClock(BaseDevice):
 
     _interrupt: int = -1
-    def __init__(self, starting_address: int, interrupt: int, address_bus: AddressBus, data_bus: DataBus,
+    def __init__(self, starting_address: int, interrupt: int, interval_milliseconds: int, address_bus: AddressBus, data_bus: DataBus,
                  control_bus: ControlBus, interrupt_bus: InterruptBus):
         """
         Constructs all the necessary attributes for the RAM device.
@@ -22,6 +22,7 @@ class RealTimeClock(BaseDevice):
         if interrupt < 0:
             raise ValueError("Invalid interrupt number. Interrupt number must be non-negative.")
         self._interrupt = interrupt
+        self.interval_milliseconds = interval_milliseconds
 
     def start(self):
         threading.Thread(target=self.process_buses, name=self.device_id + "::process_buses").start()
@@ -50,8 +51,8 @@ class RealTimeClock(BaseDevice):
                         self.interrupt_bus.clear_interrupt(self._interrupt)
 
                 # Interrupt generation logic... a non-precision timer
-                current_time = time.time()
-                if current_time - last_interrupt_time >= 0.5:  # Check if half a second has elapsed
+                current_time = time.time() * 1000  # Convert current time to milliseconds
+                if current_time - last_interrupt_time >= self.interval_milliseconds:
                     if self._interrupt != -1:
                         self.interrupt_bus.set_interrupt(self._interrupt)
                     last_interrupt_time = current_time  # Update the last interrupt time

@@ -11,10 +11,10 @@ interrupt at half-second intervals that software can subscribe to in order to do
 ### Usage
 
 Create the device by adding it to the Rubbish command-line as follows:
-`--rtc address={address} interrupt={interrupt}`
+`--rtc address={address} interrupt={interrupt} interval={milliseconds}`
 
 This will create the device, and once the machine is running, the number of seconds in since the Unix epoch began
-will be available at {address}. Every half-second (approximately), an interrupt of number {interrupt} will
+will be available at {address}. Every {milliseconds} (approximately), an interrupt of number {interrupt} will
 be generated for software to respond to.
 
 **Note**: The Rubbish processor gives lower interrupt numbers the highest priority, so choose the interrupt

@@ -80,6 +80,7 @@ class MachineBuilder:
         interrupt: int = 0
         width: int = 0
         height: int = 0
+        interval: int = 0
         program_pathname: str = ""
         device_to_add: str = device['device_name']
         if 'address' in device:
@@ -94,6 +95,8 @@ class MachineBuilder:
             width: int = int(device['width'])
         if 'height' in device:
             height: int = int(device['height'])
+        if 'interval' in device:
+            interval: int = int(device['interval'])
 
         # noinspection SpellCheckingInspection
         match device_to_add:
@@ -106,6 +109,7 @@ class MachineBuilder:
                                                 interrupt_bus=self.__backplane.interrupt_bus))
             case "rtc":
                 self.__backplane.add_device(RealTimeClock(starting_address=address,interrupt=interrupt,
+                                                          interval_milliseconds=interval,
                                                           address_bus=self.__backplane.address_bus,
                                                           data_bus=self.__backplane.data_bus,
                                                           control_bus=self.__backplane.control_bus,

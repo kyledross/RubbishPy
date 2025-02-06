@@ -1,0 +1,18 @@
+lr 1 2024
+call check_is_leap_year
+pop 2
+debug
+
+lr 1 2000
+call check_is_leap_year
+pop 2
+debug
+
+lr 1 1900
+call check_is_leap_year
+pop 2
+debug
+
+halt
+
+include ../Programs/Libraries/leap_year.txt

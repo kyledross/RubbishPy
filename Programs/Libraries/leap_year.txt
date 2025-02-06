@@ -1,0 +1,45 @@
+# -------------------------------------------------------------------------------------------
+# check_is_leap_year
+# year to check in register 1
+# return: stack value of 0 if not leap year, stack value of 1 if it is
+check_is_leap_year:
+
+# save year so we can pop it back after check (yes, we're pushing a second time.. it's okay)
+push 1
+# is the year in register 1 evenly divisible by 4?
+lr 2 4
+div
+lr 1 0
+lrr 2 4
+jne not_a_leap_year
+pop 1
+
+# is the year in register 1 evenly divisible by 100?
+push 1
+lr 2 100
+div
+lr 1 0
+lrr 2 4
+jne is_a_leap_year
+pop 1
+
+# is the year in register 1 evenly divisible by 400?
+push 1
+lr 2 400
+div
+lr 1 0
+lrr 2 4
+jne not_a_leap_year
+jmp is_a_leap_year
+
+is_a_leap_year: lr 5 1
+# restore year that we are working on
+pop 1
+push 5
+rtn
+
+not_a_leap_year: lr 5 0
+# restore year that we are working on
+pop 1
+push 5
+rtn

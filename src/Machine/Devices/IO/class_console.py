@@ -67,17 +67,16 @@ class DisplayControl(DisplayCommand):
 
 class DisplayElement(DisplayCommand):
     """
-    A display element for rendering characters on a screen.
+    Represents a visual element for display purposes.
 
-    This class represents an element with properties such as position and a character to
-    display. It provides methods to retrieve and update these attributes while keeping
-    track of whether the element needs to be redrawn.
+    Provides properties and methods to manage and update the display state of a visual
+    element, including its position, displayed character, and redraw state.
 
     Attributes:
-        x (int): The horizontal position of the display element.
-        y (int): The vertical position of the display element.
-        character (str): The character to display.
-        redraw (bool): Indicates if the element needs to be redrawn.
+        __x (int): The x-coordinate of the display element.
+        __y (int): The y-coordinate of the display element.
+        __character (str): The character to be displayed.
+        __redraw (bool): Indicates whether the display element requires redrawing.
     """
     def __init__(self, x, y, character: str):
         self.__x = x
@@ -290,6 +289,7 @@ class Console(BaseDevice):
                 # noinspection SpellCheckingInspection
                 font_path = os.path.join(windir, 'Fonts', 'consola.ttf')
             else:  # Unix/Linux/MacOS/BSD/etc
+                # noinspection SpellCheckingInspection
                 font_path = '/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf'
             self.__font = pygame.font.Font(font_path, self.__font_size)
             self.last_cursor_change = pygame.time.get_ticks()

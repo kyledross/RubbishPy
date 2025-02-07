@@ -146,7 +146,9 @@ class Processor(BaseProcessor):
         self.control_bus.unlock_bus()
         while not self.control_bus.response and self.control_bus.power_on:
             sleep(0)
-        self.control_bus.response = False            
+        self.control_bus.lock_bus()
+        self.control_bus.response = False
+        self.control_bus.unlock_bus()
 
     def perform_instruction_processing(self) -> None:
         """

@@ -1,0 +1,20 @@
+' =======================================
+' Print loop
+' Usage: Load register 3 with the address of the string to print, then call print_loop
+' Requirements: console at 1024
+' The string should terminate with ASCII 0.
+' Example:
+' lr 3 title
+' call print_loop
+' =======================================
+print_loop: LRM 4 @3
+LR 1 0
+LRR 2 4
+CMP
+JE print_return
+MRM 4 1024
+LR 1 1
+LRR 2 3
+ADD
+JMP print_loop
+print_return: rtn

@@ -20,6 +20,7 @@ class Processor(BaseProcessor):
         super().__init__(starting_address, size, address_bus, data_bus,
                          control_bus, interrupt_bus)
         # flow control
+        self.last_instruction = None
         self.instruction_pointer: int = 0
         self.instruction_pointer_stack: list[int] = []
         self.interrupt_vectors: dict[int, int] = {}
@@ -44,7 +45,7 @@ class Processor(BaseProcessor):
         Sets instruction pointer to 0, initializes registers to zero, clears stacks, and sets flags.
         """
         self.instruction_pointer = 0
-        self.registers = [0] * 8
+        self.registers = [0] * 16
         self.register_stack = []
         self.sleeping = False
         self.sleep_mode = False
@@ -78,6 +79,7 @@ class Processor(BaseProcessor):
                     except Exception as e:
                         print(f"Exception caught: {e}")
                         print(f"Instruction Pointer: {self.instruction_pointer}")
+                        print(f"Instruction Opcode: {self.last_instruction}")
                         print(f"Registers: {self.registers}")
                         self.control_bus.lock_bus()
                         self.interrupt_bus.set_interrupt(Interrupts.halt)
@@ -154,8 +156,10 @@ class Processor(BaseProcessor):
         """
         Processes instructions based on the current instruction pointer and modifies registers, memory, or control flow accordingly.
         """
-        instruction: int = self.get_value_from_address(
+        instruction = self.get_value_from_address(
             self.instruction_pointer, cacheable=True)
+
+        self.last_instruction = instruction
 
         match instruction:
             case InstructionSet.NOP:

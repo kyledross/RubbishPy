@@ -5,23 +5,29 @@
 ' RTC at 1024
 
 ' Usage:
-' python3 main.py --compiler address=0 size=1024 --rtc address=1024 interrupt=7 program=../Programs/rtc_test.txt --processor
+' python3 main.py --compiler address=0 size=1024 --rtc address=2048 interrupt=7 --console width=80 height=25 address=1024 interrupt=2 program=../Programs/rtc_test.txt --processor
 
 ' set UTC
 LR 1 -5
-MRM 1 1024
+MRM 1 2048
 
 ' set interrupt vector
 SIV 7 clock_tick
 sleep
 
 clock_tick:
-LRM 1 1026
-LRM 2 1027
-lrm 3 1028
-lrm 4 1029
-lrm 5 1030
-lrm 6 1031
+' year
+LRM 1 2050
+' month
+LRM 2 2051
+' day
+lrm 3 2052
+' hour
+lrm 4 2053
+' minute
+lrm 5 2054
+' second
+lrm 6 2055
 
 debug
 rtn

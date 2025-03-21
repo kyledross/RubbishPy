@@ -84,7 +84,6 @@ class RTC(BaseDevice):
                         self.data_bus.data = self.__memory[self.address_bus.address - self.starting_address]
                         self.control_bus.read_request = False
                         self.control_bus.response = True
-                        self.interrupt_bus.clear_interrupt(self.interval_interrupt)
                     if self.control_bus.write_request:
                         self.__memory[self.address_bus.address - self.starting_address] = (
                             self.data_bus.data)

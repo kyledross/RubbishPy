@@ -677,8 +677,6 @@ class Console(BaseDevice):
                             self.data_bus.data = buffer_data
                             self.control_bus.read_request = False
                             self.control_bus.response = True
-                        if self.__input_queue.empty():
-                            self.interrupt_bus.clear_interrupt(self.__interrupt_number)
 
                     if self.control_bus.write_request:
                         data = self.data_bus.data

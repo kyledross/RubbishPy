@@ -1,6 +1,7 @@
 import threading
 from datetime import datetime
 from time import sleep
+import traceback
 
 from Constants.class_compare_results import CompareResults
 from Constants.class_instruction_set import InstructionSet
@@ -78,6 +79,7 @@ class Processor(BaseProcessor):
                         self.perform_instruction_processing()
                     except Exception as e:
                         print(f"Exception caught: {e}")
+                        traceback.print_exc()
                         print(f"Instruction Pointer: {self.instruction_pointer}")
                         print(f"Instruction Opcode: {self.last_instruction}")
                         print(f"Registers: {self.registers}")

@@ -7,14 +7,88 @@
 ' Usage:
 ' python3 main.py --compiler address=0 size=1024 program=../Programs/rtc_test.txt --rtc address=2048 interrupt=7 --console width=80 height=25 address=1024 interrupt=2 --ram address=4096 size=1024 --processor
 
-' set UTC
-LR 1 -5
-MRM 1 2048
+' Memory map
+' 4096 - first digit of year
+' 4097 - second digit of year
+' 4098 - third digit of year
+' 4099 - fourth digit of year
+
+' Setup RTC
+call setup_rtc
 
 ' set interrupt vector
 SIV 7 clock_tick
 sleep
 
-clock_tick: debug
+clock_tick:
+call make_year
+call send_year_to_console
+rtn
+
+send_year_to_console:
+lrm 1 4096
+mrm 1 1024
+lrm 1 4097
+mrm 1 1024
+lrm 1 4098
+mrm 1 1024
+lrm 1 4099
+mrm 1 1024
+' CR/LF
+lr 1 13
+mrm 1 1024
+lr 1 10
+mrm 1 1024
+rtn
+
+make_year:
+' load year from RTC into register 1
+lrm 1 2050
+lr 2 10
+' get digit 4
+div
+mrm 4 4099
+' get digit 3
+lrr 1 3
+div
+mrm 4 4098
+' get digit 2
+lrr 1 3
+div
+mrm 4 4097
+' get digit 1
+lrr 1 3
+div
+mrm 4 4096
+
+' fixup the ascii
+lr 2 48
+lrm 1 4096
+add
+mrm 3 4096
+
+lrm 1 4097
+add
+mrm 3 4097
+
+lrm 1 4098
+add
+mrm 3 4098
+
+lrm 1 4099
+add
+mrm 3 4099
+rtn
+
+' ------------------------- End make year
+
+setup_rtc:
+' set UTC
+' set whole
+LR 1 -5
+MRM 1 2048
+' set fraction
+LR 1 0
+MRM 1 2049
 rtn
 

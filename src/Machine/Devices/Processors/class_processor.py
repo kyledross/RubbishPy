@@ -372,8 +372,8 @@ class Processor(BaseProcessor):
             interrupt_number = self.interrupt_bus.interrupt_awaiting()
             self.control_bus.unlock_bus()
             if interrupt_number in self.interrupt_vectors:
+                self.interrupt_bus.clear_interrupt(interrupt_number)
                 if interrupt_number == self.processor_raised_interrupt:
-                    self.interrupt_bus.clear_interrupt(interrupt_number)
                     self.processor_raised_interrupt = 0
                 destination_address = self.interrupt_vectors[interrupt_number]
                 self.sleeping = False

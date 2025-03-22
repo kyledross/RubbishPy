@@ -19,74 +19,74 @@ sleep
 
 clock_tick:
 ' set destination RAM address
-lr 8 4096
+lr 15 4096
 
 ' get year from RTC
 lrm 1 2050
 
 call make_int_to_ascii
-pop 8
+pop 15
 
 ' send dash
 lr 1 45
-mrm 1 @8
-inc 8
+mrm 1 @15
+inc 15
 
 ' get month from RTC
 lrm 1 2051
 
 call make_int_to_ascii
-pop 8
+pop 15
 
 ' send dash
 lr 1 45
-mrm 1 @8
-inc 8
+mrm 1 @15
+inc 15
 
 ' get day from RTC
 lrm 1 2052
 
 call make_int_to_ascii
-pop 8
+pop 15
 
 ' send space
 lr 1 32
-mrm 1 @8
-inc 8
+mrm 1 @15
+inc 15
 
 ' get hour from RTC
 lrm 1 2053
 
 call make_int_to_ascii
-pop 8
+pop 15
 
 ' send colon
 lr 1 58
-mrm 1 @8
-inc 8
+mrm 1 @15
+inc 15
 
 ' get minute from RTC
 lrm 1 2054
 
 call make_int_to_ascii
-pop 8
+pop 15
 
 ' send colon
 lr 1 58
-mrm 1 @8
-inc 8
+mrm 1 @15
+inc 15
 
 ' get second from RTC
 lrm 1 2055
 
 call make_int_to_ascii
-pop 8
+pop 15
 
 call send_cr_lf
-pop 8
+pop 15
 
 call terminate_string
-pop 8
+pop 15
 
 ' setup and call print
 lr 3 4096

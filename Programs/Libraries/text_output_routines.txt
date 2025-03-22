@@ -21,27 +21,27 @@ JMP print_loop
 print_return: rtn
 
 send_cr_lf:
-' input: address of byte after string in register 8
+' input: address of byte after string in register 15
 ' output: address of byte after appended string on stack
 ' be sure to pop address off stack upon return
 ' add cr/lf
 lr 1 13
-mrm 1 @8
-inc 8
+mrm 1 @15
+inc 15
 lr 1 10
-mrm 1 @8
-inc 8
-push 8
+mrm 1 @15
+inc 15
+push 15
 rtn
 
 terminate_string:
-' input: address of byte after string in register 8
+' input: address of byte after string in register 15
 ' output: address of byte after appended string on stack
 ' be sure to pop address off stack upon return
 ' terminate string with ascii 0
 lr 1 0
-mrm 1 @8
-push 8
+mrm 1 @15
+push 15
 rtn
 
 bottom_of_print_library: nop

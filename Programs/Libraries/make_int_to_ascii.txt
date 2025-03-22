@@ -3,6 +3,7 @@ make_int_to_ascii:
 ' input:
 ' register 1: value to convert
 ' register 15: starting destination in memory for values
+' register 14: how many digits to format to
 
 ' output:
 ' non-terminated ASCII starting at address
@@ -12,6 +13,7 @@ make_int_to_ascii:
 ' Optionally terminate string at the popped address before sending to print routines
 
 ' scratch:
+' register 8 is a copy of the digits to format to
 ' register 7 is the length of the original conversion
 ' register 6 is copy of starting address
 ' register 5 is copy of original length
@@ -24,6 +26,7 @@ make_int_to_ascii:
 push 15
 lrr 6 15
 lr 7 0
+lrr 8 14
 phase_1_loop:
 inc 7
 lr 2 10
@@ -55,16 +58,32 @@ lr 2 48
 lrm 1 @15
 add
 push 3
+dec 14
 inc 15
 jmp phase_2_loop
 phase_2_done:
 ' ascii values are on stack
 ' and the first digit is top of stack
+
+' pad digits
+debug
+lrr 1 14
+lr 2 0
+pad_loop:
+cmp
+je pad_loop_finished
+jl pad_loop_finished
+lr 3 48
+push 3
+dec 1
+jmp pad_loop
+pad_loop_finished:
+
 ' pop stack to memory
 ' set original memory address from copy we made
 lrr 15 6
 ' set the original length from copy we made
-lrr 7 5
+lrr 7 8
 lr 2 0
 phase_3_loop:
 lrr 1 7

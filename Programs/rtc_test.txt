@@ -23,7 +23,7 @@ lr 15 4096
 
 ' get year from RTC
 lrm 1 2050
-
+lr 14 4
 call make_int_to_ascii
 pop 15
 
@@ -34,6 +34,7 @@ inc 15
 
 ' get month from RTC
 lrm 1 2051
+lr 14 2
 
 call make_int_to_ascii
 pop 15
@@ -45,6 +46,7 @@ inc 15
 
 ' get day from RTC
 lrm 1 2052
+lr 14 2
 
 call make_int_to_ascii
 pop 15
@@ -56,6 +58,7 @@ inc 15
 
 ' get hour from RTC
 lrm 1 2053
+lr 14 2
 
 call make_int_to_ascii
 pop 15
@@ -67,6 +70,7 @@ inc 15
 
 ' get minute from RTC
 lrm 1 2054
+lr 14 2
 
 call make_int_to_ascii
 pop 15
@@ -78,6 +82,7 @@ inc 15
 
 ' get second from RTC
 lrm 1 2055
+lr 14 2
 
 call make_int_to_ascii
 pop 15

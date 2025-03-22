@@ -28,8 +28,59 @@ call make_int_to_ascii
 pop 8
 
 ' send dash
+lr 1 45
+mrm 1 @8
+inc 8
+
+' get month from RTC
+lrm 1 2051
+
+call make_int_to_ascii
+pop 8
+
+' send dash
+lr 1 45
+mrm 1 @8
+inc 8
+
+' get day from RTC
+lrm 1 2052
+
+call make_int_to_ascii
+pop 8
+
+' send space
 lr 1 32
-mrm 1 1024
+mrm 1 @8
+inc 8
+
+' get hour from RTC
+lrm 1 2053
+
+call make_int_to_ascii
+pop 8
+
+' send colon
+lr 1 58
+mrm 1 @8
+inc 8
+
+' get minute from RTC
+lrm 1 2054
+
+call make_int_to_ascii
+pop 8
+
+' send colon
+lr 1 58
+mrm 1 @8
+inc 8
+
+' get second from RTC
+lrm 1 2055
+
+call make_int_to_ascii
+pop 8
 
 call send_cr_lf
 pop 8
@@ -40,12 +91,13 @@ pop 8
 ' setup and call print
 lr 3 4096
 call print_loop
+
 rtn
 
 setup_rtc:
 ' set UTC
 ' set whole
-LR 1 -5
+LR 1 -4
 MRM 1 2048
 ' set fraction
 LR 1 0

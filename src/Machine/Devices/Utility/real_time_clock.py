@@ -1,4 +1,5 @@
 import threading
+from datetime import timezone
 from typing import List
 
 from Machine.Buses.class_address_bus import AddressBus
@@ -34,10 +35,10 @@ class RTC(BaseDevice):
     def __init__(self, starting_address: int, interrupt: int, address_bus: AddressBus, data_bus: DataBus,
                  control_bus: ControlBus, interrupt_bus: InterruptBus):
         """
-        Constructs all the necessary attributes for the RAM device.
+        Constructs all the necessary attributes for the RTC device.
 
         Parameters:
-            starting_address (int): The starting address of the RAM device.
+            starting_address (int): The starting address of the RTC device.
             interrupt (int): The interrupt that will be raised on every interval
 
         """
@@ -52,16 +53,16 @@ class RTC(BaseDevice):
     @property
     def memory(self) -> List[int]:
         """
-        This method returns the memory of the RAM device.
-        :return: The memory of the RAM device.
+        This method returns the memory of the RTC device.
+        :return: The memory of the RTC device.
         """
         return self.__memory
 
     @memory.setter
     def memory(self, value: List[int]):
         """
-        This method sets the memory of the RAM device.
-        :param value: The memory to set for the RAM device.
+        This method sets the memory of the RTC device.
+        :param value: The memory to set for the RTC device.
         """
         self.__memory = value
 
@@ -71,7 +72,7 @@ class RTC(BaseDevice):
 
     def main_loop(self) -> None:
         """
-        The main loop of the RAM device.  This runs continuously to monitor for read and write requests.
+        The main loop of the RTC device.  This runs continuously to monitor for read and write requests.
         Returns:
 
         """
@@ -105,7 +106,7 @@ class RTC(BaseDevice):
             dict: A dictionary with separated time components (year, month, day, hour, minute, second).
         """
         from datetime import datetime, timedelta
-        current_utc_time = datetime.utcnow()
+        current_utc_time = datetime.now(tz=timezone.utc)
         adjusted_time = current_utc_time + timedelta(hours=utc_offset)
         return {
             "year": adjusted_time.year,
@@ -126,7 +127,6 @@ class RTC(BaseDevice):
         if not hasattr(self, "_last_checked_time"):
             self._last_checked_time = current_time  # Initialize last checked time
         if current_time - self._last_checked_time >= self.interval_milliseconds:
-            print("Tick!")
             # Perform the work here
             if self.interval_interrupt >= 0:
                 utc_offset = self.memory[0] + self.memory[1] / 100

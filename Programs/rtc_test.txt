@@ -97,6 +97,7 @@ pop 15
 lr 3 4096
 call print_loop
 
+assert_empty_user_stack
 rtn
 
 setup_rtc:

@@ -66,7 +66,6 @@ phase_2_done:
 ' and the first digit is top of stack
 
 ' pad digits
-debug
 lrr 1 14
 lr 2 0
 pad_loop:
@@ -97,4 +96,4 @@ jmp phase_3_loop
 phase_3_done:
 push 15
 rtn
-end_of_make_int_to_ascii: nop
+end_of_make_int_to_ascii:

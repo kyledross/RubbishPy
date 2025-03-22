@@ -353,8 +353,16 @@ rtn
 
 sivint_ok: nop
 
-
 ' ---------------------------------------'
+' ASSERT_EMPTY_GENERAL_STACK - test that no exception is raised
+lr 0 21
+push 0
+pop 0
+ASSERT_EMPTY_USER_STACK
+
 finish: lr 0 -69
 problem: debug
-halt
+
+' To exit, let's assert a non-empty stack
+push 0
+ASSERT_EMPTY_USER_STACK

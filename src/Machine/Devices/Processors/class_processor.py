@@ -82,6 +82,11 @@ class Processor(BaseProcessor):
                         traceback.print_exc()
                         print(f"Instruction Pointer: {self.instruction_pointer}")
                         print(f"Instruction Opcode: {self.last_instruction}")
+                        try:
+                            instruction_name = InstructionSet(self.last_instruction).name
+                        except (ValueError, AttributeError):
+                            instruction_name = "UNKNOWN"
+                        print(f"Instruction: {instruction_name}")
                         print(f"Registers: {self.registers}")
                         self.control_bus.lock_bus()
                         self.interrupt_bus.set_interrupt(Interrupts.halt)
@@ -335,6 +340,13 @@ class Processor(BaseProcessor):
                 self.processor_raised_interrupt = interrupt_number
                 self.interrupt_bus.set_interrupt(interrupt_number)
                 self.instruction_pointer += 2
+            case InstructionSet.ASSERT_EMPTY_USER_STACK:
+                if len(self.user_stack) == 0:
+                    self.instruction_pointer += 1
+                else:
+                    raise ValueError(
+                        f"The user stack is not empty at address {self.instruction_pointer}. "
+                        f"Number of values in the stack: {len(self.user_stack)}")
 
             case _:
                 # Raise an error for unknown instruction

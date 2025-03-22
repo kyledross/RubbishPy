@@ -41,3 +41,4 @@ class InstructionSet(IntFlag):
     DEC = 30 # Decrement instruction
     INT = 31 # Raise interrupt instruction
     PEEK = 34  # Peek at top of stack instruction
+    ASSERT_EMPTY_USER_STACK = 35 # will raise exception if the stack is not empty

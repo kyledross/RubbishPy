@@ -14,7 +14,7 @@ call play_startup_sound
 ' =======================================
 ' Display title
 lr 3 title
-call print_loop
+call print_string_to_console
 
 ' =======================================
 ' Entry point

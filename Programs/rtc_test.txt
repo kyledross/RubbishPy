@@ -95,7 +95,7 @@ pop 15
 
 ' setup and call print
 lr 3 4096
-call print_loop
+call print_string_to_console
 
 assert_empty_user_stack
 rtn

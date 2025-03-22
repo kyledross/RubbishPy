@@ -1,0 +1,81 @@
+jmp end_of_make_int_to_ascii
+make_int_to_ascii:
+' input:
+' register 1: value to convert
+' register 8: starting destination in memory for values
+
+' output:
+' non-terminated ASCII starting at address
+' ending address in on stack
+
+' Be sure to pop the address off of stack upon return
+' Optionally terminate string at the popped address before sending to print routines
+
+' scratch:
+' register 7 is the length of the original conversion
+' register 6 is copy of starting address
+' register 5 is copy of original length
+
+' phase 1: convert value to tens and write to memory in reverse order
+' phase 2: add 48 to bring to ASCII
+' phase 3: reverse digits in memory
+
+' phase 1: convert
+push 8
+lrr 6 8
+lr 7 0
+phase_1_loop:
+inc 7
+lr 2 10
+div
+mrm 4 @8
+' check to see if there is any more to convert
+push 1
+lrr 1 3
+lr 2 0
+cmp
+pop 1
+je phase_1_done
+inc 8
+lrr 1 3
+jmp phase_1_loop
+phase_1_done:
+pop 8
+lrr 5 7
+
+' phase 2: convert to ASCII
+phase_2_loop:
+' check to see if there is any work to be done
+lrr 1 7
+lr 2 0
+cmp
+je phase_2_done
+dec 7
+lr 2 48
+lrm 1 @8
+add
+push 3
+inc 8
+jmp phase_2_loop
+phase_2_done:
+' ascii values are on stack
+' and the first digit is top of stack
+' pop stack to memory
+' set original memory address from copy we made
+lrr 8 6
+' set the original length from copy we made
+lrr 7 5
+lr 2 0
+phase_3_loop:
+lrr 1 7
+cmp
+je phase_3_done
+pop 1
+mrm 1 @8
+inc 8
+dec 7
+jmp phase_3_loop
+phase_3_done:
+push 8
+rtn
+end_of_make_int_to_ascii: nop

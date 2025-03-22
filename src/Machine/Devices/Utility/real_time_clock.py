@@ -95,7 +95,8 @@ class RTC(BaseDevice):
             self.check_interval()
             self.control_bus.unlock_bus()
 
-    def compute_current_datetime(self, utc_offset: float) -> dict:
+    @staticmethod
+    def compute_current_datetime(utc_offset: float) -> dict:
         """
         Compute the current date and time as a dictionary using the UTC offset stored in memory.
     

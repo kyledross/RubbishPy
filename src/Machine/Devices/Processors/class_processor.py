@@ -341,12 +341,11 @@ class Processor(BaseProcessor):
                 self.interrupt_bus.set_interrupt(interrupt_number)
                 self.instruction_pointer += 2
             case InstructionSet.ASSERT_EMPTY_USER_STACK:
-                if len(self.user_stack) == 0:
-                    self.instruction_pointer += 1
-                else:
-                    raise ValueError(
-                        f"The user stack is not empty at address {self.instruction_pointer}. "
-                        f"Number of values in the stack: {len(self.user_stack)}")
+                self.instruction_pointer += 1
+                if len(self.user_stack) != 0:
+                    self.control_bus.lock_bus()
+                    self.interrupt_bus.set_interrupt(Interrupts.stack_assertion)
+                    self.control_bus.unlock_bus()
 
             case _:
                 # Raise an error for unknown instruction

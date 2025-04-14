@@ -1,6 +1,7 @@
 import threading
 from datetime import datetime
 from time import sleep
+import traceback
 
 from Constants.class_compare_results import CompareResults
 from Constants.class_instruction_set import InstructionSet
@@ -20,6 +21,7 @@ class Processor(BaseProcessor):
         super().__init__(starting_address, size, address_bus, data_bus,
                          control_bus, interrupt_bus)
         # flow control
+        self.last_instruction = None
         self.instruction_pointer: int = 0
         self.instruction_pointer_stack: list[int] = []
         self.interrupt_vectors: dict[int, int] = {}
@@ -44,7 +46,7 @@ class Processor(BaseProcessor):
         Sets instruction pointer to 0, initializes registers to zero, clears stacks, and sets flags.
         """
         self.instruction_pointer = 0
-        self.registers = [0] * 8
+        self.registers = [0] * 16
         self.register_stack = []
         self.sleeping = False
         self.sleep_mode = False
@@ -77,7 +79,14 @@ class Processor(BaseProcessor):
                         self.perform_instruction_processing()
                     except Exception as e:
                         print(f"Exception caught: {e}")
+                        traceback.print_exc()
                         print(f"Instruction Pointer: {self.instruction_pointer}")
+                        print(f"Instruction Opcode: {self.last_instruction}")
+                        try:
+                            instruction_name = InstructionSet(self.last_instruction).name
+                        except (ValueError, AttributeError):
+                            instruction_name = "UNKNOWN"
+                        print(f"Instruction: {instruction_name}")
                         print(f"Registers: {self.registers}")
                         self.control_bus.lock_bus()
                         self.interrupt_bus.set_interrupt(Interrupts.halt)
@@ -146,14 +155,18 @@ class Processor(BaseProcessor):
         self.control_bus.unlock_bus()
         while not self.control_bus.response and self.control_bus.power_on:
             sleep(0)
-        self.control_bus.response = False            
+        self.control_bus.lock_bus()
+        self.control_bus.response = False
+        self.control_bus.unlock_bus()
 
     def perform_instruction_processing(self) -> None:
         """
         Processes instructions based on the current instruction pointer and modifies registers, memory, or control flow accordingly.
         """
-        instruction: int = self.get_value_from_address(
+        instruction = self.get_value_from_address(
             self.instruction_pointer, cacheable=True)
+
+        self.last_instruction = instruction
 
         match instruction:
             case InstructionSet.NOP:
@@ -327,6 +340,12 @@ class Processor(BaseProcessor):
                 self.processor_raised_interrupt = interrupt_number
                 self.interrupt_bus.set_interrupt(interrupt_number)
                 self.instruction_pointer += 2
+            case InstructionSet.ASSERT_EMPTY_USER_STACK:
+                self.instruction_pointer += 1
+                if len(self.user_stack) != 0:
+                    self.control_bus.lock_bus()
+                    self.interrupt_bus.set_interrupt(Interrupts.stack_assertion)
+                    self.control_bus.unlock_bus()
 
             case _:
                 # Raise an error for unknown instruction
@@ -366,8 +385,8 @@ class Processor(BaseProcessor):
             interrupt_number = self.interrupt_bus.interrupt_awaiting()
             self.control_bus.unlock_bus()
             if interrupt_number in self.interrupt_vectors:
+                self.interrupt_bus.clear_interrupt(interrupt_number)
                 if interrupt_number == self.processor_raised_interrupt:
-                    self.interrupt_bus.clear_interrupt(interrupt_number)
                     self.processor_raised_interrupt = 0
                 destination_address = self.interrupt_vectors[interrupt_number]
                 self.sleeping = False

@@ -22,3 +22,8 @@ class Interrupts:
     Represents the halt interrupt. This should be raised when a device in the system is requesting the system to halt.
     Devices in the system should monitor this interrupt and perform the necessary actions to halt the system.
     """
+    stack_assertion: int = 10
+    """
+    This interrupt is raised when an ASSERT_EMPTY_USER_STACK instruction is encountered
+    and the user stack is not empty.
+    """

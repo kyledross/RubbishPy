@@ -1,4 +1,5 @@
 from typing import List
+from Constants.class_instruction_set import InstructionSet
 
 
 class RubbishCompiler:
@@ -49,36 +50,25 @@ class RubbishCompiler:
                                 parameters.pop(0)
                             if len(parameters) == 0:  # this was a stand-alone label
                                 continue
-
-                        instruction = parameters[0].strip().upper()
-                        # noinspection SpellCheckingInspection
+                        instruction = parameters[0].strip()
                         if instruction == "'" or instruction == "#":
                             # This is just a comment
                             pass
-                        elif instruction == "NOP":
-                            self.add_instruction(0, [], code, phase == 2)
-
-                        elif instruction == "DATA":
+                        elif instruction.upper() == "DATA":
                             data = line[line.index(parameters[0]) + len(parameters[0]) + 1:]
                             data = data.replace(r"\r", "\r").replace(r"\n", "\n").replace(r"\0", "\0").replace(r"\f",
                                                                                                                "\f")
                             code.extend(ord(char) for char in data)
-
-                        elif instruction in {"LR", "LRM", "LRR", "MRM", "ADD", "DIV", "MUL", "SUB", "JMP", "HALT",
-                                             "DEBUG", "RST", "JE", "JNE", "JL", "JG", "PUSH", "POP", "CALL",
-                                             "RTN", "SIV", "SLEEP", "WAKE", "PEEK", "OR", "AND", "XOR", "NOT", "INC", "DEC", "INT", "CMP"}:
-                            self.add_instruction(self.get_instruction_code(instruction), parameters, code, phase == 2)
-
                         else:
-                            print("Compile failed.")
-                            out = f"Unknown instruction {instruction} at line {line_number}"
-                            print(out)
-                            raise Exception(out)
-
+                            try:
+                                self.add_instruction(self.get_instruction_code(instruction), parameters, code,
+                                                     phase == 2)
+                            except Exception as ex:
+                                raise Exception(f"Error on line {line_number}: {ex}")
 
         except Exception as ex:
             raise ex
-        finally:
+        else:
             return code
 
     def read_file(self, source_pathname: str, lines: List[str]):
@@ -171,15 +161,10 @@ class RubbishCompiler:
         :param instruction: The instruction to get the op code for.
         :return: The op code for the given instruction.
         """
-        # noinspection SpellCheckingInspection
-        op_codes = {
-            "LR": 1, "LRM": 2, "LRR": 3, "MRM": 4, "ADD": 5, "SUB": 6, "MUL": 7, "DIV": 8, "HALT": 9,
-            "DEBUG": 10, "JMP": 11, "RST": 12, "CMP": 13, "JE": 14, "JNE": 15, "JL": 16, "JG": 17, "PUSH": 18,
-            "POP": 19, "CALL": 20, "RTN": 21, "NOT": 22, "OR": 23, "AND": 24, "XOR": 25, "SIV": 26, "INC": 27,
-            "SLEEP": 28, "WAKE": 29, "DEC": 30, "INT":31, "PEEK": 34,
-
-        }
-        return op_codes[instruction]
+        opcode: int = getattr(InstructionSet, instruction.upper(), InstructionSet.NoInstruction)
+        if opcode == InstructionSet.NoInstruction:
+            raise Exception(f"Unknown instruction '{instruction}'.")
+        return opcode
 
     @staticmethod
     def is_numeric(s: str) -> bool:

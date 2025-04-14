@@ -49,6 +49,8 @@ class InterruptBus:
         This method clears a specific interrupt on the bus.
         It uses bitwise AND with bitwise NOT to clear the interrupt.
         :param interrupt_number: The interrupt to clear on the bus.
+        In general, this should only be used by the processor when it has handled the interrupt.
+        Devices should refrain from clearing interrupts.
         """
         if interrupt_number in self.__activeInterrupts:
             del self.__activeInterrupts[interrupt_number]

@@ -13,8 +13,20 @@ interrupt at half-second intervals that software can subscribe to in order to do
 Create the device by adding it to the Rubbish command-line as follows:
 `--rtc address={address} interrupt={interrupt} interval={milliseconds}`
 
-This will create the device, and once the machine is running, the number of seconds in since the Unix epoch began
-will be available at {address}. Every {milliseconds} (approximately), an interrupt of number {interrupt} will
+This will create the device, and once the machine is running, the following address space will be in effect:
+
+address: UTC offset whole
+address+1: UTC offset fraction
+address+2: year
+address+3: month
+address+4: day
+address+5: hour
+address+6: minute
+address+7: second
+
+All addresses are writeable, but only the UTC values are persistent.  The remaining addresses are overwritten each interval.
+
+Every {milliseconds} (approximately), an interrupt of number {interrupt} will
 be generated for software to respond to.
 
 **Note**: The Rubbish processor gives lower interrupt numbers the highest priority, so choose the interrupt

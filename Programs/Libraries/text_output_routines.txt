@@ -1,0 +1,47 @@
+' =======================================
+' Print loop
+' Usage: Load register 3 with the address of the string to print, then call print_string_to_console
+' Requirements: console at 1024
+' The string should terminate with ASCII 0.
+' Example:
+' lr 3 title
+' call print_string_to_console
+' =======================================
+jmp bottom_of_print_library
+print_string_to_console: LRM 4 @3
+LR 1 0
+LRR 2 4
+CMP
+JE print_return
+MRM 4 1024
+LR 1 1
+LRR 2 3
+ADD
+JMP print_string_to_console
+print_return: rtn
+
+send_cr_lf:
+' input: address of byte after string in register 15
+' output: address of byte after appended string on stack
+' be sure to pop address off stack upon return
+' add cr/lf
+lr 1 13
+mrm 1 @15
+inc 15
+lr 1 10
+mrm 1 @15
+inc 15
+push 15
+rtn
+
+terminate_string:
+' input: address of byte after string in register 15
+' output: address of byte after appended string on stack
+' be sure to pop address off stack upon return
+' terminate string with ascii 0
+lr 1 0
+mrm 1 @15
+push 15
+rtn
+
+bottom_of_print_library:

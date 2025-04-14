@@ -175,6 +175,10 @@ WAKE
 Opcode: 29
 Purpose: Causes processor to resume processing instructions. Cancels any previous SLEEP instruction.  Typically found in the code of an interrupt vector, as it can't be reached in any other fashion if the processor is already asleep from a prior SLEEP instruction.
 
+ASSERT_EMPTY_USER_STACK
+Opcode: 35
+Purpose: As a debugging measure, when the processor encounters this instruction, if the user-stack is not empty, an exception will be raised.
+
 
 =======================================================
 Compiler Meta-commands

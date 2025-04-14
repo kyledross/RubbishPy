@@ -76,9 +76,8 @@ def add_rtc(args, devices):
         rtc_args = dict(args.rtc)
         address = rtc_args.get("address")
         interrupt = rtc_args.get("interrupt")
-        interval = rtc_args.get("interval")
-        check_required_parameters("RTC", rtc_args, ["address", "interrupt", "interval"])
-        devices.append({'device_name': 'rtc', 'address': address, 'interrupt': interrupt, 'interval': interval})
+        check_required_parameters("RTC", rtc_args, ["address", "interrupt"])
+        devices.append({'device_name': 'rtc', 'address': address, 'interrupt': interrupt})
 
 def parse_command_line() -> {}:
     """Parses the command line arguments and returns a list of device groups.  Each device group is a dictionary"""

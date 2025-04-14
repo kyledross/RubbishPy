@@ -16,9 +16,6 @@ call check_is_leap_year
 pop 2
 debug
 
-
-
-
 halt
 
 include ../Programs/Libraries/leap_year.txt

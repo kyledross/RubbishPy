@@ -313,11 +313,10 @@ dec_ok: nop
 ' SIV/INT
 lr 0 20
 ' test siv and int by
-
 ' setting register 1 to 0
 lr 1 0
 
-' setting register 2 to 1
+' set register 2 to 1
 lr 2 1
 
 ' send 0 to address 1024
@@ -365,7 +364,7 @@ improper_stack_assertion:
 jmp problem
 
 ' ------------------------------------
-' ASSERT_EMPTY_GENERAL_STACK - test that exception is ra
+' ASSERT_EMPTY_GENERAL_STACK - test that exception is raised
 stack_assertion_test_2:
 siv 10 proper_stack_assertion2
 lr 0 22

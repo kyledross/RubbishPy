@@ -133,6 +133,8 @@ SIV interrupt :labelAddress
 SIV interrupt labelAddress
 Opcode: 26
 Purpose: When the interrupt occurs, the current instruction pointer is pushed into an instruction pointer cache and processor jumps to the address.
+Note: Because all general-purpose registers are automatically preserved in a stack upon the interrupt being raised (and returned to their original value in the RTN), preserve any values
+using the general-purpose stack or by moving to memory.
 
 Call code
 CALL address
@@ -140,6 +142,8 @@ CALL :labelAddress
 CALL labelAddress
 Opcode: 20
 Purpose: Pushes current instruction pointer into an instruction pointer stack, pushes all general purpose registers into a register stack, and jumps to the address.
+Note: Because all general-purpose registers are automatically preserved in a stack upon CALL (and returned to their original value in the RTN), preserve any values
+using the general-purpose stack or by moving to memory.
 
 Return
 RETURN

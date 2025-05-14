@@ -116,6 +116,9 @@ class Processor(BaseProcessor):
         if self.cache_enabled and cacheable:
             if address in self.data_cache:
                 return self.data_cache[address]
+        while self.control_bus.read_request or self.control_bus.write_request:
+            sleep(0)
+        self.control_bus.begin_transaction()
         self.control_bus.lock_bus()
         self.address_bus.address = address
         self.control_bus.read_request = True
@@ -126,6 +129,7 @@ class Processor(BaseProcessor):
         value: int = self.data_bus.data
         self.control_bus.response = False
         self.control_bus.unlock_bus()
+        self.control_bus.end_transaction()
         if self.cache_enabled and cacheable:
             self.data_cache[address] = value
         else:
@@ -148,6 +152,7 @@ class Processor(BaseProcessor):
             self.data_cache.pop(address, None)
         while self.control_bus.read_request or self.control_bus.write_request:
             sleep(0)
+        self.control_bus.begin_transaction()
         self.control_bus.lock_bus()
         self.address_bus.address = address
         self.data_bus.data = value
@@ -158,6 +163,7 @@ class Processor(BaseProcessor):
         self.control_bus.lock_bus()
         self.control_bus.response = False
         self.control_bus.unlock_bus()
+        self.control_bus.end_transaction()
 
     def perform_instruction_processing(self) -> None:
         """

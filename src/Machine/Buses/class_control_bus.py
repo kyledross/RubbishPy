@@ -17,6 +17,7 @@ class ControlBus:
         self.__ReadRequest = False
         self.__WriteRequest = False
         self.__Response = False
+        self.__transactionInProgress = False
         self.__busLock = Lock()
 
     def lock_bus(self) -> None:
@@ -31,6 +32,20 @@ class ControlBus:
         """
         self.__busLock.release()
         time.sleep(0)
+
+    def begin_transaction(self) -> None:
+        """
+        This method begins a transaction on the bus.
+        """
+        while self.__transactionInProgress:
+            time.sleep(0)
+        self.__transactionInProgress = True
+
+    def end_transaction(self) -> None:
+        """
+        This method ends a transaction on the bus.
+        """
+        self.__transactionInProgress = False
 
     @property
     def read_request(self) -> bool:

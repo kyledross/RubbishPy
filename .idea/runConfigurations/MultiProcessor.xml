@@ -15,7 +15,7 @@
     <option name="ADD_SOURCE_ROOTS" value="true" />
     <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
     <option name="SCRIPT_NAME" value="$Sourcepath$/main.py" />
-    <option name="PARAMETERS" value="--compiler1 address=0 size=1024 program=../Programs/MultiProcessor/process1.txt --compiler2 address=1025 size=1024 program=../Programs/MultiProcessor/process2.txt --console width=80 height=25 address=1024 interrupt=2 --processor1 address=0 --processor2 address=1025" />
+    <option name="PARAMETERS" value="--compiler1 address=0 size=256 program=../Programs/MultiProcessor/process1.txt --compiler2 address=257 size=256 program=../Programs/MultiProcessor/process2.txt --console width=80 height=25 address=1024 interrupt=2 --processor1 address=0 --processor2 address=257" />
     <option name="SHOW_COMMAND_LINE" value="false" />
     <option name="EMULATE_TERMINAL" value="false" />
     <option name="MODULE_MODE" value="false" />

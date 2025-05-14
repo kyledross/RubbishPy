@@ -53,7 +53,7 @@ def check_required_parameters(device: str, parameters: {str}, keys: List[str]):
 # noinspection SpellCheckingInspection
 def add_sound_card(args, devices: {}) -> None:
     """
-    Adds a sound card device to the list of devices to add to the backplane.
+    Adds one or more sound card devices to the list of devices to add to the backplane.
     Args:
         args: The command line arguments.
         devices: The list of devices that will be added to the machine.
@@ -61,40 +61,60 @@ def add_sound_card(args, devices: {}) -> None:
     Returns:
 
     """
-    if args.soundcard:
-        soundcard_args = dict(args.soundcard)
+    device_type = 'soundcard'
+    # Handle the unnumbered argument
+    if hasattr(args, device_type) and getattr(args, device_type) is not None:
+        soundcard_args = dict(getattr(args, device_type))
         address = soundcard_args.get("address")
-        # noinspection SpellCheckingInspection
         check_required_parameters("Soundcard", soundcard_args, ["address"])
-        # noinspection SpellCheckingInspection
-        devices.append(
-            {'device_name': 'soundcard', 'address': address})
+        devices.append({'device_name': device_type, 'address': address})
+
+    # Handle the numbered arguments
+    for i in range(1, 11):
+        device_attr_name = f'{device_type}{i}'
+        if hasattr(args, device_attr_name) and getattr(args, device_attr_name) is not None:
+            soundcard_args = dict(getattr(args, device_attr_name))
+            address = soundcard_args.get("address")
+            check_required_parameters("Soundcard", soundcard_args, ["address"])
+            devices.append({'device_name': device_type, 'address': address})
 
 
 def add_rtc(args, devices):
-    if args.rtc:
-        rtc_args = dict(args.rtc)
+    device_type = 'rtc'
+    # Handle the unnumbered argument
+    if hasattr(args, device_type) and getattr(args, device_type) is not None:
+        rtc_args = dict(getattr(args, device_type))
         address = rtc_args.get("address")
         interrupt = rtc_args.get("interrupt")
         check_required_parameters("RTC", rtc_args, ["address", "interrupt"])
-        devices.append({'device_name': 'rtc', 'address': address, 'interrupt': interrupt})
+        devices.append({'device_name': device_type, 'address': address, 'interrupt': interrupt})
+
+    # Handle the numbered arguments
+    for i in range(1, 11):
+        device_attr_name = f'{device_type}{i}'
+        if hasattr(args, device_attr_name) and getattr(args, device_attr_name) is not None:
+            rtc_args = dict(getattr(args, device_attr_name))
+            address = rtc_args.get("address")
+            interrupt = rtc_args.get("interrupt")
+            check_required_parameters("RTC", rtc_args, ["address", "interrupt"])
+            devices.append({'device_name': device_type, 'address': address, 'interrupt': interrupt})
 
 def parse_command_line() -> {}:
-    """Parses the command line arguments and returns a list of device groups.  Each device group is a dictionary"""
+    """Parses the command line arguments and returns a list of device groups. Each device group is a dictionary"""
     devices = []
     import argparse
 
     # Create an argument parser
     parser = argparse.ArgumentParser(add_help=False)
 
-    # todo : multi-processor-enhancement - come up with scheme to allow multiple devices of the same type to be added
     parser.add_argument('--help', action='store_const', const=True)
-    parser.add_argument('--ram', type=lambda x: x.split('='), nargs='+')
-    parser.add_argument('--processor', type=lambda x: x.split('='), nargs='*')
-    parser.add_argument('--console', type=lambda x: x.split('='), nargs='+')
-    parser.add_argument("--compiler", type=lambda x: x.split('='), nargs='+')
-    parser.add_argument('--soundcard', type=lambda x: x.split('='), nargs='+')
-    parser.add_argument("--rtc", type=lambda x: x.split('='), nargs='+')
+
+    # Add arguments for each device type, including numbered versions
+    device_types = ['ram', 'processor', 'console', 'compiler', 'soundcard', 'rtc']
+    for device_type in device_types:
+        parser.add_argument(f'--{device_type}', type=lambda x: x.split('='), nargs='*')
+        for i in range(1, 11):  # Add up to 10 numbered instances
+            parser.add_argument(f'--{device_type}{i}', type=lambda x: x.split('='), nargs='*')
 
     args = parser.parse_args()
     if args.help:
@@ -113,7 +133,7 @@ def parse_command_line() -> {}:
 
 def add_compiler(args, devices: {}) -> None:
     """
-    Adds a RAM device to the list of devices to add to the backplane, and loads it with a compiled program.
+    Adds one or more compiler devices to the list of devices to add to the backplane, and loads it with a compiled program.
     Args:
         args: The command line arguments.
         devices: The list of devices that will be added to the machine.
@@ -121,18 +141,31 @@ def add_compiler(args, devices: {}) -> None:
     Returns:
 
     """
-    if args.compiler:
-        compiler_args = dict(args.compiler)
+    device_type = 'compiler'
+    # Handle the unnumbered argument
+    if hasattr(args, device_type) and getattr(args, device_type) is not None:
+        compiler_args = dict(getattr(args, device_type))
         address = compiler_args.get("address")
         program = compiler_args.get("program")
         size = compiler_args.get("size")
         check_required_parameters("Compiler", compiler_args, ["address", "program", "size"])
-        devices.append({'device_name': 'compiler', 'address': address, 'program': program, 'size': size})
+        devices.append({'device_name': device_type, 'address': address, 'program': program, 'size': size})
+
+    # Handle the numbered arguments
+    for i in range(1, 11):
+        device_attr_name = f'{device_type}{i}'
+        if hasattr(args, device_attr_name) and getattr(args, device_attr_name) is not None:
+            compiler_args = dict(getattr(args, device_attr_name))
+            address = compiler_args.get("address")
+            program = compiler_args.get("program")
+            size = compiler_args.get("size")
+            check_required_parameters("Compiler", compiler_args, ["address", "program", "size"])
+            devices.append({'device_name': device_type, 'address': address, 'program': program, 'size': size})
 
 
 def add_console(args, devices: {}) -> None:
     """
-    Adds a console device to the list of devices to add to the backplane.
+    Adds one or more console devices to the list of devices to add to the backplane.
     Args:
         args: The command line arguments.
         devices: The list of devices that will be added to the machine.
@@ -140,22 +173,33 @@ def add_console(args, devices: {}) -> None:
     Returns:
 
     """
-    if args.console:
-        console_args = dict(args.console)
+    device_type = 'console'
+    # Handle the unnumbered argument
+    if hasattr(args, device_type) and getattr(args, device_type) is not None:
+        console_args = dict(getattr(args, device_type))
         address = console_args.get("address")
         interrupt = console_args.get("interrupt")
         width = console_args.get("width")
         height = console_args.get("height")
-        # noinspection SpellCheckingInspection
         check_required_parameters("Console", console_args, ["address", "interrupt", "width", "height"])
-        # noinspection SpellCheckingInspection
-        devices.append(
-            {'device_name': 'console', 'address': address, 'interrupt': interrupt, 'width': width, 'height': height})
+        devices.append({'device_name': device_type, 'address': address, 'interrupt': interrupt, 'width': width, 'height': height})
+
+    # Handle the numbered arguments
+    for i in range(1, 11):
+        device_attr_name = f'{device_type}{i}'
+        if hasattr(args, device_attr_name) and getattr(args, device_attr_name) is not None:
+            console_args = dict(getattr(args, device_attr_name))
+            address = console_args.get("address")
+            interrupt = console_args.get("interrupt")
+            width = console_args.get("width")
+            height = console_args.get("height")
+            check_required_parameters("Console", console_args, ["address", "interrupt", "width", "height"])
+            devices.append({'device_name': device_type, 'address': address, 'interrupt': interrupt, 'width': width, 'height': height})
 
 
 def add_ram(args, devices: {}) -> None:
     """
-    Adds a RAM device to the list of devices to add to the backplane.
+    Adds one or more RAM devices to the list of devices to add to the backplane.
     Args:
         args: The command line arguments.
         devices: The list of devices that will be added to the machine.
@@ -163,17 +207,29 @@ def add_ram(args, devices: {}) -> None:
     Returns:
 
     """
-    if args.ram:
-        ram_args = dict(args.ram)
+    device_type = 'ram'
+    # Handle the unnumbered argument
+    if hasattr(args, device_type) and getattr(args, device_type) is not None:
+        ram_args = dict(getattr(args, device_type))
         address = ram_args.get("address")
         size = ram_args.get("size")
         check_required_parameters("RAM", ram_args, ["address", "size"])
-        devices.append({'device_name': 'ram', 'address': address, 'size': size})
+        devices.append({'device_name': device_type, 'address': address, 'size': size})
+
+    # Handle the numbered arguments
+    for i in range(1, 11):
+        device_attr_name = f'{device_type}{i}'
+        if hasattr(args, device_attr_name) and getattr(args, device_attr_name) is not None:
+            ram_args = dict(getattr(args, device_attr_name))
+            address = ram_args.get("address")
+            size = ram_args.get("size")
+            check_required_parameters("RAM", ram_args, ["address", "size"])
+            devices.append({'device_name': device_type, 'address': address, 'size': size})
 
 
 def add_processor(args, devices: {}) -> None:
     """
-    Adds a processor device to the list of devices to add to the backplane.
+    Adds one or more processor devices to the list of devices to add to the backplane.
     Args:
         args: The command line arguments.
         devices: The list of devices that will be added to the machine.
@@ -181,10 +237,19 @@ def add_processor(args, devices: {}) -> None:
     Returns:
 
     """
-    if args.processor is not None:
+    # Add the default processor if it exists
+    if hasattr(args, 'processor') and args.processor is not None:
         processor_args = dict(args.processor) if args.processor else {'address': '0'}
         address = processor_args.get('address', '0')
         devices.append({'device_name': 'processor', 'address': address, 'options': ''})
+
+    # Loop through potential numbered processors
+    for i in range(1, 11):  # Check for processors 1 through 10
+        processor_attr_name = f'processor{i}'
+        if hasattr(args, processor_attr_name) and getattr(args, processor_attr_name) is not None:
+            processor_args = dict(getattr(args, processor_attr_name)) if getattr(args, processor_attr_name) else {'address': '0'}
+            address = processor_args.get('address', '0')
+            devices.append({'device_name': 'processor', 'address': address, 'options': ''})
 
 def show_help() -> None:
     """Displays the help screen."""

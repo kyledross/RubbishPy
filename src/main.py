@@ -87,9 +87,10 @@ def parse_command_line() -> {}:
     # Create an argument parser
     parser = argparse.ArgumentParser(add_help=False)
 
+    # todo : multi-processor-enhancement - come up with scheme to allow multiple devices of the same type to be added
     parser.add_argument('--help', action='store_const', const=True)
     parser.add_argument('--ram', type=lambda x: x.split('='), nargs='+')
-    parser.add_argument('--processor', action='store_const', const=True)
+    parser.add_argument('--processor', type=lambda x: x.split('='), nargs='*')
     parser.add_argument('--console', type=lambda x: x.split('='), nargs='+')
     parser.add_argument("--compiler", type=lambda x: x.split('='), nargs='+')
     parser.add_argument('--soundcard', type=lambda x: x.split('='), nargs='+')
@@ -180,8 +181,10 @@ def add_processor(args, devices: {}) -> None:
     Returns:
 
     """
-    if args.processor:
-        devices.append({'device_name': 'processor', 'options': ''})
+    if args.processor is not None:
+        processor_args = dict(args.processor) if args.processor else {'address': '0'}
+        address = processor_args.get('address', '0')
+        devices.append({'device_name': 'processor', 'address': address, 'options': ''})
 
 def show_help() -> None:
     """Displays the help screen."""

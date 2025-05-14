@@ -43,9 +43,9 @@ class Processor(BaseProcessor):
         """
         Resets the state of the processor to its initial conditions.
 
-        Sets instruction pointer to 0, initializes registers to zero, clears stacks, and sets flags.
+        Sets instruction pointer to the starting_address, initializes registers to zero, clears stacks, and sets flags.
         """
-        self.instruction_pointer = 0
+        self.instruction_pointer = self.starting_address
         self.registers = [0] * 16
         self.register_stack = []
         self.sleeping = False

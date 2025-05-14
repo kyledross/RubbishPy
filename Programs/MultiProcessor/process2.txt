@@ -1,0 +1,7 @@
+' this code continuously sends a '2' to the console
+' requirements:  console at 1024
+
+begin:
+lr 1 50
+mrm 1 1024
+jmp begin

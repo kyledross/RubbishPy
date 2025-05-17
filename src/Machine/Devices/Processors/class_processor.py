@@ -92,7 +92,7 @@ class Processor(BaseProcessor):
                         self.interrupt_bus.set_interrupt(Interrupts.halt)
                         self.control_bus.unlock_bus()
             self.finished = True
-        self.control_bus.end_transaction()
+        self.control_bus.end_transaction() # todo: before just blindly releasing a transaction, the processor should check that it is in a transaction. It may be some other device's transaction.
     def get_value_from_address(self, address: int, cacheable: bool):
         """
         This function retrieves data from the specified address.

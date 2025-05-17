@@ -20,6 +20,31 @@ class ControlBus:
         self.__transactionInProgress = False
         self.__busLock = Lock()
 
+    # What's the difference between locking the bus and starting a transaction?
+    #
+    # Locking the bus is more of a low-level emulator control. It ensures that only one device is accessing
+    # a control-bus variable at a time. It's a race condition protection mechanism.
+    #
+    # A transaction is a higher-level control meant to indicate that a logical operation is in-progress and
+    # that other logical operations must wait until this one is finished.  Where a bus lock prevents changing
+    # bus values at a granular level, a transaction wraps a series of requests and responses into a transaction.
+    # Any device wanting to make a request and have the request fulfilled without interference by other device
+    # requests should wrap the entire operation in a transaction.
+    #
+    # Bus locks are still required within the transaction because it is still necessary to control variable access
+    # between devices.  Only more higher-order devices (like a processor) would begin and end a transaction.  Other
+    # devices (like memory or a console) wouldn't do such a thing.  Lower-order devices would typically just signal
+    # an interrupt if they need to "make a request", and let a higher-order device (like a processor) respond to
+    # the interrupt and make a request (in a transaction) to retrieve the data the device has to offer.
+    #
+    # Should transactions, then, be a function of the control bus?  Shouldn't it be part of the processors?  Yes,
+    # probably.  As of the time of this writing, the processors are completely independent devices in the machine
+    # and have no knowledge of each other.  The control bus is common between the two, so for the time being,
+    # the control bus is where this transaction is tracked.  Perhaps a future enhancement would isolate
+    # processors behind a common interface to the buses.  That interface would become the "processor" and the
+    # current-day processors would be "cores" behind that processor.  The transaction control would then be moved
+    # away from the control bus and into the new "processor".
+
     def lock_bus(self) -> None:
         """
         This method locks the bus. This is used to prevent multiple devices from accessing the bus at the same time.

@@ -92,7 +92,7 @@ class Processor(BaseProcessor):
                         self.interrupt_bus.set_interrupt(Interrupts.halt)
                         self.control_bus.unlock_bus()
             self.finished = True
-
+        self.control_bus.end_transaction()
     def get_value_from_address(self, address: int, cacheable: bool):
         """
         This function retrieves data from the specified address.
@@ -174,6 +174,8 @@ class Processor(BaseProcessor):
 
         self.last_instruction = instruction
 
+        # The IDE is flagging the match as unreachable, for some reason. 🤷
+        # noinspection PyUnreachableCode
         match instruction:
             case InstructionSet.NOP:
                 self.instruction_pointer += 1

@@ -63,6 +63,8 @@ class ControlBus:
         This method begins a transaction on the bus.
         """
         while self.__transactionInProgress:
+            if not self.power_on:
+                return
             time.sleep(0)
         self.__transactionInProgress = True
 

@@ -254,24 +254,18 @@ class Console(BaseDevice):
         def run(self) -> None:
             """
             The main loop for the visible display.
-            Returns:
-
             """
-
             def process_events() -> None:
                 """
                 This method continuously processes events for the display,
                 such as key presses and window close events.
                 The loop runs until the display is no longer running.
-                Returns:
-
                 """
                 while self.__running:
                     for event in pygame.event.get():
                         if event.type == pygame.QUIT:
                             self.__running = False
                         if event.type == pygame.KEYDOWN:
-                            # add to input queue
                             if event.unicode:
                                 self.__input_queue.put(ord(event.unicode))
                     time.sleep(0)
@@ -281,25 +275,46 @@ class Console(BaseDevice):
             icon = pygame.image.load('../Resources/graphics/console_icon.png')
             pygame.display.set_icon(icon)
             self.__screen = pygame.display.set_mode((self.__display_width * self.__character_width,
-                                                     self.__display_height * self.__character_height))
+                                                   self.__display_height * self.__character_height))
             self.__clock = pygame.time.Clock()
-            if os.name == 'nt':  # Windows
-                # noinspection SpellCheckingInspection
-                windir = os.getenv('WINDIR')
-                # noinspection SpellCheckingInspection
-                font_path = os.path.join(windir, 'Fonts', 'consola.ttf')
-            else:  # Unix/Linux/MacOS/BSD/etc
-                # noinspection SpellCheckingInspection
-                font_path = '/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf'
-            self.__font = pygame.font.Font(font_path, self.__font_size)
-            self.last_cursor_change = pygame.time.get_ticks()
 
+            # Try multiple font paths
+            font_paths = [
+                # Windows path
+                os.path.join(os.getenv('WINDIR', ''), 'Fonts', 'consola.ttf'),
+                # Common Linux paths
+                '/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf',
+                '/usr/share/fonts/TTF/DejaVuSansMono.ttf',
+                '/usr/share/fonts/dejavu/DejaVuSansMono.ttf',
+                # Add more paths if needed
+            ]
+
+            # Try to load a specific font
+            font_loaded = False
+            for font_path in font_paths:
+                if os.path.exists(font_path):
+                    try:
+                        self.__font = pygame.font.Font(font_path, self.__font_size)
+                        font_loaded = True
+                        break
+                    except (OSError, pygame.error):
+                        continue
+
+            # Fall back to default font if no specific font was loaded
+            if not font_loaded:
+                try:
+                    self.__font = pygame.font.SysFont('monospace', self.__font_size)
+                except pygame.error:
+                    # Last resort: use the default Pygame font
+                    self.__font = pygame.font.Font(None, self.__font_size)
+
+            self.last_cursor_change = pygame.time.get_ticks()
             self.__running = True
             pygame.key.set_repeat(500, 50)
 
             # Start the event processing in a separate thread
             event_thread = threading.Thread(target=process_events,
-                                            name=self.__parent_console_device_id + "_Display::process_events")
+                                          name=self.__parent_console_device_id + "_Display::process_events")
             event_thread.start()
             self.main_loop()
 

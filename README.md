@@ -18,10 +18,8 @@ But, it works.
 ## Requirements
 RubbishPy requires the following:
 Python 3.11 or later.  
-Python package PyGame required (pip install pygame).
-Python package Numpy required (pip install numpy).
-
-RubbishPy was developed with JetBrains PyCharm.  
+Python package PyGame required (pip install pygame).  
+Python package Numpy required (pip install numpy).  
 
 ## Running RubbishPy in terminal
 python3 main.py  {options}  
